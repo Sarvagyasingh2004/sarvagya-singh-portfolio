@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { navLinks } from "../../constants/index.js";
+import ScrollProgress from "./ScrollProgress";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -74,6 +75,8 @@ const Navbar = () => {
           <img src="/images/menu.svg" alt="" width="28" height="28" />
         </button>
       </div>
+
+      <ScrollProgress />
 
       <div
         id="mobile-nav"

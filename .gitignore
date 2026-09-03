@@ -28,3 +28,5 @@ npm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+resumes/*
+!resumes/README.md

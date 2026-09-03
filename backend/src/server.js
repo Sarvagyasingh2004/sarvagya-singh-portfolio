@@ -15,10 +15,29 @@ const app = express();
 // X-Forwarded-For — otherwise every request rate-limits as 127.0.0.1.
 app.set("trust proxy", 1);
 
-app.use(helmet());
+app.use(
+  helmet({
+    // This API is consumed from a different origin than it is served from,
+    // so the default `same-origin` policy would block every response body
+    // even when CORS itself passes.
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
+
+const isDev = config.nodeEnv !== "production";
+
 app.use(
   cors({
-    origin: config.corsOrigins,
+    origin(origin, cb) {
+      // Same-origin / curl / server-to-server requests carry no Origin.
+      if (!origin) return cb(null, true);
+      if (config.corsOrigins.includes(origin)) return cb(null, true);
+      // In development Vite hops to 5174, 5175, ... when a port is taken.
+      if (isDev && /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)) {
+        return cb(null, true);
+      }
+      return cb(new Error(`Origin not allowed: ${origin}`));
+    },
     methods: ["GET", "POST"],
     credentials: false,
   })
@@ -46,6 +65,9 @@ app.use("/*splat", (req, res) => {
 
 // Express 5 forwards rejected promises here automatically.
 app.use((err, req, res, next) => {
+  if (err?.message?.startsWith("Origin not allowed")) {
+    return res.status(403).json({ error: err.message });
+  }
   console.error("[error]", err);
   if (res.headersSent) return next(err);
   res.status(500).json({ error: "Internal server error" });

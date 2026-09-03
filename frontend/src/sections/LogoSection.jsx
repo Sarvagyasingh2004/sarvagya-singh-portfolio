@@ -1,29 +1,50 @@
+import { useEffect, useRef, useState } from "react";
 import { techMarquee } from "../../constants/index.js";
 
-const LogoIcon = ({ icon }) => {
-  return (
-    <div className="flex-none flex-center marquee-icon">
-      <img src={icon.imgPath} alt={icon.name} />
-    </div>
-  );
-};
+const Chip = ({ item }) => (
+  <div className="tech-chip">
+    <img src={item.imgPath} alt="" loading="lazy" width="34" height="34" />
+    <span>{item.name}</span>
+  </div>
+);
 
 const LogoSection = () => {
+  const ref = useRef(null);
+  const [focused, setFocused] = useState(false);
+
+  // The marquee halts and the marks lift once the strip reaches the middle of
+  // the viewport, so they're readable exactly when you're looking at them.
+  // It resumes scrolling as you move past.
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setFocused(entry.isIntersecting),
+      { rootMargin: "-38% 0px -38% 0px", threshold: 0 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="md:my-20 my-10 relative">
-      <div className="gradient-edge"></div>
-      <div className="gradient-edge"></div>
-      <div className="marquee h-52">
-        <div className="marquee-box md:gap-12 gap-5">
-          {techMarquee.map((icon, index) => (
-            <LogoIcon key={index} icon={icon} />
-          ))}
-          {techMarquee.map((icon, index) => (
-            <LogoIcon key={index} icon={icon} />
-          ))}
-        </div>
+    <section
+      ref={ref}
+      className={`tech-marquee-wrap ${focused ? "is-focused" : ""}`}
+      aria-label="Technologies I work with"
+    >
+      <div className="tech-track">
+        {techMarquee.map((item) => (
+          <Chip key={item.name} item={item} />
+        ))}
+        {/* Duplicate for a seamless -50% loop; hidden from screen readers so
+            each technology is announced only once. */}
+        {techMarquee.map((item) => (
+          <Chip key={`dup-${item.name}`} item={item} />
+        ))}
       </div>
-    </div>
+    </section>
   );
 };
 

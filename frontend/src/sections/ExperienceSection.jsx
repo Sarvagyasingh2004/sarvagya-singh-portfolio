@@ -1,6 +1,5 @@
 import TitleHeader from "../components/TitleHeader";
 import { expCards } from "../../constants/index.js";
-import GlowCard from "../components/GlowCard.jsx";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/all";
@@ -9,93 +8,81 @@ gsap.registerPlugin(ScrollTrigger);
 
 const ExperienceSection = () => {
   useGSAP(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    gsap.utils.toArray(".timeline-card").forEach((card) => {
-      gsap.from(card, {
-        xPercent: -100,
+    gsap.utils.toArray(".exp-item").forEach((item) => {
+      gsap.from(item, {
+        y: 32,
         opacity: 0,
-        transformOrigin: "left left",
-        duration: 1,
-        ease: "power2.inOut",
-        scrollTrigger: { trigger: card, start: "top 80%" },
+        duration: 0.8,
+        ease: "power2.out",
+        scrollTrigger: { trigger: item, start: "top 85%" },
       });
     });
 
-    gsap.to(".timeline", {
-      transformOrigin: "bottom bottom",
-      ease: "power1.inOut",
-      scrollTrigger: {
-        trigger: ".timeline",
-        start: "top center",
-        end: "70% center",
-        onUpdate: (self) => {
-          gsap.to(".timeline", { scaleY: 1 - self.progress });
+    // The rail draws itself downward as the section scrolls through — scaling
+    // the line itself, rather than un-masking it with a black overlay.
+    gsap.fromTo(
+      ".exp-rail-line",
+      { scaleY: 0 },
+      {
+        scaleY: 1,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".exp-timeline",
+          start: "top 70%",
+          end: "bottom 60%",
+          scrub: true,
         },
-      },
-    });
-
-    gsap.utils.toArray(".expText").forEach((text) => {
-      gsap.from(text, {
-        opacity: 0,
-        duration: 1,
-        ease: "power2.inOut",
-        scrollTrigger: { trigger: text, start: "top 60%" },
-      });
-    });
+      }
+    );
   }, []);
 
   return (
     <section
       id="experience"
       aria-labelledby="experience-heading"
-      className="w-full md:mt-40 mt-20 section-padding xl:px-0"
+      className="section-padding"
     >
-      <div className="w-full h-full md:px-20 px-5">
+      <div className="w-full md:px-20 px-5">
         <TitleHeader
           id="experience-heading"
-          title="Professional Work Experience"
-          sub="My Career Overview"
+          title="Where I've Shipped"
+          sub="Professional Experience"
         />
-        <div className="mt-32 relative">
-          <div className="relative z-50 xl:space-y-32 space-y-10">
-            {expCards.map((card) => (
-              <div className="exp-card-wrapper" key={card.company}>
-                <div className="xl:w-2/6">
-                  <GlowCard>
-                    <p className="text-[#839cb5] text-sm uppercase tracking-wider mb-3">
-                      {card.company} &middot; {card.location}
-                    </p>
-                    <p className="text-white-50 text-lg">{card.summary}</p>
-                  </GlowCard>
-                </div>
-                <div className="xl:w-4/6">
-                  <div className="flex items-start">
-                    <div className="timeline-wrapper">
-                      <div className="timeline" />
-                      <div className="gradient-line w-1 h-full" />
-                    </div>
-                    <div className="expText flex xl:gap-20 md:gap-10 gap-5 relative z-20">
-                      <div>
-                        <h3 className="font-semibold text-3xl">{card.title}</h3>
-                        <p className="my-5 text-white-50">{card.date}</p>
-                        <p className="text-[#839cb5] italic">What I owned</p>
-                        <ul className="list-disc ms-5 mt-5 flex flex-col gap-5 text-white-50">
-                          {card.responsibilities.map((item) => (
-                            <li key={item} className="text-lg">
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+
+        <ol className="exp-timeline">
+          {expCards.map((card) => (
+            <li className="exp-item" key={card.company}>
+              <div className="exp-rail" aria-hidden="true">
+                <span className="exp-dot" />
+                <span className="exp-rail-line" />
               </div>
-            ))}
-          </div>
-        </div>
+
+              <div className="exp-body">
+                <div className="exp-head">
+                  <div>
+                    <h3 className="exp-title">{card.title}</h3>
+                    <p className="exp-org">
+                      <span>{card.company}</span>
+                      <span className="exp-sep">/</span>
+                      <span>{card.location}</span>
+                    </p>
+                  </div>
+                  <p className="exp-date">{card.date}</p>
+                </div>
+
+                <p className="exp-summary">{card.summary}</p>
+
+                <ul className="exp-points">
+                  {card.responsibilities.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );

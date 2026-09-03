@@ -7,17 +7,17 @@ import HeroLights from "./HeroLights";
 import Particles from "./Particles";
 
 const HeroExperience = () => {
-  const isTablet = useMediaQuery({ maxWidth: 1024 });
   const isMobile = useMediaQuery({ maxWidth: 767 });
   return (
     <Canvas camera={{ position: [0, 0, 15], fov: 45 }}>
       <HeroLights />
       <Particles count={100} />
+      {/* Zoom stays off: OrbitControls captures the wheel event, which
+          hijacks page scroll when the cursor is over the canvas. Rotation
+          only — drag to look around. */}
       <OrbitControls
         enablePan={false}
-        enableZoom={!isTablet}
-        maxDistance={20}
-        minDistance={5}
+        enableZoom={false}
         minPolarAngle={Math.PI / 5}
         maxPolarAngle={Math.PI / 2}
       />

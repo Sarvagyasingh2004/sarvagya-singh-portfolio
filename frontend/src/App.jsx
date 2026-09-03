@@ -8,6 +8,7 @@ import TechStack from "./sections/TechStack";
 import Contact from "./sections/Contact";
 import Footer from "./sections/Footer";
 import Chatbot from "./components/Chatbot";
+import PointerGlow from "./components/PointerGlow";
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
       <a href="#main" className="skip-link">
         Skip to content
       </a>
+      <PointerGlow />
       <Navbar />
       <main id="main">
         <Hero />

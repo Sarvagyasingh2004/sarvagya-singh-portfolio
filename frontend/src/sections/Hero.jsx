@@ -1,6 +1,7 @@
 import { useGSAP } from "@gsap/react";
 import { words } from "../../constants";
 import Button from "../components/Button";
+import ResumeButton from "../components/ResumeButton";
 import HeroExperience from "../components/HeroModels/HeroExperience";
 import { SplitText } from "gsap/all";
 import gsap from "gsap";
@@ -61,11 +62,14 @@ const Hero = () => {
               Hi, I'm Sarvagya, a developer based in India with passion to learn
               and code.
             </p>
-            <Button
+            <div className="hero-ctas">
+              <Button
               className="md:w-80 md:h-16 w-60 h-12"
               targetId="counter"
-              text="See My Work"
-            />
+                text="See My Work"
+              />
+              <ResumeButton />
+            </div>
           </div>
         </header>
         {/* right - 3D Model */}

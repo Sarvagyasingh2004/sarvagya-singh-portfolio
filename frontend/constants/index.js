@@ -42,15 +42,31 @@ const counterItems = [
   { value: 3, suffix: "", label: "Open-Source Systems" },
 ];
 
-// Repurposed from the template's fake "client logos" marquee into an honest
-// tech-stack marquee. REPLACE_ME: add TypeScript, MongoDB, AWS, Docker, Redis
-// and RabbitMQ marks (grab SVGs from simpleicons.org) to fill this out.
+// Every mark here is a technology that appears on Sarvagya's resume.
+// SVGs are generated from the simple-icons package, so the brand paths are
+// accurate rather than hand-drawn. Regenerate with: npm run icons
 const techMarquee = [
-  { name: "React", imgPath: "/images/logos/react.png" },
-  { name: "Node.js", imgPath: "/images/logos/node.png" },
-  { name: "Python", imgPath: "/images/logos/python.svg" },
-  { name: "Three.js", imgPath: "/images/logos/three.png" },
-  { name: "Git", imgPath: "/images/logos/git.svg" },
+  { name: "TypeScript", imgPath: "/images/tech/typescript.svg" },
+  { name: "Node.js", imgPath: "/images/tech/node-js.svg" },
+  { name: "Express", imgPath: "/images/tech/express.svg" },
+  { name: "React", imgPath: "/images/tech/react.svg" },
+  { name: "Redux", imgPath: "/images/tech/redux.svg" },
+  { name: "Next.js", imgPath: "/images/tech/next-js.svg" },
+  { name: "PostgreSQL", imgPath: "/images/tech/postgresql.svg" },
+  { name: "MySQL", imgPath: "/images/tech/mysql.svg" },
+  { name: "MongoDB", imgPath: "/images/tech/mongodb.svg" },
+  { name: "Redis", imgPath: "/images/tech/redis.svg" },
+  { name: "RabbitMQ", imgPath: "/images/tech/rabbitmq.svg" },
+  { name: "Docker", imgPath: "/images/tech/docker.svg" },
+  { name: "Socket.IO", imgPath: "/images/tech/socket-io.svg" },
+  { name: "Nginx", imgPath: "/images/tech/nginx.svg" },
+  { name: "Git", imgPath: "/images/tech/git.svg" },
+  { name: "GitHub Actions", imgPath: "/images/tech/github-actions.svg" },
+  { name: "Linux", imgPath: "/images/tech/linux.svg" },
+  { name: "Python", imgPath: "/images/tech/python.svg" },
+  { name: "JavaScript", imgPath: "/images/tech/javascript.svg" },
+  { name: "Tailwind CSS", imgPath: "/images/tech/tailwind-css.svg" },
+  { name: "Three.js", imgPath: "/images/tech/three-js.svg" },
 ];
 
 const abilities = [
@@ -218,6 +234,11 @@ const socialImgs = [
 // dies now that you've left).
 const contactEmail = "REPLACE_ME";
 
+// REPLACE_ME — country code, no +, no spaces. e.g. "91XXXXXXXXXX"
+// This becomes a public wa.me link, so only set it if you're happy for
+// recruiters (and scrapers) to have the number.
+const whatsappNumber = "REPLACE_ME";
+
 export {
   words,
   abilities,
@@ -227,6 +248,7 @@ export {
   projects,
   socialImgs,
   contactEmail,
+  whatsappNumber,
   techStackIcons,
   navLinks,
 };
