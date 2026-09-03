@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
 // REPLACE_ME_DOMAIN — swap for the real domain once purchased.
@@ -70,6 +71,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Applies the stored / time-of-day theme before first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}

@@ -3,6 +3,7 @@
 import { useGSAP } from "@gsap/react";
 import { words } from "@/constants";
 import Button from "../components/Button";
+import ScrollCue from "../components/ScrollCue";
 import dynamic from "next/dynamic";
 
 // WebGL can't be server-rendered, and a static export prerenders everything —
@@ -81,6 +82,7 @@ const Hero = () => {
           </div>
         </figure>
       </div>
+      <ScrollCue />
       <AnimatedCounter />
     </section>
   );

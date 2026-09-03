@@ -470,3 +470,644 @@ section {
 .card:hover::before {
   opacity: 1;
 }
+
+/* ==========================================================================
+   LIGHT THEME OVERRIDE
+   Dark is the default and everything above is untouched, so the dark
+   appearance is exactly the original. Light is a pure override layer keyed on
+   [data-theme="light"], remapping the Tailwind theme tokens the design
+   already uses plus the handful of literal colours.
+   ========================================================================== */
+:root {
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+
+  --color-white-50: #2b3a47;
+  --color-black-50: #dfe5ea;
+  --color-black-100: #ffffff;
+  --color-black-200: #cfd8e0;
+  --color-blue-50: #3d5f80;
+  --color-blue-100: #e4eaf0;
+
+  --gradient: radial-gradient(circle, #ffffff 0%, #e7edf3 100%);
+}
+
+html[data-theme="light"],
+html[data-theme="light"] body {
+  background-color: #f4f6f8;
+  color: #10151b;
+}
+
+html[data-theme="light"] .text-white,
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3 {
+  color: #10151b;
+}
+
+html[data-theme="light"] .bg-black,
+html[data-theme="light"] .navbar.scrolled {
+  background-color: #ffffff !important;
+}
+
+html[data-theme="light"] .bg-zinc-900 {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(16, 21, 27, 0.1);
+}
+
+html[data-theme="light"] .card-border {
+  border-color: rgba(16, 21, 27, 0.12);
+  background-color: rgba(16, 21, 27, 0.02);
+}
+
+html[data-theme="light"] .hero-badge {
+  background-color: #e4eaf0;
+  color: #2b3a47;
+}
+
+html[data-theme="light"] .footer,
+html[data-theme="light"] .footer-container {
+  border-color: rgba(16, 21, 27, 0.12);
+}
+
+html[data-theme="light"] .gradient-edge:first-child {
+  background: linear-gradient(90deg, #f4f6f8, transparent);
+}
+html[data-theme="light"] .gradient-edge:last-child {
+  background: linear-gradient(-90deg, #f4f6f8, transparent);
+}
+
+/* The marquee marks are white SVGs; invert them on a light ground. */
+html[data-theme="light"] .marquee-item img,
+html[data-theme="light"] .tech-chip img {
+  filter: invert(1) brightness(0.35);
+}
+
+html[data-theme="light"] input,
+html[data-theme="light"] textarea {
+  background-color: #ffffff;
+  border-color: rgba(16, 21, 27, 0.16);
+  color: #10151b;
+}
+
+html[data-theme="light"] .cta-button .text { color: #ffffff; }
+html[data-theme="light"] .cta-wrapper .cta-button { background-color: #10151b; }
+
+/* Theme transition, skipped for anyone who asked for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html, body {
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+}
+
+/* ===================== Scroll progress =====================
+   scaleX is compositor-only and the easing is owned by rAF in JS. No CSS
+   transition here — a transition layered on a per-frame write is exactly what
+   made the first attempt stutter. */
+.scroll-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  pointer-events: none;
+}
+html[data-theme="light"] .scroll-progress {
+  background: rgba(16, 21, 27, 0.1);
+}
+.scroll-progress span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(90deg, #839cb5, #d9ecff);
+  will-change: transform;
+}
+
+/* ===================== Theme toggle ===================== */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  flex: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: transparent;
+  color: #d9ecff;
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+.theme-toggle:hover {
+  border-color: #839cb5;
+  background: rgba(255, 255, 255, 0.06);
+}
+html[data-theme="light"] .theme-toggle {
+  border-color: rgba(16, 21, 27, 0.2);
+  color: #2b3a47;
+}
+html[data-theme="light"] .theme-toggle:hover {
+  background: rgba(16, 21, 27, 0.05);
+}
+.theme-icon { display: inline-flex; animation: theme-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes theme-pop {
+  from { transform: rotate(-45deg) scale(0.6); opacity: 0; }
+  to   { transform: rotate(0) scale(1); opacity: 1; }
+}
+
+/* ===================== Navbar actions ===================== */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.resume-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+.resume-btn:hover { border-color: #839cb5; background: rgba(255, 255, 255, 0.06); }
+.resume-btn[aria-disabled="true"] { opacity: 0.4; pointer-events: none; }
+html[data-theme="light"] .resume-btn {
+  border-color: rgba(16, 21, 27, 0.2);
+  color: #10151b;
+}
+html[data-theme="light"] .resume-btn:hover { background: rgba(16, 21, 27, 0.05); }
+
+@media (max-width: 900px) {
+  .resume-btn span { display: none; }
+  .resume-btn { padding: 0.5rem 0.6rem; }
+}
+
+/* ===================== Scroll cue ===================== */
+.scroll-cue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin: 3.5rem auto 0;
+  color: #6b7480;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.scroll-cue.is-hidden { opacity: 0; transform: translateY(10px); pointer-events: none; }
+.scroll-cue-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: #839cb5;
+}
+.scroll-cue-mouse {
+  position: relative;
+  width: 1.55rem;
+  height: 2.5rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+}
+html[data-theme="light"] .scroll-cue-mouse { border-color: rgba(16, 21, 27, 0.28); }
+.scroll-cue-mouse i {
+  position: absolute;
+  left: 50%;
+  top: 0.48rem;
+  width: 0.28rem;
+  height: 0.28rem;
+  margin-left: -0.14rem;
+  border-radius: 999px;
+  background: currentColor;
+  animation: cue-wheel 1.9s cubic-bezier(0.45, 0, 0.35, 1) infinite;
+}
+@keyframes cue-wheel {
+  0%   { transform: translateY(0); opacity: 0; }
+  20%  { opacity: 1; }
+  70%  { transform: translateY(1.15rem); opacity: 0; }
+  100% { transform: translateY(1.15rem); opacity: 0; }
+}
+.scroll-cue-chevrons { display: flex; flex-direction: column; align-items: center; margin-top: -0.3rem; }
+.scroll-cue-chevrons svg { animation: cue-chevron 2s ease-in-out infinite; opacity: 0.35; margin-top: -0.5rem; }
+.scroll-cue-chevrons svg:nth-child(2) { animation-delay: 0.22s; }
+@keyframes cue-chevron {
+  0%, 100% { opacity: 0.18; transform: translateY(-2px); }
+  50%      { opacity: 0.7;  transform: translateY(2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue-mouse i, .scroll-cue-chevrons svg, .theme-icon { animation: none; }
+}
+
+/* ===================== Custom pointer + lamp =====================
+   Only shown once the script confirms a fine pointer, so touch devices and
+   reduced-motion users keep the native cursor and see no layers at all. */
+.cursor-dot,
+.cursor-ring,
+.cursor-bulb {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+}
+
+.cursor-dot {
+  z-index: 9999;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 999px;
+  background: #fff;
+  /* Inverts whatever is underneath, so it stays visible on both themes and
+     over the WebGL scenes without needing a colour per context. */
+  mix-blend-mode: difference;
+  transition: opacity 0.3s ease, width 0.25s ease, height 0.25s ease, margin 0.25s ease;
+}
+
+.cursor-ring {
+  z-index: 9998;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1px solid rgba(131, 156, 181, 0.6);
+  border-radius: 999px;
+  transition: opacity 0.3s ease, width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.28s cubic-bezier(0.22, 1, 0.36, 1), margin 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.28s ease, background 0.28s ease;
+}
+
+/* The lamp sits behind the content, never over it. */
+.cursor-bulb {
+  z-index: 0;
+  width: 46rem;
+  height: 46rem;
+  margin: -23rem 0 0 -23rem;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(131, 156, 181, 0.16) 0%,
+    rgba(93, 74, 168, 0.09) 38%,
+    transparent 68%
+  );
+  transition: opacity 0.6s ease;
+}
+html[data-theme="light"] .cursor-bulb {
+  background: radial-gradient(
+    circle,
+    rgba(61, 95, 128, 0.13) 0%,
+    rgba(93, 74, 168, 0.06) 38%,
+    transparent 68%
+  );
+}
+
+.has-cursor-fx .cursor-dot,
+.has-cursor-fx .cursor-ring { opacity: 1; }
+.has-cursor-fx .cursor-bulb { opacity: 1; }
+
+.has-cursor-fx.cursor-hidden .cursor-dot,
+.has-cursor-fx.cursor-hidden .cursor-ring,
+.has-cursor-fx.cursor-hidden .cursor-bulb { opacity: 0; }
+
+/* Over a canvas the lamp fades right down — an earlier version washed the
+   3D scenes out, which is why the effect was pulled the first time. */
+.has-cursor-fx.cursor-over-canvas .cursor-bulb { opacity: 0.22; }
+
+/* Expand over anything interactive. */
+.has-cursor-fx.cursor-active .cursor-ring {
+  width: 62px;
+  height: 62px;
+  margin: -31px 0 0 -31px;
+  border-color: rgba(217, 236, 255, 0.85);
+  background: rgba(217, 236, 255, 0.07);
+}
+.has-cursor-fx.cursor-active .cursor-dot {
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+}
+
+/* Hide the native cursor only where the custom one is actually active, and
+   never on text inputs where the caret matters. */
+.has-cursor-fx,
+.has-cursor-fx a,
+.has-cursor-fx button,
+.has-cursor-fx .tech-card,
+.has-cursor-fx .card { cursor: none; }
+.has-cursor-fx input,
+.has-cursor-fx textarea,
+.has-cursor-fx select { cursor: auto; }
+.has-cursor-fx canvas { cursor: grab; }
+
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .cursor-dot, .cursor-ring, .cursor-bulb { display: none !important; }
+  .has-cursor-fx, .has-cursor-fx * { cursor: auto !important; }
+}
+
+/* Download icon bobs down-and-back, hinting the action. */
+.resume-icon {
+  display: inline-flex;
+  animation: resume-bob 2.4s ease-in-out infinite;
+}
+.resume-btn:hover .resume-icon { animation-duration: 0.9s; }
+@keyframes resume-bob {
+  0%, 100% { transform: translateY(-1.5px); }
+  50%      { transform: translateY(2px); }
+}
+
+/* Whole scroll cue drifts up and down. */
+.scroll-cue { animation: cue-bob 2.6s ease-in-out infinite; }
+@keyframes cue-bob {
+  0%, 100% { transform: translateY(-4px); }
+  50%      { transform: translateY(4px); }
+}
+.scroll-cue.is-hidden { animation: none; }
+
+/* ===================== Assistant FAB — small, highlighted ===================== */
+.chat-fab {
+  position: fixed;
+  right: 1.35rem;
+  bottom: 1.35rem;
+  z-index: 170;
+  width: 3.1rem;
+  height: 3.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(217, 236, 255, 0.5);
+  border-radius: 999px;
+  background: #0b0b0f;
+  color: #d9ecff;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(131, 156, 181, 0.14), 0 10px 30px rgba(0, 0, 0, 0.55);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.chat-fab:hover {
+  transform: translateY(-2px);
+  border-color: #d9ecff;
+  box-shadow: 0 0 0 6px rgba(131, 156, 181, 0.2), 0 12px 34px rgba(0, 0, 0, 0.6);
+}
+html[data-theme="light"] .chat-fab {
+  background: #10151b;
+  border-color: rgba(16, 21, 27, 0.35);
+}
+
+/* Live dot in the corner of the button. */
+.chat-fab-pulse {
+  position: absolute;
+  top: 0.42rem;
+  right: 0.42rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: #4ade80;
+  animation: fab-pulse 2.4s ease-out infinite;
+}
+@keyframes fab-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); }
+  70%  { box-shadow: 0 0 0 0.5rem rgba(74, 222, 128, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+
+.chat-shell {
+  position: fixed;
+  right: 1.35rem;
+  bottom: 5.6rem;
+  z-index: 170;
+  width: min(25rem, calc(100vw - 2.7rem));
+  height: min(33rem, calc(100vh - 9rem));
+  display: flex;
+  flex-direction: column;
+  background: #0a0c10;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.9rem;
+  overflow: hidden;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.7);
+}
+html[data-theme="light"] .chat-shell {
+  background: #ffffff;
+  border-color: rgba(16, 21, 27, 0.14);
+  box-shadow: 0 26px 70px rgba(16, 21, 27, 0.18);
+}
+
+.chat-titlebar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  background: #11141a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+html[data-theme="light"] .chat-titlebar {
+  background: #f0f3f6;
+  border-color: rgba(16, 21, 27, 0.1);
+}
+.chat-lights { display: flex; gap: 0.33rem; }
+.chat-lights i { width: 0.62rem; height: 0.62rem; border-radius: 999px; display: block; }
+.chat-lights i:nth-child(1) { background: #ff5f57; }
+.chat-lights i:nth-child(2) { background: #febc2e; }
+.chat-lights i:nth-child(3) { background: #28c840; }
+
+.chat-tty {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  justify-self: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  color: #8b95a1;
+}
+.chat-dot { width: 0.42rem; height: 0.42rem; border-radius: 999px; background: #6b7480; }
+.chat-dot.online { background: #28c840; }
+.chat-dot.offline { background: #ff5f57; }
+.chat-dot.connecting { background: #febc2e; }
+
+.chat-close { background: none; border: 0; color: #6b7480; cursor: pointer; font-size: 0.82rem; padding: 0.2rem 0.3rem; }
+.chat-close:hover { color: #fff; }
+html[data-theme="light"] .chat-close:hover { color: #10151b; }
+
+.chat-log { flex: 1; overflow-y: auto; padding: 1.05rem; }
+.chat-intro { display: flex; flex-direction: column; gap: 0.65rem; }
+.chat-intro-lead { margin: 0; color: #fff; font-size: 0.95rem; font-weight: 600; line-height: 1.5; }
+.chat-intro-sub { margin: 0 0 0.35rem; color: #7d8895; font-size: 0.8rem; line-height: 1.6; }
+html[data-theme="light"] .chat-intro-lead { color: #10151b; }
+
+.chat-suggestions { display: flex; flex-direction: column; gap: 0.42rem; }
+.chat-suggestions button {
+  text-align: left;
+  padding: 0.58rem 0.78rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.52rem;
+  background: transparent;
+  color: #c3ccd6;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.chat-suggestions button:hover { border-color: #839cb5; color: #fff; }
+html[data-theme="light"] .chat-suggestions button { border-color: rgba(16,21,27,0.14); color: #47535f; }
+html[data-theme="light"] .chat-suggestions button:hover { color: #10151b; }
+
+.chat-thread { display: flex; flex-direction: column; gap: 1rem; }
+.chat-row { display: flex; flex-direction: column; gap: 0.28rem; }
+.chat-row.user { align-items: flex-end; }
+.chat-who {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5d6874;
+}
+.chat-bubble {
+  max-width: 92%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.68rem;
+  font-size: 0.87rem;
+  line-height: 1.62;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.chat-row.user .chat-bubble { background: #1d2632; color: #fff; border-bottom-right-radius: 0.2rem; }
+.chat-row.model .chat-bubble { background: rgba(255,255,255,0.045); color: #cdd5de; border-bottom-left-radius: 0.2rem; }
+html[data-theme="light"] .chat-row.user .chat-bubble { background: #10151b; }
+html[data-theme="light"] .chat-row.model .chat-bubble { background: rgba(16,21,27,0.05); color: #2b3a47; }
+
+.chat-typing { display: inline-flex; gap: 0.2rem; }
+.chat-typing i { width: 0.33rem; height: 0.33rem; border-radius: 999px; background: #839cb5; animation: chat-blink 1.3s ease-in-out infinite; }
+.chat-typing i:nth-child(2) { animation-delay: 0.18s; }
+.chat-typing i:nth-child(3) { animation-delay: 0.36s; }
+@keyframes chat-blink {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50%      { opacity: 1;    transform: translateY(-2px); }
+}
+
+.chat-fallback {
+  margin-top: 0.9rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(248,113,113,0.3);
+  border-radius: 0.52rem;
+  background: rgba(248,113,113,0.06);
+}
+.chat-fallback p { margin: 0 0 0.5rem; color: #fca5a5; font-size: 0.82rem; }
+.chat-fallback a { color: #fff; font-size: 0.82rem; border-bottom: 1px solid rgba(255,255,255,0.35); }
+html[data-theme="light"] .chat-fallback a { color: #10151b; border-color: rgba(16,21,27,0.3); }
+
+.chat-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.48rem;
+  padding: 0.7rem;
+  border-top: 1px solid rgba(255,255,255,0.09);
+  background: #0d1015;
+}
+html[data-theme="light"] .chat-composer { background: #f6f8fa; border-color: rgba(16,21,27,0.1); }
+.chat-composer textarea {
+  flex: 1;
+  resize: none;
+  max-height: 6rem;
+  padding: 0.55rem 0.68rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 0.48rem;
+  background: #11141a;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+.chat-composer button {
+  flex: none;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 0;
+  border-radius: 0.48rem;
+  background: #d9ecff;
+  color: #0a0c10;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.chat-composer button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+@media (max-width: 480px) {
+  .chat-shell { right: 0.7rem; left: 0.7rem; width: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resume-icon, .scroll-cue, .chat-fab-pulse, .chat-typing i { animation: none; }
+}
+
+/* ===================== Tech marquee =====================
+   Seamless infinite loop. Spacing is per-item margin, NOT flex `gap`: with
+   gap, 2N items span 2N items + (2N-1) gaps while one set spans N + (N-1),
+   so translateX(-50%) lands half a gap short of the seam and the loop
+   visibly jumps. Per-item margin makes -50% exactly one set. Never pauses. */
+.marquee-box {
+  display: flex;
+  width: max-content;
+  position: static;
+  animation: marquee-scroll 46s linear infinite;
+  gap: 0 !important;
+  will-change: transform;
+}
+@keyframes marquee-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+.marquee-item {
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 7rem;
+  margin-right: 2.75rem;
+  opacity: 0.5;
+  transform: translateY(0);
+  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.marquee-item img {
+  width: 2.1rem;
+  height: 2.1rem;
+  object-fit: contain;
+  transition: filter 0.45s ease, transform 0.3s ease;
+}
+.marquee-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  color: #98a3af;
+  transition: color 0.45s ease;
+}
+
+.marquee-wrap.is-focused .marquee-item { opacity: 1; transform: translateY(-6px); }
+.marquee-wrap.is-focused .marquee-item img {
+  filter: drop-shadow(0 6px 14px rgba(131, 156, 181, 0.45));
+}
+.marquee-wrap.is-focused .marquee-label { color: #d9ecff; }
+html[data-theme="light"] .marquee-wrap.is-focused .marquee-label { color: #2b3a47; }
+.marquee-item:hover img { transform: scale(1.16); }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-box { animation: none; }
+}
+
+.form-status { margin: 0; font-size: 0.88rem; line-height: 1.5; }
+.form-status.is-ok { color: #4ade80; }
+.form-status.is-error { color: #fca5a5; }
+.honeypot {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+}

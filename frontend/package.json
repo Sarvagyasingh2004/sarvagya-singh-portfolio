@@ -12,20 +12,23 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
+    "@google/genai": "^2.21.0",
     "@gsap/react": "^2.1.2",
     "@react-three/drei": "^10.7.5",
     "@react-three/fiber": "^9.3.0",
     "@react-three/postprocessing": "^3.0.4",
     "gsap": "^3.13.0",
+    "mongoose": "^9.9.4",
     "next": "^16.3.4",
     "postprocessing": "^6.37.7",
     "react": "^19.2.8",
     "react-countup": "^6.5.3",
     "react-dom": "^19.2.8",
     "react-responsive": "^10.0.1",
+    "resend": "^6.26.0",
     "tailwindcss": "^4.1.13",
-    "three": "^0.179.0"
+    "three": "^0.179.0",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

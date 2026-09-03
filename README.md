@@ -1,57 +1,65 @@
 # sarvagya-singh-portfolio
 
-Monorepo. Two deployables.
+One Next.js app. Pages and API routes together, deployed on Vercel.
 
 ```
-frontend/   Next.js 16 (App Router, TypeScript, static export)
-            -> S3 + CloudFront behind Origin Access Control
-backend/    Express 5 API — Gemini chatbot, contact, events, resume
-            -> EC2 behind an Nginx reverse proxy
+frontend/
+  app/            routes + API (chat, contact, events, resume, cron)
+  components/     UI, including the WebGL scenes
+  sections/       page sections
+  knowledge/      the assistant's corpus (markdown)
+  private/        resume PDF — no public URL, served via /api/resume
+  lib/server/     db, env, rate limiting, corpus loader
 ```
 
 ## Local development
 
 ```bash
-# terminal 1
-cd backend && npm install && cp .env.example .env   # add GEMINI_API_KEY
-npm run dev                                          # http://127.0.0.1:3001
-
-# terminal 2
-cd frontend && npm install && cp .env.example .env.local
-npm run dev                                          # http://localhost:3000
+cd frontend
+npm install
+cp .env.example .env.local     # add GEMINI_API_KEY
+npm run dev                    # http://localhost:3000
 ```
 
-Only `GEMINI_API_KEY` is required. The API starts and the chatbot works without
-MongoDB, S3 or SES configured — those features report themselves as disabled on
-`GET /api/health` rather than crashing the process.
+Only `GEMINI_API_KEY` is required. Without MongoDB, Resend or the testimonials
+sheet the site still runs — those features report themselves as disabled on
+`GET /api/health` instead of crashing.
+
+## Scripts
+
+| Command | Does |
+|---|---|
+| `npm run dev` | Dev server |
+| `npm run build` | Production build |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run icons` | Regenerate tech marquee SVGs from `simple-icons` |
 
 ## API
 
-| Route | Method | Notes |
-|---|---|---|
-| `/api/health` | GET | Feature flags and connection state |
-| `/api/chat` | POST | SSE stream. Rate limited to 15/hr per IP |
-| `/api/contact` | POST | Honeypot + Zod validated |
-| `/api/events` | POST | Client beacon, returns 204 |
-| `/api/resume` | GET | 6 variants; local disk in dev, presigned S3 in prod |
+| Route | Notes |
+|---|---|
+| `GET /api/health` | Feature flags + DB state |
+| `POST /api/chat` | SSE stream, 15/hr per IP |
+| `POST /api/contact` | Zod + honeypot, instant email alert |
+| `POST /api/events` | Client beacon, always 204 |
+| `GET /api/resume` | Serves the PDF from `private/`, logs the request |
+| `GET /api/cron/digest` | Nightly report, guarded by `CRON_SECRET` |
 
-## Chatbot design
+## The assistant
 
-The knowledge corpus in `backend/knowledge/*.md` is concatenated in sorted
-filename order and sent as the Gemini system instruction. At ~2,200 tokens it
-sits below the threshold where explicit context caching earns its complexity,
-so there is deliberately no vector store and no retrieval step — the whole
-corpus fits in context. Retrieval becomes the right call well above this size.
+The corpus in `knowledge/*.md` is concatenated in sorted filename order and
+sent as the Gemini system instruction. It is ~2,200 tokens, so there is
+deliberately **no vector store and no retrieval step** — the whole thing fits
+in context, and RAG would add an embedding pipeline plus a similarity-tuning
+problem to select from a set that already fits. Retrieval becomes the right
+call well above this size.
 
 `knowledge/99-boundaries.md` holds the answering rules: corpus-only answers, no
 compensation discussion, and visitor messages treated as data rather than
 instructions.
 
-## Deployment
+## Docs
 
-Two GitHub Actions workflows, path-filtered so a frontend change does not
-redeploy the API. Both authenticate to AWS via OIDC — no stored access keys.
-
-
-See [CONTEXT.md](CONTEXT.md) for the full end-to-end status and the
-remaining work to go live.
+- [CONTEXT.md](CONTEXT.md) — end-to-end status: what's done, what remains
+- [docs/deploy-vercel.md](docs/deploy-vercel.md) — deployment, domain, free tiers
+- [docs/testimonials-setup.md](docs/testimonials-setup.md) — Google Form pipeline

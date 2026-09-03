@@ -9,6 +9,8 @@ import Contact from "@/sections/Contact";
 import Testimonials from "@/sections/Testimonials";
 import Footer from "@/sections/Footer";
 import { getTestimonials } from "@/lib/testimonials";
+import Chatbot from "@/components/Chatbot";
+import CursorFX from "@/components/CursorFX";
 
 // Section order matches the original App.jsx.
 // Server component: the sheet is read here at build time and the rows are
@@ -18,6 +20,7 @@ export default async function Home() {
 
   return (
     <>
+      <CursorFX />
       <Navbar />
       <Hero />
       <ShowcaseSection />
@@ -28,6 +31,7 @@ export default async function Home() {
       <Testimonials testimonials={testimonials} />
       <Contact />
       <Footer />
+      <Chatbot />
     </>
   );
 }

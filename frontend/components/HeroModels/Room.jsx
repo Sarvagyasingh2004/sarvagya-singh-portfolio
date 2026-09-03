@@ -9,7 +9,6 @@ import * as THREE from "three";
 export function Room(props) {
   const { nodes, materials } = useGLTF("/models/optimized-room.glb");
   const screensRef = useRef();
-  const bloomLightRef = useRef();
   const matcapTexture = useTexture("/images/textures/mat1.png");
 
   const curtainMaterial = new THREE.MeshPhongMaterial({
@@ -43,12 +42,16 @@ export function Room(props) {
   return (
     <group {...props} dispose={null}>
       {/* <ambientLight intensity={0.2} /> */}
-      <directionalLight ref={bloomLightRef} position={[5, 5, 5]} intensity={0.2} />
+      <directionalLight position={[5, 5, 5]} intensity={0.2} />
       <EffectComposer>
         <SelectiveBloom
-          // SelectiveBloom needs the light passed explicitly — having one in
-          // the scene is not enough, hence the "requires lights" warning.
-          lights={[bloomLightRef]}
+          // NOTE: no `lights` prop, matching the original template. This logs
+          // "SelectiveBloom requires lights to work" and applies no bloom.
+          // Passing lights={[ref]} is NOT the fix — SelectiveBloom reads
+          // .layers off the light during the first render, when the ref is
+          // still null, which throws and takes the whole scene down. Making
+          // bloom actually work needs the composer gated behind a mounted
+          // check, and would change how the scene looks.
           selection={screensRef}
           intensity={1.5} // Strength of the bloom
           luminanceThreshold={0.2} // Minimum luminance needed

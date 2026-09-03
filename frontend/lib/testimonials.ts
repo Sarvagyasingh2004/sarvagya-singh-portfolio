@@ -8,21 +8,17 @@ export type Testimonial = {
 };
 
 /**
- * Where testimonials come from, and why it works this way.
+ * Testimonials come from a Google Sheet fed by a Google Form.
  *
- * The site is a static export, so there is no server at request time and no
- * ISR. That means the Sheet is read ONCE, during `next build`, and baked into
- * the HTML. Consequences, both deliberate:
+ * Now that the site runs on Vercel rather than as a static export, this uses
+ * ISR: the sheet is re-read at most once an hour and the page is regenerated
+ * in the background. So ticking `approved` in the sheet publishes the
+ * testimonial automatically, within the hour, with NO rebuild and no GitHub
+ * dispatch. The markup is still server-rendered, so it stays crawlable.
  *
- *   1. Testimonials ship as real crawlable markup, not a client-side fetch
- *      that Google may never execute. Good for SEO.
- *   2. Approving a new testimonial does NOT appear instantly — it needs a
- *      rebuild. The Apps Script trigger fires a GitHub repository_dispatch to
- *      do exactly that, so the lag is a deploy, roughly 2-3 minutes.
- *
- * If TESTIMONIALS_URL is unset, or Google is down, or the payload is malformed,
- * we fall back to the committed snapshot in content/testimonials.json rather
- * than failing the build or shipping an empty section.
+ * If TESTIMONIALS_URL is unset, or Google is down, or the payload is
+ * malformed, it falls back to the committed content/testimonials.json rather
+ * than blanking the section.
  */
 const isValid = (row: unknown): row is Testimonial => {
   if (typeof row !== "object" || row === null) return false;
@@ -49,7 +45,8 @@ export async function getTestimonials(): Promise<Testimonial[]> {
   try {
     const res = await fetch(url, {
       // Build-time only; never cache a stale sheet into the artifact.
-      cache: "no-store",
+      // ISR: refreshed at most once an hour without a rebuild.
+      next: { revalidate: 3600 },
       signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) throw new Error(`sheet responded ${res.status}`);

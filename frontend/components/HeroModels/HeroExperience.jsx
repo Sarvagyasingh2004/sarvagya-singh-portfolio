@@ -15,11 +15,11 @@ const HeroExperience = () => {
     <Canvas camera={{ position: [0, 0, 15], fov: 45 }}>
       <HeroLights />
       <Particles count={100} />
+      {/* Zoom stays off: OrbitControls captures the wheel, which hijacks page
+          scroll whenever the cursor is over the canvas. Drag to rotate only. */}
       <OrbitControls
         enablePan={false}
-        enableZoom={!isTablet}
-        maxDistance={20}
-        minDistance={5}
+        enableZoom={false}
         minPolarAngle={Math.PI / 5}
         maxPolarAngle={Math.PI / 2}
       />

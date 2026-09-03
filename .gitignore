@@ -28,5 +28,7 @@ npm-debug.log*
 *.njsproj
 *.sln
 *.sw?
-resumes/*
-!resumes/README.md
+
+# Resume PDF — carries a phone number, must not be in a public repo
+frontend/private/*
+!frontend/private/.gitkeep

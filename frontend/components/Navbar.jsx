@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { navLinks } from "@/constants";
+import ScrollProgress from "./ScrollProgress";
+import ThemeToggle from "./ThemeToggle";
+import ResumeButton from "./ResumeButton";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -34,12 +37,13 @@ const Navbar = () => {
             ))}
           </ul>
         </nav>
-        <a href="#contact" className="contact-btn group">
-          <div className="inner">
-            <span>Contact me</span>
-          </div>
-        </a>
+        <div className="nav-actions">
+          <ThemeToggle />
+          <ResumeButton />
+        </div>
       </div>
+
+      <ScrollProgress />
     </header>
   );
 };

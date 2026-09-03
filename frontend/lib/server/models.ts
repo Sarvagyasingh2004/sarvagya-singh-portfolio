@@ -1,8 +1,6 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const { Schema, model, models } = mongoose;
-
-const chatMessageSchema = new Schema(
+const chat = new Schema(
   {
     sessionId: { type: String, index: true },
     role: { type: String, enum: ["user", "model"] },
@@ -14,12 +12,11 @@ const chatMessageSchema = new Schema(
   { versionKey: false }
 );
 
-const eventSchema = new Schema(
+const event = new Schema(
   {
     type: { type: String, index: true },
     path: String,
     meta: Schema.Types.Mixed,
-    sessionId: String,
     ipHash: String,
     referrer: String,
     createdAt: { type: Date, default: Date.now, index: true },
@@ -27,19 +24,18 @@ const eventSchema = new Schema(
   { versionKey: false }
 );
 
-const contactSchema = new Schema(
+const contact = new Schema(
   {
     name: String,
     email: String,
     message: String,
     ipHash: String,
-    notified: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now, index: true },
   },
   { versionKey: false }
 );
 
-const resumeGrantSchema = new Schema(
+const resumeGrant = new Schema(
   {
     ipHash: String,
     referrer: String,
@@ -48,7 +44,7 @@ const resumeGrantSchema = new Schema(
   { versionKey: false }
 );
 
-export const ChatMessage = models.ChatMessage || model("ChatMessage", chatMessageSchema);
-export const Event = models.Event || model("Event", eventSchema);
-export const Contact = models.Contact || model("Contact", contactSchema);
-export const ResumeGrant = models.ResumeGrant || model("ResumeGrant", resumeGrantSchema);
+export const ChatMessage = mongoose.models.ChatMessage || mongoose.model("ChatMessage", chat);
+export const Event = mongoose.models.Event || mongoose.model("Event", event);
+export const Contact = mongoose.models.Contact || mongoose.model("Contact", contact);
+export const ResumeGrant = mongoose.models.ResumeGrant || mongoose.model("ResumeGrant", resumeGrant);

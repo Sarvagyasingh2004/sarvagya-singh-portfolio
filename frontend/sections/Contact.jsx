@@ -2,12 +2,12 @@
 
 import React, { useRef, useState } from "react";
 import TitleHeader from "../components/TitleHeader";
+import { contactEmail } from "@/constants";
 import dynamic from "next/dynamic";
 
 // WebGL can't be server-rendered, and a static export prerenders everything —
 // so the canvas loads on the client only.
 const ContactExperience = dynamic(() => import("../components/ContactModels/ContactExperience"), { ssr: false });
-import emailjs from "@emailjs/browser";
 const Contact = () => {
   const formRef = useRef(null);
   const [form, setForm] = useState({
@@ -16,33 +16,36 @@ const Contact = () => {
     message: "",
   });
 
-  const [loading, setLoading] = useState(false);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };
+  const [status, setStatus] = useState({ state: "idle", message: "" });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setStatus({ state: "sending", message: "" });
     try {
-      setLoading(true);
-
-      await emailjs.sendForm(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
-        formRef.current,
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
-      );
-      setForm({
-        name: "",
-        email: "",
-        message: "",
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, company_url: "" }),
       });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Couldn't send that message.");
+      }
+      setForm({ name: "", email: "", message: "" });
+      setStatus({ state: "success", message: "Message sent. I'll reply within a day." });
     } catch (error) {
-      console.log("EmailJS error", error);
-    } finally {
-      setLoading(false);
+      setStatus({
+        state: "error",
+        message: `${error.message} You can email me directly at ${contactEmail}.`,
+      });
     }
   };
+
+  const loading = status.state === "sending";
 
   return (
     <section id="contact" className="flex-center section-padding">
@@ -97,6 +100,29 @@ const Contact = () => {
                     required
                   />
                 </div>
+
+                {status.message ? (
+                  <p
+                    role="status"
+                    aria-live="polite"
+                    className={
+                      status.state === "error" ? "form-status is-error" : "form-status is-ok"
+                    }
+                  >
+                    {status.message}
+                  </p>
+                ) : null}
+
+                {/* Honeypot — hidden from people, filled by bots. */}
+                <input
+                  type="text"
+                  name="company_url"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="honeypot"
+                  onChange={() => {}}
+                />
 
                 <button type="submit" disabled={loading}>
                   <div className="cta-button group">
