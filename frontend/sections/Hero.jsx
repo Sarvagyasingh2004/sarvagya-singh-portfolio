@@ -4,14 +4,10 @@ import { useGSAP } from "@gsap/react";
 import { words } from "@/constants";
 import Button from "../components/Button";
 import dynamic from "next/dynamic";
-import ScrollCue from "../components/ScrollCue";
 
-// R3F touches window/WebGL, so it must not render during the static export.
-// Loading it lazily also keeps three.js out of the first JS payload.
-const HeroExperience = dynamic(
-  () => import("../components/HeroModels/HeroExperience"),
-  { ssr: false, loading: () => <div className="canvas-skeleton" /> }
-);
+// WebGL can't be server-rendered, and a static export prerenders everything —
+// so the canvas loads on the client only.
+const HeroExperience = dynamic(() => import("../components/HeroModels/HeroExperience"), { ssr: false });
 import { SplitText } from "gsap/all";
 import gsap from "gsap";
 import AnimatedCounter from "../components/AnimatedCounter";
@@ -71,13 +67,11 @@ const Hero = () => {
               Hi, I'm Sarvagya, a developer based in India with passion to learn
               and code.
             </p>
-            <div className="hero-ctas">
-              <Button
+            <Button
               className="md:w-80 md:h-16 w-60 h-12"
-              targetId="counter"
-                text="See My Work"
-              />
-            </div>
+              id="counter"
+              text="See My Work"
+            />
           </div>
         </header>
         {/* right - 3D Model */}
@@ -87,7 +81,6 @@ const Hero = () => {
           </div>
         </figure>
       </div>
-      <ScrollCue />
       <AnimatedCounter />
     </section>
   );

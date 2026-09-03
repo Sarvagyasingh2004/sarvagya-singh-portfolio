@@ -45,7 +45,7 @@ const counterItems = [
 // Every mark here is a technology that appears on Sarvagya's resume.
 // SVGs are generated from the simple-icons package, so the brand paths are
 // accurate rather than hand-drawn. Regenerate with: npm run icons
-const techMarquee = [
+const logoIconsList = [
   { name: "TypeScript", imgPath: "/images/tech/typescript.svg" },
   { name: "Node.js", imgPath: "/images/tech/node-js.svg" },
   { name: "Express", imgPath: "/images/tech/express.svg" },
@@ -120,15 +120,17 @@ const techStackIcons = [
   },
 ];
 
-// Real roles, real dates, real scope. `summary` replaces the template's fake
-// third-party "review" quote — it is a first-person statement of ownership.
+// `review` keeps the original field name, but it is now a first-person
+// statement of ownership rather than an invented third-party quote.
+// REPLACE_ME: imgPath / logoPath are still the template's generic images —
+// swap for real company logos or project screenshots when you have them.
 const expCards = [
   {
-    title: "Software Development Engineer (Full-Stack)",
-    company: "Kraftshala",
-    location: "Delhi, India",
+    title: "Software Development Engineer (Full-Stack) — Kraftshala",
     date: "March 2026 - September 2026",
-    summary:
+    imgPath: "/images/exp1.png",
+    logoPath: "/images/logo1.png",
+    review:
       "Owned features end-to-end across a Node/TypeScript/MySQL backend and a React/Redux internal ops platform. 331 commits across both repositories.",
     responsibilities: [
       "Built a self-service Google Chat alerting platform: teams define SQL rules and thresholds via API, a per-minute cron evaluates them, and a validation layer restricts queries to SELECT/WITH and blocks DDL/DML. Another engineer later shipped two of their own alert features on top of it.",
@@ -140,11 +142,11 @@ const expCards = [
     ],
   },
   {
-    title: "Full-Stack Developer",
-    company: "BWS",
-    location: "Remote",
+    title: "Full-Stack Developer — BWS",
     date: "July 2025 - December 2025",
-    summary:
+    imgPath: "/images/exp2.png",
+    logoPath: "/images/logo2.png",
+    review:
       "Built and deployed the company's website chatbot and lead-capture flow on the MERN stack, then optimized the site's performance and on-page SEO.",
     responsibilities: [
       "Built and deployed an end-to-end AI chatbot on the company website with MongoDB, Express, React and Node.js, automating responses to 100+ visitor queries.",
@@ -154,11 +156,11 @@ const expCards = [
     ],
   },
   {
-    title: "Teaching Assistant",
-    company: "Coding Blocks",
-    location: "Noida, India",
+    title: "Teaching Assistant — Coding Blocks",
     date: "May 2024 - August 2024",
-    summary:
+    imgPath: "/images/exp3.png",
+    logoPath: "/images/logo3.png",
+    review:
       "Mentored 100+ students through Java, data structures and algorithms via doubt sessions and one-on-one code review.",
     responsibilities: [
       "Ran doubt sessions and one-on-one code reviews for 100+ students learning Java and DSA.",
@@ -230,16 +232,32 @@ const socialImgs = [
   },
 ];
 
+const expLogos = [
+  { name: "logo1", imgPath: "/images/logo1.png" },
+  { name: "logo2", imgPath: "/images/logo2.png" },
+  { name: "logo3", imgPath: "/images/logo3.png" },
+];
+
+const techStackImgs = [
+  { name: "React Developer", imgPath: "/images/logos/react.png" },
+  { name: "Python Developer", imgPath: "/images/logos/python.svg" },
+  { name: "Backend Developer", imgPath: "/images/logos/node.png" },
+  { name: "Interactive Developer", imgPath: "/images/logos/three.png" },
+  { name: "Project Manager", imgPath: "/images/logos/git.svg" },
+];
+
 const contactEmail = "sarvagya3555cc@gmail.com";
 
 
 export {
   words,
   abilities,
-  techMarquee,
+  logoIconsList,
   counterItems,
   expCards,
+  expLogos,
   projects,
+  techStackImgs,
   socialImgs,
   contactEmail,
   techStackIcons,

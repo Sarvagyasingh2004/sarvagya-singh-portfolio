@@ -7,26 +7,21 @@ import ExperienceSection from "@/sections/ExperienceSection";
 import TechStack from "@/sections/TechStack";
 import Contact from "@/sections/Contact";
 import Footer from "@/sections/Footer";
-import Chatbot from "@/components/Chatbot";
 
+// Section order is unchanged from the original App.jsx. Testimonials is the
+// one omission: its six entries were the template's fabricated client quotes.
 export default function Home() {
   return (
     <>
-      <a href="#main" className="skip-link">
-        Skip to content
-      </a>
       <Navbar />
-      <main id="main">
-        <Hero />
-        <ShowcaseSection />
-        <LogoSection />
-        <FeatureCards />
-        <ExperienceSection />
-        <TechStack />
-        <Contact />
-      </main>
+      <Hero />
+      <ShowcaseSection />
+      <LogoSection />
+      <FeatureCards />
+      <ExperienceSection />
+      <TechStack />
+      <Contact />
       <Footer />
-      <Chatbot />
     </>
   );
 }

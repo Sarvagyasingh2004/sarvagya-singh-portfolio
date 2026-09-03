@@ -2,103 +2,91 @@
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useRef } from "react";
+import React, { useRef } from "react";
 import { ScrollTrigger } from "gsap/all";
-import { projects } from "@/constants";
-import TitleHeader from "../components/TitleHeader";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const isReal = (url) => Boolean(url) && url !== "REPLACE_ME";
-
-const ProjectCard = ({ project, featured }) => {
-  const { title, thesis, desc, tech, imgPath, repoUrl, liveUrl } = project;
-
-  const links = [
-    { label: "Read the code", url: repoUrl },
-    { label: "Live demo", url: liveUrl },
-  ].filter((l) => isReal(l.url));
-
-  return (
-    <article className={`proj-card ${featured ? "featured" : ""}`}>
-      <div className="proj-media">
-        <img src={imgPath} alt={`${title} interface`} loading="lazy" />
-      </div>
-
-      <div className="proj-body">
-        <p className="proj-thesis">{thesis}</p>
-        <h3 className="proj-title">{title}</h3>
-        <p className="proj-desc">{desc}</p>
-
-        <ul className="proj-tech" aria-label={`${title} technologies`}>
-          {tech.map((t) => (
-            <li key={t}>{t}</li>
-          ))}
-        </ul>
-
-        {links.length ? (
-          <div className="proj-links">
-            {links.map(({ label, url }) => (
-              <a
-                key={label}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${label} — ${title}`}
-              >
-                {label}
-                <span aria-hidden="true">↗</span>
-              </a>
-            ))}
-          </div>
-        ) : (
-          <p className="proj-pending">Links coming shortly</p>
-        )}
-      </div>
-    </article>
-  );
-};
-
 const ShowcaseSection = () => {
-  const gridRef = useRef(null);
+  const sectionRef = useRef(null);
+  const project1Ref = useRef(null);
+  const project2Ref = useRef(null);
+  const project3Ref = useRef(null);
 
   useGSAP(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    gsap.utils.toArray(".proj-card").forEach((card, i) => {
-      gsap.from(card, {
-        y: 40,
+    gsap.fromTo(
+      sectionRef.current,
+      {
         opacity: 0,
-        duration: 0.75,
-        delay: i * 0.08,
-        ease: "power2.out",
-        scrollTrigger: { trigger: card, start: "top 88%" },
-      });
+      },
+      {
+        opacity: 1,
+        duration: 1.5,
+      }
+    );
+
+    const projects = [
+      project1Ref.current,
+      project2Ref.current,
+      project3Ref.current,
+    ];
+
+    projects.forEach((project, index) => {
+      gsap.fromTo(
+        project,
+        {
+          y: 50,
+          opacity: 0,
+        },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          delay: 0.3 * (index + 1),
+          scrollTrigger: {
+            trigger: project,
+            start: "top bottom-=100",
+          },
+        }
+      );
     });
   }, []);
-
-  const [lead, ...rest] = projects;
-
   return (
-    <section id="work" aria-labelledby="work-heading" className="section-padding">
-      <div className="w-full md:px-20 px-5">
-        <TitleHeader
-          id="work-heading"
-          title="Systems I Built Alone"
-          sub="Independent Work"
-        />
-
-        <p className="proj-intro">
-          My production work at Kraftshala and BWS shipped to real users, but you
-          can&rsquo;t clone it. These you can. Every one is a public repository
-          &mdash; read the code and judge it directly.
-        </p>
-
-        <div className="proj-grid" ref={gridRef}>
-          <ProjectCard project={lead} featured />
-          {rest.map((project) => (
-            <ProjectCard key={project.slug} project={project} />
-          ))}
+    <section id="work" className="app-showcase" ref={sectionRef}>
+      <div className="w-full">
+        <div className="showcaselayout">
+          {/* left */}
+          <div className="first-project-wrapper" ref={project1Ref}>
+            <div className="image-wrapper">
+              <img src="/images/project1.png" alt="Food Delivery Microservices Platform" />
+            </div>
+            <div className="text-content">
+              <h2>
+                Six Independent Microservices Handling Orders, Payments and
+                Live Rider Tracking
+              </h2>
+              <p className="text-white-50 md:text-xl">
+                Built with Node.js, TypeScript and RabbitMQ. Redis caching cut
+                DB reads ~60%; retries, a dead-letter queue and health checks
+                handle partial failure.
+              </p>
+            </div>
+          </div>
+          {/* right */}
+          <div className="project-list-wrapper overflow-hidden">
+            <div className="project" ref={project2Ref}>
+              <div className="image-wrapper bg-[#ffefdb]">
+                <img src="/images/project2.png" alt="Real-Time Chat Application" />
+              </div>
+              <h2>Real-Time Chat &mdash; WebSockets with Offline Delivery</h2>
+            </div>
+            <div className="project" ref={project3Ref}>
+              <div className="image-wrapper bg-[#ffe7eb]">
+                <img src="/images/project3.png" alt="SaaSify-AI" />
+              </div>
+              <h2>SaaSify-AI &mdash; Multi-Provider LLM Platform</h2>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -4,10 +4,9 @@ import TitleHeader from "../components/TitleHeader";
 import { techStackIcons } from "@/constants";
 import dynamic from "next/dynamic";
 
-const TechIcon = dynamic(() => import("../components/Models/TechLogos/TechIcon.jsx"), {
-  ssr: false,
-  loading: () => <div className="canvas-skeleton" />,
-});
+// WebGL can't be server-rendered, and a static export prerenders everything —
+// so the canvas loads on the client only.
+const TechIcon = dynamic(() => import("../components/Models/TechLogos/TechIcon.jsx"), { ssr: false });
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 const TechStack = () => {
@@ -35,7 +34,7 @@ const TechStack = () => {
     <div id="skills" className="flex-center section-padding">
       <div className="w-full h-full md:px-10 px-5">
         <TitleHeader
-          title="My Tech Stack"
+          title="My Preferred Tech Stack"
           sub="🤝 The Skills I Bring to the Table"
         />
         <div className="tech-grid">

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { themeInitScript } from "@/lib/theme-script";
 import "./globals.css";
 
 // REPLACE_ME_DOMAIN — swap for the real domain once purchased.
@@ -69,17 +68,14 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Applies the stored/time-of-day theme before first paint, so there
-            is no flash of the wrong theme on load. */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
         />
       </head>
-      <body>{children}</body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }
