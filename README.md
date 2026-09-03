@@ -3,7 +3,7 @@
 Monorepo. Two deployables.
 
 ```
-frontend/   Vite + React SPA (migrating to Next.js static export)
+frontend/   Next.js 16 (App Router, TypeScript, static export)
             -> S3 + CloudFront behind Origin Access Control
 backend/    Express 5 API — Gemini chatbot, contact, events, resume
             -> EC2 behind an Nginx reverse proxy
@@ -17,8 +17,8 @@ cd backend && npm install && cp .env.example .env   # add GEMINI_API_KEY
 npm run dev                                          # http://127.0.0.1:3001
 
 # terminal 2
-cd frontend && npm install && cp .env.example .env
-npm run dev                                          # http://localhost:5173
+cd frontend && npm install && cp .env.example .env.local
+npm run dev                                          # http://localhost:3000
 ```
 
 Only `GEMINI_API_KEY` is required. The API starts and the chatbot works without
@@ -33,7 +33,7 @@ MongoDB, S3 or SES configured — those features report themselves as disabled o
 | `/api/chat` | POST | SSE stream. Rate limited to 15/hr per IP |
 | `/api/contact` | POST | Honeypot + Zod validated |
 | `/api/events` | POST | Client beacon, returns 204 |
-| `/api/resume` | GET | Presigned S3 URL (not yet wired) |
+| `/api/resume` | GET | 6 variants; local disk in dev, presigned S3 in prod |
 
 ## Chatbot design
 
@@ -51,3 +51,7 @@ instructions.
 
 Two GitHub Actions workflows, path-filtered so a frontend change does not
 redeploy the API. Both authenticate to AWS via OIDC — no stored access keys.
+
+
+See [CONTEXT.md](CONTEXT.md) for the full end-to-end status and the
+remaining work to go live.

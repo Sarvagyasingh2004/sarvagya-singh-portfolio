@@ -4,11 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "icons": "node scripts/generate-icons.mjs"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "icons": "node scripts/generate-icons.mjs",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -16,26 +17,26 @@
     "@react-three/drei": "^10.7.5",
     "@react-three/fiber": "^9.3.0",
     "@react-three/postprocessing": "^3.0.4",
-    "@tailwindcss/vite": "^4.1.13",
     "gsap": "^3.13.0",
+    "next": "^16.3.4",
     "postprocessing": "^6.37.7",
-    "react": "^19.1.1",
+    "react": "^19.2.8",
     "react-countup": "^6.5.3",
-    "react-dom": "^19.1.1",
+    "react-dom": "^19.2.8",
     "react-responsive": "^10.0.1",
     "tailwindcss": "^4.1.13",
     "three": "^0.179.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
-    "@types/react": "^19.1.10",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.4.1",
+    "@types/react": "^19.2.18",
     "@types/react-dom": "^19.1.7",
-    "@vitejs/plugin-react": "^5.0.0",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
     "simple-icons": "^16.29.0",
-    "vite": "^7.1.2"
+    "typescript": "^7.0.2"
   }
 }

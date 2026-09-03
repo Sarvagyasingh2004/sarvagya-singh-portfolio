@@ -14,7 +14,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const resumeDir = join(here, "..", "..", "resumes");
 
 const querySchema = z.object({
-  role: z.enum(["backend", "fullstack"]).default("backend"),
+  role: z.enum(["backend", "fullstack", "frontend"]).default("backend"),
   scope: z.enum(["india", "remote"]).default("remote"),
   // ?download=1 forces a save dialog instead of opening in the viewer.
   download: z.enum(["0", "1"]).optional(),
@@ -25,7 +25,7 @@ const fileFor = ({ role, scope }) => `sarvagya-singh-${role}-${scope}.pdf`;
 // GET /api/resume/variants — lets the UI show only variants that exist.
 router.get("/variants", (req, res) => {
   const variants = [];
-  for (const role of ["backend", "fullstack"]) {
+  for (const role of ["backend", "fullstack", "frontend"]) {
     for (const scope of ["india", "remote"]) {
       const file = fileFor({ role, scope });
       variants.push({

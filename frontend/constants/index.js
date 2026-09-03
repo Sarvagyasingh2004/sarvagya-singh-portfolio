@@ -230,14 +230,8 @@ const socialImgs = [
   },
 ];
 
-// REPLACE_ME — your personal address, not the Kraftshala one (that mailbox
-// dies now that you've left).
-const contactEmail = "REPLACE_ME";
+const contactEmail = "sarvagya3555cc@gmail.com";
 
-// REPLACE_ME — country code, no +, no spaces. e.g. "91XXXXXXXXXX"
-// This becomes a public wa.me link, so only set it if you're happy for
-// recruiters (and scrapers) to have the number.
-const whatsappNumber = "REPLACE_ME";
 
 export {
   words,
@@ -248,7 +242,6 @@ export {
   projects,
   socialImgs,
   contactEmail,
-  whatsappNumber,
   techStackIcons,
   navLinks,
 };
