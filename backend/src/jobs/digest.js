@@ -15,20 +15,13 @@ const build = async () => {
     Event.find({ createdAt: { $gte: since } }).lean(),
   ]);
 
-  const byVariant = resumes.reduce((acc, r) => {
-    const k = `${r.role}-${r.scope}`;
-    acc[k] = (acc[k] || 0) + 1;
-    return acc;
-  }, {});
-
   const lines = [
     `Portfolio digest — last 24h`,
     ``,
     `## Contact submissions (${contacts.length})`,
     ...contacts.map((c) => `  ${c.name} <${c.email}>\n    ${c.message.slice(0, 300)}`),
     ``,
-    `## Resume downloads (${resumes.length})`,
-    ...Object.entries(byVariant).map(([k, n]) => `  ${k}: ${n}`),
+    `## Resume downloads: ${resumes.length}`,
     ``,
     `## Chatbot questions (${questions.length})`,
     ...questions.map((q) => `  - ${q.text.slice(0, 200)}`),

@@ -41,8 +41,6 @@ const contactSchema = new Schema(
 
 const resumeGrantSchema = new Schema(
   {
-    role: String,
-    scope: String,
     ipHash: String,
     referrer: String,
     createdAt: { type: Date, default: Date.now, index: true },

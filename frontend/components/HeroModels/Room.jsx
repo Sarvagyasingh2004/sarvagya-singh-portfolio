@@ -9,6 +9,7 @@ import * as THREE from "three";
 export function Room(props) {
   const { nodes, materials } = useGLTF("/models/optimized-room.glb");
   const screensRef = useRef();
+  const bloomLightRef = useRef();
   const matcapTexture = useTexture("/images/textures/mat1.png");
 
   const curtainMaterial = new THREE.MeshPhongMaterial({
@@ -42,9 +43,12 @@ export function Room(props) {
   return (
     <group {...props} dispose={null}>
       {/* <ambientLight intensity={0.2} /> */}
-      <directionalLight position={[5, 5, 5]} intensity={0.2} />
+      <directionalLight ref={bloomLightRef} position={[5, 5, 5]} intensity={0.2} />
       <EffectComposer>
         <SelectiveBloom
+          // SelectiveBloom needs the light passed explicitly — having one in
+          // the scene is not enough, hence the "requires lights" warning.
+          lights={[bloomLightRef]}
           selection={screensRef}
           intensity={1.5} // Strength of the bloom
           luminanceThreshold={0.2} // Minimum luminance needed

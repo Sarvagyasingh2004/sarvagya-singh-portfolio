@@ -2,7 +2,7 @@
 
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import React from "react";
+import React, { Suspense } from "react";
 import { useMediaQuery } from "react-responsive";
 import { Room } from "./Room";
 import HeroLights from "./HeroLights";
@@ -23,13 +23,17 @@ const HeroExperience = () => {
         minPolarAngle={Math.PI / 5}
         maxPolarAngle={Math.PI / 2}
       />
-      <group
-        scale={isMobile ? 0.7 : 1}
-        position={[0, -3.5, 0]}
-        rotation={[0, -Math.PI / 4, 0]}
-      >
-        <Room />
-      </group>
+      {/* useGLTF/useTexture suspend while the model and matcap load. Without
+          a boundary here the scene never resolves and the canvas stays empty. */}
+      <Suspense fallback={null}>
+        <group
+          scale={isMobile ? 0.7 : 1}
+          position={[0, -3.5, 0]}
+          rotation={[0, -Math.PI / 4, 0]}
+        >
+          <Room />
+        </group>
+      </Suspense>
     </Canvas>
   );
 };

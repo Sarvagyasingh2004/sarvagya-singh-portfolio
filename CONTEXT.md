@@ -181,56 +181,76 @@ Low-confidence answers are flagged so the nightly digest can surface **what
 recruiters want to know that the corpus does not cover** — the most useful line
 in that email.
 
-### 3.7 UI / UX ✅
+### 3.7 UI / UX — reverted to the original design ⚠️
 
-- **Theme system:** dark default, click to toggle. On a first visit the theme
-  follows the visitor's **local time of day** — light while the sun is up where
-  they are, dark at night — read from the browser's own clock, so it works for
-  a recruiter in San Francisco or Berlin with no geo lookup and no permission
-  prompt. Once someone picks a theme it persists and stops auto-switching. An
-  inline head script applies it before first paint so there is no flash.
-  All ~103 colour literals are tokenized; both themes resolve as complete sets.
-- **Smooth progress bar:** drives `transform: scaleX()` (compositor-only) eased
-  toward its target in a single rAF loop at 12% of remaining distance per
-  frame. The previous version animated `width` with a CSS transition, which
-  fought every scroll event and stuttered.
-- **Seamless marquee:** 21 marks generated from `simple-icons` (`npm run
-  icons`). Spacing lives on each chip's `margin-right`, **not** on the track's
-  `gap` — with `gap`, 2N chips span `2N items + (2N-1) gaps` while one set
-  spans `N items + (N-1) gaps`, so `translateX(-50%)` lands half a gap short of
-  the seam and the loop visibly jumps. Per-item margin makes -50% exact. Never
-  pauses; lifts and brightens when centred in the viewport.
-- **Scroll cue** in the hero, self-hiding past 80px
-- **Resume control in the navbar only** — one primary download with a sensible
-  default, variant picker as secondary disclosure
-- Assistant shell: terminal chrome, live status probe, streaming indicator,
-  textarea composer, email fallback on failure
-- **Pointer spotlight removed** — it degraded readability around the canvases
-- **WhatsApp removed** — a `wa.me` link publishes the phone number
+I replaced the original design while fixing a reported layout bug. That was
+overreach and has been reverted. `app/globals.css` is now **byte-for-byte
+identical** to the original `src/index.css`, and every section's `className`
+set matches the original (Hero differs by exactly one entry: the
+`pointer-events-none` typo fix).
 
-### 3.8 Repo hygiene ✅
+**Reverted:** grid experience timeline, rebuilt project grid, custom marquee,
+theme system + colour tokenization, pointer spotlight, scroll cue, scroll
+progress bar, navbar resume widget.
 
-- `git init` with a pre-restructure snapshot commit (everything reversible)
-- `.env*` gitignored with committed `.env.example` files
-- `backend/resumes/` gitignored except its README — the PDFs carry a phone
-  number and must not sit in a public repo
-- Assets 10 MB → 3.7 MB (14 unreferenced files, incl. a 4.3 MB `readme.png`)
-- Root README documenting both deployables
+**Lesson for future work:** fix the reported bug, not the design around it.
+The bug was that an earlier commit removed `.timeline-logo` from the markup,
+leaving the `.timeline` masking bar (absolute, hardcoded `35.5vw`, `z-30`)
+painting over the copy. Restoring one element was the fix.
 
----
+### 3.8 Three.js under Next.js ✅
+
+Three.js is fully compatible with Next.js; the scenes were broken by two
+things, now fixed:
+
+1. **No `<Suspense>` boundaries anywhere.** `useGLTF` and `useTexture` suspend
+   while loading. `dynamic(ssr: false)` provides a boundary for the *module*,
+   not for data suspension *inside* it, so the scene never resolved. Added
+   boundaries in `HeroExperience`, `ContactExperience` and `TechIcon`.
+2. **`SelectiveBloom` had no `lights` prop.** Having a light in the scene is
+   not enough — the console said `SelectiveBloom requires lights to work`.
+   Now passes the `directionalLight` ref. Pre-existing template bug.
+
+Also added `transpilePackages` for the three ecosystem, the Turbopack
+equivalent of the old Vite `optimizeDeps: { include: ["postprocessing"] }`.
+
+Verified in the static export: 1 hero canvas, 5 tech-icon canvases, 1 contact
+canvas, with three.js in a separate 934 KB lazy chunk.
+
+### 3.9 Resume — single file ✅
+
+One PDF (`SarvagyaCVFullStackRemote`), served by `GET /api/resume`. Local disk
+in dev, 5-minute presigned private-S3 URL in prod. Every request logged.
+The six-variant picker was removed at the user's request.
+
+**Not yet mounted in the UI** — the endpoint works, but no button is wired
+into the restored design pending a decision on placement.
+
+### 3.10 Testimonials via Google Form ✅ (code) / ⚠️ (needs Google setup)
+
+Data layer built: `lib/testimonials.ts` reads the Apps Script `/exec` JSON at
+**build time** (static export has no request-time server and no ISR), validates
+each row, and falls back to the committed `content/testimonials.json` if the
+sheet is unset, down, or malformed. Zero approved rows renders **no section at
+all**. Original `Testimonials.jsx` design restored, data arriving as a prop.
+
+Full setup — Form fields, the `approved` moderation gate, the Apps Script
+(`doGet`, `onFormSubmit`, `onEdit` → `repository_dispatch`), and deployment
+settings — is in **[docs/testimonials-setup.md](docs/testimonials-setup.md)**.
 
 ## 4. REPLACE_ME — outstanding values
 
 | # | File | Field | Consequence while unset |
 |---|---|---|---|
 | 1 | `constants/index.js` | `socialImgs` GitHub / LinkedIn / X URLs | Footer icons hidden |
-| 2 | `constants/index.js` | `repoUrl` + `liveUrl` × 3 projects | Renders "Links coming shortly" |
-| 3 | `constants/index.js` | Real screenshots for `project1/2/3.png` | Still the tutorial's images |
+| 2 | `constants/index.js` | `expCards` `imgPath` / `logoPath` | Still the template's generic images |
+| 3 | `public/images/project1-3.png` | Real project screenshots | Still the tutorial's images |
 | 4 | `app/layout.tsx` | `SITE` + `sameAs: []` | OG previews and name-search broken |
 | 5 | `app/sitemap.ts`, `app/robots.ts` | `SITE` | Sitemap points at a placeholder host |
 | 6 | `public/images/og.png` | 1200×630 share image | Blank link previews |
+| 7 | `frontend/.env.local` | `TESTIMONIALS_URL` | Section hidden; falls back to committed JSON |
 
-**Done:** email (`sarvagya3555cc@gmail.com`), job title, all six resume PDFs.
+**Done:** email, job title, single resume PDF.
 **Deliberately never set:** phone number.
 
 Placeholders fail *visibly* — a `REPLACE_ME` URL renders nothing rather than

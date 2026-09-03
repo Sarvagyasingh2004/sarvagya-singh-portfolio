@@ -11,6 +11,15 @@ const nextConfig = {
   // Images are pre-optimized at build time instead.
   images: { unoptimized: true },
   reactStrictMode: true,
+  // three and its R3F wrappers ship untranspiled ESM; the old Vite config
+  // needed optimizeDeps for postprocessing for the same reason.
+  transpilePackages: [
+    "three",
+    "@react-three/fiber",
+    "@react-three/drei",
+    "@react-three/postprocessing",
+    "postprocessing",
+  ],
 };
 
 export default nextConfig;

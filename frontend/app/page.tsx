@@ -6,11 +6,16 @@ import FeatureCards from "@/sections/FeatureCards";
 import ExperienceSection from "@/sections/ExperienceSection";
 import TechStack from "@/sections/TechStack";
 import Contact from "@/sections/Contact";
+import Testimonials from "@/sections/Testimonials";
 import Footer from "@/sections/Footer";
+import { getTestimonials } from "@/lib/testimonials";
 
-// Section order is unchanged from the original App.jsx. Testimonials is the
-// one omission: its six entries were the template's fabricated client quotes.
-export default function Home() {
+// Section order matches the original App.jsx.
+// Server component: the sheet is read here at build time and the rows are
+// baked into the HTML, so they are crawlable rather than client-fetched.
+export default async function Home() {
+  const testimonials = await getTestimonials();
+
   return (
     <>
       <Navbar />
@@ -20,6 +25,7 @@ export default function Home() {
       <FeatureCards />
       <ExperienceSection />
       <TechStack />
+      <Testimonials testimonials={testimonials} />
       <Contact />
       <Footer />
     </>
