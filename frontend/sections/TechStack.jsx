@@ -44,13 +44,18 @@ const TechStack = () => {
       const cy = c.top + c.height / 2 - w.top;
 
       setPaths(
-        nodeRefs.current.filter(Boolean).map((el) => {
+        nodeRefs.current.filter(Boolean).map((el, i) => {
           const r = el.getBoundingClientRect();
           const x = r.left + r.width / 2 - w.left;
           const y = r.top + r.height - w.top - 8;
           // Control points pulled toward the core's vertical axis, so every
           // curve funnels into the centre like fibre into a hub.
-          return `M ${x} ${y} C ${x} ${y + (cy - y) * 0.45}, ${cx + (x - cx) * 0.12} ${cy - (cy - y) * 0.3}, ${cx} ${cy}`;
+          // Nodes sitting almost directly above the hub get a deliberate
+          // sideways bow, alternating direction. Without it the centre wire is
+          // a straight vertical line that disappears into the orb's glow.
+          const dx = x - cx;
+          const bow = Math.abs(dx) < 40 ? (i % 2 === 0 ? -58 : 58) : dx * 0.12;
+          return `M ${x} ${y} C ${x + bow * 0.5} ${y + (cy - y) * 0.45}, ${cx + bow} ${cy - (cy - y) * 0.32}, ${cx} ${cy}`;
         })
       );
     };
@@ -85,14 +90,26 @@ const TechStack = () => {
             aria-hidden="true"
           >
             <defs>
-              <linearGradient id="wire" x1="0" y1="0" x2="0" y2="1">
+              {/* userSpaceOnUse, not the default objectBoundingBox: a nearly
+                  vertical path has near-zero bbox width, which makes an
+                  objectBoundingBox gradient degenerate and it silently fails
+                  to paint. That is exactly why the centre node's wire was
+                  missing while the four angled ones drew fine. */}
+              <linearGradient
+                id="wire"
+                gradientUnits="userSpaceOnUse"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2={box.h || 1}
+              >
                 <stop offset="0%" stopColor="rgba(167,139,250,0.05)" />
                 <stop offset="55%" stopColor="rgba(139,92,246,0.35)" />
                 <stop offset="100%" stopColor="rgba(91,110,245,0.7)" />
               </linearGradient>
             </defs>
             {paths.map((d, i) => (
-              <path key={i} d={d} className="constellation-wire" fill="none" />
+              <path key={i} d={d} className="constellation-wire" fill="none" pathLength={1} />
             ))}
           </svg>
 

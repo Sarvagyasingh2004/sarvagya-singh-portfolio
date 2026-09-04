@@ -157,46 +157,58 @@ const expCards = [
   },
 ];
 
-// Two tracks, both first-class. `production` work shipped to real users under
-// constraints someone else set; `independent` work is publicly inspectable —
-// a reviewer can clone it and judge the code directly.
-//
-// REPLACE_ME on every entry below: repoUrl, liveUrl, and imgPath.
-// The imgPath values still point at the tutorial template's screenshots —
-// replace each with a real screenshot of your own running app.
+// Project cards. `highlights` are the three things a reviewer should take
+// away; `stack` is what it was actually built with. REPLACE_ME on repoUrl,
+// liveUrl and shot for each — a placeholder renders no link rather than a
+// dead one.
 const projects = [
   {
-    track: "independent",
     slug: "food-delivery-microservices",
-    title: "Food Delivery Microservices Platform",
-    thesis: "Distributed-systems failure handling",
-    desc: "Six independent services communicating over asynchronous RabbitMQ events, with real-time order and rider tracking over Socket.IO. Redis caching cut DB reads ~60% and latency ~35%; retries, a dead-letter queue and health checks handle partial failure.",
-    tech: ["Node.js", "TypeScript", "RabbitMQ", "Socket.IO", "Redis", "Docker", "AWS"],
-    imgPath: "/images/project1.png",
+    title: "Food Delivery Microservices",
+    tagline:
+      "Six independent services coordinating one order, built so any of them can fail without taking the order with it.",
+    stack: ["Node.js", "TypeScript", "RabbitMQ", "Socket.IO", "Redis", "Docker", "AWS"],
+    highlights: [
+      "Six services communicating over asynchronous RabbitMQ events, with live order and rider tracking on Socket.IO.",
+      "Redis caching cut database reads by roughly 60% and latency by roughly 35%.",
+      "Retries, a dead-letter queue and health checks so a downed service degrades instead of losing orders.",
+    ],
     repoUrl: "REPLACE_ME",
     liveUrl: "REPLACE_ME",
+    shot: "",
+    accent: "violet",
   },
   {
-    track: "independent",
     slug: "realtime-chat",
-    title: "Real-Time Chat Application",
-    thesis: "Message delivery guarantees",
-    desc: "A microservices messaging platform where RabbitMQ sits behind the WebSocket layer rather than writing straight to the database, so message acknowledgements and offline delivery survive a recipient being disconnected. Redis caching and query optimization cut response times ~35%.",
-    tech: ["Next.js", "TypeScript", "Node.js", "MongoDB", "Redis", "RabbitMQ"],
-    imgPath: "/images/project2.png",
+    title: "Real-Time Chat",
+    tagline:
+      "A messaging platform where a message survives the recipient being offline.",
+    stack: ["Next.js", "TypeScript", "Node.js", "MongoDB", "Redis", "RabbitMQ"],
+    highlights: [
+      "RabbitMQ sits behind the WebSocket layer rather than the socket writing straight to the database — which is what makes acknowledgements and offline delivery work.",
+      "Redis caching and query optimization cut response times by roughly 35%.",
+      "JWT authentication with per-message delivery state, so the UI can show sent, delivered and read honestly.",
+    ],
     repoUrl: "REPLACE_ME",
     liveUrl: "REPLACE_ME",
+    shot: "",
+    accent: "indigo",
   },
   {
-    track: "independent",
     slug: "saasify-ai",
     title: "SaaSify-AI",
-    thesis: "Provider-agnostic LLM integration",
-    desc: "A full-stack AI SaaS for content and image generation behind one adapter interface over two providers, with token authentication and REST APIs. Shipped with CI/CD and released open-source with documentation.",
-    tech: ["React", "Node.js", "Express", "PostgreSQL", "OpenAI", "Claude API"],
-    imgPath: "/images/project3.png",
+    tagline:
+      "Content and image generation across two LLM providers behind a single adapter.",
+    stack: ["React", "Node.js", "Express", "PostgreSQL", "OpenAI", "Claude API"],
+    highlights: [
+      "Two providers behind one interface, so swapping or adding a model is a config change rather than a rewrite.",
+      "Token-based authentication and REST APIs, shipped with CI/CD.",
+      "Released open-source with documentation — counting this site's Gemini integration, that is three providers on the same abstraction.",
+    ],
     repoUrl: "REPLACE_ME",
     liveUrl: "REPLACE_ME",
+    shot: "",
+    accent: "cyan",
   },
 ];
 
