@@ -1,4 +1,7 @@
+"use client";
+
 import TitleHeader from "../components/TitleHeader";
+import Reveal from "../components/Reveal";
 import { about, now } from "@/constants";
 
 const About = () => (
@@ -9,11 +12,13 @@ const About = () => (
       <div className="about-grid mt-16">
         <div className="about-copy">
           {about.paragraphs.map((p, i) => (
-            <p key={i}>{p}</p>
+            <Reveal as="p" key={i} delay={i * 90}>
+              {p}
+            </Reveal>
           ))}
         </div>
 
-        <aside className="about-side">
+        <Reveal as="aside" className="about-side" delay={140}>
           <dl className="about-facts">
             {about.facts.map(({ k, v }) => (
               <div key={k}>
@@ -36,7 +41,7 @@ const About = () => (
               ))}
             </ul>
           </div>
-        </aside>
+        </Reveal>
       </div>
     </div>
   </section>

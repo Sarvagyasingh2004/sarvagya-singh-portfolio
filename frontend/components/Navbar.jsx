@@ -27,7 +27,7 @@ const Navbar = () => {
           <span className="brand-mark"><Logo size={30} /></span>
           <span className="brand-name">
             <b>Sarvagya Singh</b>
-            <i>Full-Stack Engineer</i>
+            <i>Full-Stack Developer</i>
           </span>
         </a>
         <nav className="desktop">

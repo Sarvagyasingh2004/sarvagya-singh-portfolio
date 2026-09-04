@@ -1685,7 +1685,10 @@ input:focus-visible,
 textarea:focus-visible {
   outline: 2px solid var(--accent-1);
   outline-offset: 3px;
-  border-radius: 4px;
+  /* Deliberately NO border-radius here. A fixed 4px squared off the circular
+     theme toggle on focus, and `inherit` was no better - it takes the
+     PARENT's radius, which resolved to 0. Omitting the property entirely
+     lets each element keep its own radius and the outline follows it. */
 }
 
 /* Inline star row — replaces five star.png requests per card. */
@@ -2518,16 +2521,35 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
   flex-direction: column;
   gap: clamp(1.5rem, 3vw, 2.5rem);
 }
+/* Each slot is a full screen of scroll, which is the travel GSAP scrubs the
+   outgoing card's scale and opacity across. */
+@media (min-width: 769px) and (prefers-reduced-motion: no-preference) {
+  .stack-slot { min-height: 78svh; }
+}
+
+.stack-slot {
+  /* GSAP pins the card inside this slot; the slot keeps the scroll length. */
+  position: relative;
+}
 
 .stack-card {
-  position: sticky;
-  /* `top` and z-index are set per card in JSX so the offsets step. */
-  border-radius: 1.5rem;
-  /* The outer element carries the shadow so the stack reads as physical
-     layers; the inner one clips the content to the radius. */
-  box-shadow:
-    0 -1px 0 var(--hairline) inset,
-    0 -18px 40px -22px rgba(0, 0, 0, 0.6);
+  width: 100%;
+  /* Industry standard reading width. The previous 70-80vw cards were far too
+     wide: line lengths ran past 120 characters and the layout read as a page
+     section rather than a card. */
+  max-width: 56rem;
+  margin-inline: auto;
+  transform-origin: center top;
+  will-change: transform, opacity;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  border: 1px solid var(--hairline);
+  background: var(--card-bg);
+  /* Opaque, so the receded card behind cannot bleed through. */
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.7);
+}
+html[data-theme="light"] .stack-card {
+  box-shadow: 0 24px 60px -34px rgba(15, 23, 42, 0.28);
 }
 html[data-theme="light"] .stack-card {
   box-shadow:
@@ -2535,16 +2557,9 @@ html[data-theme="light"] .stack-card {
     0 -18px 40px -24px rgba(15, 23, 42, 0.22);
 }
 
-.stack-card-inner {
-  overflow: hidden;
-  border-radius: 1.5rem;
-  border: 1px solid var(--hairline);
-  background: var(--card-bg);
-  backdrop-filter: blur(10px);
-}
 
-:root { --card-bg: rgba(18, 16, 28, 0.92); }
-html[data-theme="light"] { --card-bg: rgba(255, 255, 255, 0.94); }
+:root { --card-bg: #12101c; }
+html[data-theme="light"] { --card-bg: #ffffff; }
 
 /* ---- Screenshot band ---- */
 .stack-shot {
@@ -2685,4 +2700,78 @@ html[data-theme="light"] .stack-shot-empty span { color: rgba(15, 23, 42, 0.55);
 .stack-points p { margin: 0; color: var(--text); font-size: clamp(0.88rem, 1.1vw, 0.97rem); line-height: 1.6; }
 
 /* Reduced motion: no pinning, just a list. */
-.stack-track.is-static .stack-card { position: relative; top: auto !important; }
+
+
+/* ==========================================================================
+   (1) NAVBAR — one height, always
+   ========================================================================== */
+.navbar,
+.navbar.scrolled,
+.navbar.not-scrolled {
+  height: var(--nav-h);
+  min-height: var(--nav-h);
+  max-height: var(--nav-h);
+  padding-block: 0;
+}
+.navbar .inner { height: 100%; padding-block: 0; }
+
+/* (2) Brand: breathing room between the two lines, tighter type */
+.brand { gap: 0.7rem; }
+.brand-name { gap: 0.2rem; line-height: 1.1; }
+.brand-name b { font-size: 0.97rem; letter-spacing: -0.01em; line-height: 1.15; }
+.brand-name i { font-size: 0.6rem; letter-spacing: 0.15em; line-height: 1.2; }
+
+/* (3) Nav items: real hit areas, and the underline sits clear of the pill */
+.navbar nav.desktop ul { gap: 0.15rem; }
+.navbar nav.desktop ul li {
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
+}
+.navbar nav.desktop ul li .underline {
+  /* Was overlapping the pill's own bottom edge. */
+  bottom: -0.28rem;
+  height: 2px;
+}
+.navbar nav.desktop ul li:hover .underline {
+  width: calc(100% - 2rem);
+  left: 1rem;
+}
+
+/* ==========================================================================
+   (6) PRIMARY CTA — no plate behind the label, no colour flip
+   `.bg-circle` sat at 120% of the button, so at rest it was a pale disc
+   covering the whole surface. Its 500ms transition plus a text colour swap is
+   what read as a 1-2s lag before the label settled. The button already
+   carries the accent gradient, so the disc has no job.
+   ========================================================================== */
+.cta-button .bg-circle { display: none !important; }
+.cta-button .text,
+html[data-theme="light"] .cta-button .text {
+  color: #fff !important;
+  /* No transition at all: there is nothing left to transition to. */
+  transition: none !important;
+  text-shadow: none;
+}
+.cta-button,
+html[data-theme="light"] .cta-button {
+  background: var(--grad-accent) !important;
+  background-color: transparent !important;
+}
+
+/* ==========================================================================
+   (5) SCROLL REVEAL
+   Sections that had no motion now sequence their reading order on entry.
+   Transform and opacity only, so it composites; the class is toggled by an
+   IntersectionObserver rather than a scroll listener.
+   ========================================================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.is-revealed { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}

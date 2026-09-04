@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import TitleHeader from "../components/TitleHeader";
+import Reveal from "../components/Reveal";
 import { contactEmail } from "@/constants";
 import dynamic from "next/dynamic";
 
@@ -55,7 +56,7 @@ const Contact = () => {
           sub="☎️ Contact Information"
         />
         <div className="mt-16 grid-12-cols">
-          <div className="xl:col-span-5 ">
+          <Reveal className="xl:col-span-5">
             <div className="flex-center card-border rounded-xl p-10">
               <form
                 ref={formRef}
@@ -151,12 +152,12 @@ const Contact = () => {
                 </button>
               </form>
             </div>
-          </div>
-          <div className="xl:col-span-7 min-h-96">
+          </Reveal>
+          <Reveal className="xl:col-span-7 min-h-96" delay={130}>
             <div className="contact-canvas-wrap w-full h-full rounded-3xl overflow-hidden">
               <ContactExperience />
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

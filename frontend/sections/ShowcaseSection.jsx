@@ -1,21 +1,28 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { projects } from "@/constants";
 
+gsap.registerPlugin(ScrollTrigger);
+
 /**
- * Projects as a sticky card stack.
+ * Projects as a real sticky stack.
  *
- * Each card sticks at a slightly lower offset than the one before, so as you
- * scroll the next card rises over the previous while a sliver of every earlier
- * card stays visible — the depth cue that tells you how many are behind.
+ * The previous version used CSS `position: sticky` alone. Cards pinned, but
+ * nothing happened to the outgoing card, so there was no depth cue and you
+ * could not tell how many were behind. A stack needs the card underneath to
+ * recede.
  *
- * Built with position: sticky and a per-card top offset rather than
- * scroll-driven JS transforms: the browser owns the pinning, so it stays
- * smooth and it degrades to a plain vertical list if sticky is unsupported.
+ * Each card except the last is pinned with ScrollTrigger, and its scale and
+ * opacity are scrubbed by the NEXT card's entry: as card 2 rises, card 1
+ * shrinks and dims behind it. Pinning starts at "top top" so a card locks the
+ * moment it reaches the top of the viewport, offset by the navbar plus a
+ * little breathing room.
  */
 const ARROW = (
-  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M4 12h15" />
     <path d="M13 6l6 6-6 6" />
   </svg>
@@ -28,22 +35,13 @@ const ProjectCard = ({ project, index, total }) => {
   ].filter((l) => l.url && l.url !== "REPLACE_ME");
 
   return (
-    <article
-      className="stack-card"
-      data-accent={project.accent}
-      style={{
-        // Each card pins 1.6rem lower than the last, leaving the previous
-        // card's top edge showing.
-        top: `calc(var(--nav-h) + ${index * 1.6}rem)`,
-        zIndex: index + 1,
-      }}
-    >
-      <div className="stack-card-inner">
+    <div className="stack-slot">
+      <article className="stack-card" data-accent={project.accent}>
         <header className="stack-shot">
           {project.shot ? (
             <img src={project.shot} alt={`${project.title} interface`} loading="lazy" />
           ) : (
-            <div className="stack-shot-empty" role="img" aria-label={`${project.title} — screenshot pending`}>
+            <div className="stack-shot-empty" role="img" aria-label={`${project.title} preview pending`}>
               <span>{project.stack.slice(0, 3).join(" · ")}</span>
             </div>
           )}
@@ -81,30 +79,69 @@ const ProjectCard = ({ project, index, total }) => {
             ))}
           </ul>
         </div>
-      </div>
-    </article>
+      </article>
+    </div>
   );
 };
 
 const ShowcaseSection = () => {
-  const ref = useRef(null);
-  const [reduced, setReduced] = useState(false);
+  const root = useRef(null);
 
   useEffect(() => {
-    setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(max-width: 768px)").matches) return;
+
+    const ctx = gsap.context(() => {
+      const cards = gsap.utils.toArray(".stack-card");
+      const slots = gsap.utils.toArray(".stack-slot");
+      if (cards.length < 2) return;
+
+      // Pin offset: navbar plus ~6vh, so a card settles below the bar rather
+      // than flush against it.
+      const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--nav-h")) * 16 || 72;
+      const offset = Math.round(navH + window.innerHeight * 0.06);
+
+      cards.forEach((card, i) => {
+        if (i === cards.length - 1) return;
+
+        ScrollTrigger.create({
+          trigger: slots[i],
+          start: () => `top ${offset}px`,
+          endTrigger: slots[cards.length - 1],
+          end: () => `top ${offset}px`,
+          pin: card,
+          pinSpacing: false,
+        });
+
+        // Driven by the NEXT card's arrival, so the outgoing card recedes
+        // exactly as the incoming one covers it. This is the depth cue.
+        gsap.to(card, {
+          scale: 0.94 - (cards.length - 1 - i) * 0.005,
+          opacity: 0.45,
+          ease: "none",
+          scrollTrigger: {
+            trigger: slots[i + 1],
+            start: () => `top bottom`,
+            end: () => `top ${offset}px`,
+            scrub: true,
+          },
+        });
+      });
+    }, root);
+
+    return () => ctx.revert();
   }, []);
 
   return (
-    <section id="work" className="stack-section" ref={ref}>
+    <section id="work" className="stack-section" ref={root}>
       <div className="stack-head">
-        <p className="stack-eyebrow">Selected work</p>
         <h2>Systems I designed and built end to end</h2>
         <p className="stack-sub">
-          Every one is a public repository &mdash; clone it and read the code.
+          Every one is a public repository. Clone it and read the code.
         </p>
       </div>
 
-      <div className={`stack-track ${reduced ? "is-static" : ""}`}>
+      <div className="stack-track">
         {projects.map((project, i) => (
           <ProjectCard
             key={project.slug}
