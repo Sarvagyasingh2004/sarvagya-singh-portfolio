@@ -32,6 +32,7 @@ export default async function Home() {
       <TechStack />
       <Testimonials testimonials={testimonials} />
       <Contact />
+      <hr className="section-rule" />
       <Footer />
       <Chatbot />
     </>

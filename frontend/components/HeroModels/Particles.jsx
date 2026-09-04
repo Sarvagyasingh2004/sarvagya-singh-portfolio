@@ -2,9 +2,11 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
+import { useThemeName } from "@/lib/useTheme";
 
 const Particles = ({ count = 200 }) => {
   const mesh = useRef();
+  const isDay = useThemeName() === "light";
 
   const particles = useMemo(() => {
     const temp = [];
@@ -50,10 +52,13 @@ const Particles = ({ count = 200 }) => {
         />
       </bufferGeometry>
       <pointsMaterial
-        color="#ffffff"
-        size={0.05}
+        // White flakes are invisible against a light page. In day mode they
+        // become a soft slate and get bigger, reading as drifting motes lit
+        // from the window rather than snow against a night sky.
+        color={isDay ? "#6d7fa8" : "#ffffff"}
+        size={isDay ? 0.075 : 0.05}
         transparent
-        opacity={0.9}
+        opacity={isDay ? 0.55 : 0.9}
         depthWrite={false}
       />
     </points>

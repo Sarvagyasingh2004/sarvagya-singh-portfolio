@@ -18,6 +18,7 @@ const ScrollProgress = () => {
   useEffect(() => {
     const el = bar.current;
     if (!el) return;
+    const spark = el.querySelector<HTMLElement>(".scroll-progress-spark");
 
     const measure = () => {
       const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -63,7 +64,11 @@ const ScrollProgress = () => {
 
   return (
     <div className="scroll-progress" aria-hidden="true">
-      <span ref={bar} />
+      <span ref={bar} className="scroll-progress-fill">
+        {/* Sits at the leading edge of the fill and travels with it, so the
+            spark is always exactly where the progress ends. */}
+        <i className="scroll-progress-spark" />
+      </span>
     </div>
   );
 };

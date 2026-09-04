@@ -30,22 +30,26 @@ const HeroLights = () => {
     return (
       <>
         {/* Sun through the window — bright, slightly warm, from outside. */}
+        {/* Warmer and softer than a neutral key — late-morning sun rather
+            than overcast daylight, which read as clinical. */}
         <spotLight
           position={[6, 7, 8]}
-          angle={0.55}
-          penumbra={0.7}
-          intensity={220}
-          color="#fff6e5"
+          angle={0.6}
+          penumbra={0.85}
+          intensity={190}
+          color="#ffeacd"
         />
         {/* Sky bounce filling the shadows, so nothing goes black in daylight. */}
-        <ambientLight intensity={1.5} color="#dceaff" />
+        <ambientLight intensity={1.25} color="#f2e6d8" />
+        {/* Warm sky over a warm floor bounce keeps the shadows from going
+            blue, which is what made the room feel cold. */}
         <hemisphereLight
-          intensity={1.1}
-          color="#eaf3ff"
-          groundColor="#c9b9a4"
+          intensity={1.0}
+          color="#fff3e2"
+          groundColor="#d8c3a5"
         />
         {/* Soft warm rim along the desk side. */}
-        <directionalLight position={[-4, 5, 4]} intensity={1.2} color="#ffe9c9" />
+        <directionalLight position={[-4, 5, 4]} intensity={0.95} color="#ffdfb5" />
         <primitive
           object={areaLight}
           position={[1, 3, 4]}

@@ -561,32 +561,7 @@ html[data-theme="light"] .cta-button { background-color: #10151b; }
   }
 }
 
-/* ===================== Scroll progress =====================
-   scaleX is compositor-only and the easing is owned by rAF in JS. No CSS
-   transition here — a transition layered on a per-frame write is exactly what
-   made the first attempt stutter. */
-.scroll-progress {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-  pointer-events: none;
-}
-html[data-theme="light"] .scroll-progress {
-  background: rgba(16, 21, 27, 0.1);
-}
-.scroll-progress span {
-  display: block;
-  height: 100%;
-  width: 100%;
-  transform: scaleX(0);
-  transform-origin: left center;
-  background: linear-gradient(90deg, #839cb5, #d9ecff);
-  will-change: transform;
-}
+
 
 /* ===================== Theme toggle ===================== */
 .theme-toggle {
@@ -761,26 +736,36 @@ html[data-theme="light"] { --cursor-rgb: 109, 40, 217; }
    being carried around. */
 .cursor-bulb {
   z-index: 0;
-  width: 46rem;
-  height: 46rem;
-  margin: -23rem 0 0 -23rem;
+  width: 26rem;
+  height: 26rem;
+  margin: -13rem 0 0 -13rem;
   border-radius: 999px;
   transition: opacity 0.6s ease;
+  /* Many closely-spaced stops running all the way to 100%: a ramp that ends
+     early (transparent 70%) leaves a visible circular edge. */
   background: radial-gradient(
-    circle,
-    rgba(139, 92, 246, 0.17) 0%,
-    rgba(99, 102, 241, 0.10) 34%,
-    rgba(91, 110, 245, 0.05) 54%,
-    transparent 70%
+    circle closest-side,
+    rgba(139, 92, 246, 0.13) 0%,
+    rgba(129, 96, 246, 0.10) 22%,
+    rgba(119, 100, 245, 0.07) 40%,
+    rgba(109, 104, 244, 0.045) 56%,
+    rgba(99, 108, 243, 0.026) 70%,
+    rgba(99, 108, 243, 0.012) 82%,
+    rgba(99, 108, 243, 0.004) 92%,
+    transparent 100%
   );
 }
 html[data-theme="light"] .cursor-bulb {
   background: radial-gradient(
-    circle,
-    rgba(124, 58, 237, 0.13) 0%,
-    rgba(99, 102, 241, 0.07) 34%,
-    rgba(56, 89, 214, 0.04) 54%,
-    transparent 70%
+    circle closest-side,
+    rgba(124, 58, 237, 0.10) 0%,
+    rgba(118, 70, 238, 0.075) 22%,
+    rgba(112, 82, 239, 0.052) 40%,
+    rgba(106, 94, 240, 0.033) 56%,
+    rgba(99, 102, 241, 0.019) 70%,
+    rgba(99, 102, 241, 0.009) 82%,
+    rgba(99, 102, 241, 0.003) 92%,
+    transparent 100%
   );
 }
 
@@ -1966,3 +1951,131 @@ html[data-theme="light"] .hero-text h1:last-of-type {
   -webkit-user-select: none;
   touch-action: pan-y;   /* horizontal drag spins; vertical still scrolls */
 }
+
+/* ==========================================================================
+   SCROLL PROGRESS
+   Thicker, brighter, with a travelling spark at the leading edge. The bar is
+   driven by scaleX (compositor-only) and eased in rAF — no CSS transition on
+   the transform, since a transition layered on a per-frame write is what made
+   the first version stutter.
+   ========================================================================== */
+.scroll-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  overflow: visible;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.07);
+}
+html[data-theme="light"] .scroll-progress { background: rgba(15, 23, 42, 0.07); }
+
+.scroll-progress-fill {
+  position: relative;
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+  background: linear-gradient(
+    90deg,
+    rgba(139, 92, 246, 0.35) 0%,
+    #8b5cf6 45%,
+    #6d5cf6 78%,
+    #7dd3fc 100%
+  );
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.55);
+}
+
+/* The spark. Counter-scaled in JS so it stays round however far the bar has
+   travelled. */
+.scroll-progress-spark {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin-top: -4.5px;
+  margin-right: -4.5px;
+  border-radius: 999px;
+  background: #eaf6ff;
+  transform-origin: right center;
+  box-shadow:
+    0 0 6px 1px rgba(234, 246, 255, 0.95),
+    0 0 16px 3px rgba(125, 211, 252, 0.8),
+    0 0 30px 6px rgba(139, 92, 246, 0.55);
+  animation: spark-pulse 1.8s ease-in-out infinite;
+}
+@keyframes spark-pulse {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress-spark { animation: none; }
+}
+
+/* ===================== Section divider ===================== */
+.section-rule {
+  width: 100%;
+  height: 1px;
+  border: 0;
+  margin: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--hairline) 18%,
+    color-mix(in srgb, var(--accent-1) 45%, transparent) 50%,
+    var(--hairline) 82%,
+    transparent 100%
+  );
+}
+
+/* ===================== Navbar refinement ===================== */
+.navbar .inner { max-width: 84rem; }
+
+/* Nav links: quieter at rest, with the underline growing from the centre
+   instead of sliding in from the left. */
+.navbar nav.desktop ul { gap: 0.35rem; }
+.navbar nav.desktop ul li {
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  transition: background 0.25s ease;
+}
+.navbar nav.desktop ul li:hover { background: var(--surface-hover); }
+.navbar nav.desktop ul li span:first-child {
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  color: var(--muted);
+}
+.navbar nav.desktop ul li:hover span:first-child { color: var(--text); }
+.navbar nav.desktop ul li .underline {
+  left: 50%;
+  right: auto;
+  bottom: 0.15rem;
+  height: 1.5px;
+  border-radius: 999px;
+  background: var(--grad-accent);
+  transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.navbar nav.desktop ul li:hover .underline { width: calc(100% - 1.7rem); left: 0.85rem; }
+
+/* Brand block */
+.brand-name b { font-size: 1rem; letter-spacing: -0.011em; }
+.brand-name i {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+.avatar { width: 2.4rem; height: 2.4rem; }
+
+/* A hairline that only appears once scrolled, so the bar reads as flat at the
+   top of the page and lifted afterwards. */
+.navbar.scrolled { box-shadow: 0 1px 0 var(--nav-border), 0 8px 30px rgba(0, 0, 0, 0.28); }
+html[data-theme="light"] .navbar.scrolled {
+  box-shadow: 0 1px 0 var(--nav-border), 0 8px 30px rgba(15, 23, 42, 0.07);
+}
+.navbar.not-scrolled { box-shadow: none; }
