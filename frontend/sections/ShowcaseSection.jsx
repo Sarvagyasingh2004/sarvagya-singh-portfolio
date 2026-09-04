@@ -58,7 +58,10 @@ const ShowcaseSection = () => {
           {/* left */}
           <div className="first-project-wrapper" ref={project1Ref}>
             <div className="image-wrapper">
-              <img src="/images/project1.png" alt="Food Delivery Microservices Platform" />
+              <div className="shot-placeholder" role="img" aria-label="Food Delivery Microservices Platform — screenshot pending">
+                <span>6 services</span>
+                <b>RabbitMQ &middot; Redis &middot; Socket.IO</b>
+              </div>
             </div>
             <div className="text-content">
               <h2>
@@ -76,13 +79,19 @@ const ShowcaseSection = () => {
           <div className="project-list-wrapper overflow-hidden">
             <div className="project" ref={project2Ref}>
               <div className="image-wrapper bg-[#ffefdb]">
-                <img src="/images/project2.png" alt="Real-Time Chat Application" />
+                <div className="shot-placeholder alt" role="img" aria-label="Real-Time Chat Application — screenshot pending">
+                  <span>WebSockets</span>
+                  <b>Offline delivery</b>
+                </div>
               </div>
               <h2>Real-Time Chat &mdash; WebSockets with Offline Delivery</h2>
             </div>
             <div className="project" ref={project3Ref}>
               <div className="image-wrapper bg-[#ffe7eb]">
-                <img src="/images/project3.png" alt="SaaSify-AI" />
+                <div className="shot-placeholder alt2" role="img" aria-label="SaaSify-AI — screenshot pending">
+                  <span>2 LLM providers</span>
+                  <b>One adapter</b>
+                </div>
               </div>
               <h2>SaaSify-AI &mdash; Multi-Provider LLM Platform</h2>
             </div>

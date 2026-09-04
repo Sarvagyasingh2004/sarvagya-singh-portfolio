@@ -3,28 +3,14 @@
 import { useEffect, useState } from "react";
 import { THEME_KEY, isDaytime, localZone, type Theme } from "@/lib/theme";
 
-const Sun = () => (
-  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="4" />
-    <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" />
-  </svg>
-);
-
-const Moon = () => (
-  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-  </svg>
-);
-
 const ThemeToggle = () => {
   const [theme, setTheme] = useState<Theme>("dark");
   const [tip, setTip] = useState("");
 
-  // The head script already applied the theme — read it back rather than
-  // overriding it, so there's no flicker on mount.
+  // The head script already applied the theme — read it back so there's no
+  // flicker from re-deciding on mount.
   useEffect(() => {
-    const t = (document.documentElement.dataset.theme as Theme) || "dark";
-    setTheme(t);
+    setTheme((document.documentElement.dataset.theme as Theme) || "dark");
     setTip(`it's ${isDaytime() ? "daytime" : "night"} in ${localZone()}`);
   }, []);
 
@@ -43,13 +29,22 @@ const ThemeToggle = () => {
   return (
     <button
       type="button"
-      className="theme-toggle"
+      className="btn-surface theme-toggle"
       onClick={() => apply(isDark ? "light" : "dark")}
       aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
       title={tip ? `${isDark ? "Dark" : "Light"} — ${tip}` : undefined}
     >
-      {/* Icon shows the destination: sun means "switch to light". */}
-      <span key={theme} className="theme-icon">{isDark ? <Sun /> : <Moon />}</span>
+      {/* Both icons are always mounted; CSS rotates one out and the other in,
+          each keeping its own colour. */}
+      <span className="theme-toggle-track" aria-hidden="true">
+        <svg className="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12 2.2v2.1M12 19.7v2.1M2.2 12h2.1M19.7 12h2.1M5.1 5.1l1.5 1.5M17.4 17.4l1.5 1.5M18.9 5.1l-1.5 1.5M6.6 17.4l-1.5 1.5" />
+        </svg>
+        <svg className="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+        </svg>
+      </span>
     </button>
   );
 };

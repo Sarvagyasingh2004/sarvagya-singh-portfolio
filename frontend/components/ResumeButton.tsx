@@ -25,7 +25,7 @@ const ResumeButton = () => {
   return (
     <a
       href={`${API_URL}/api/resume`}
-      className="resume-btn group"
+      className="btn-surface resume-btn"
       aria-disabled={disabled}
       onClick={(e) => disabled && e.preventDefault()}
       title={disabled ? "Resume not available right now" : "Download my resume (PDF)"}

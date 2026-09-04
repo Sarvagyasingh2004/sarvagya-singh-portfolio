@@ -540,12 +540,6 @@ html[data-theme="light"] .gradient-edge:last-child {
   background: linear-gradient(-90deg, #f4f6f8, transparent);
 }
 
-/* The marquee marks are white SVGs; invert them on a light ground. */
-html[data-theme="light"] .marquee-item img,
-html[data-theme="light"] .tech-chip img {
-  filter: invert(1) brightness(0.35);
-}
-
 html[data-theme="light"] input,
 html[data-theme="light"] textarea {
   background-color: #ffffff;
@@ -1049,10 +1043,10 @@ html[data-theme="light"] .chat-composer { background: #f6f8fa; border-color: rgb
 }
 
 /* ===================== Tech marquee =====================
-   Seamless infinite loop. Spacing is per-item margin, NOT flex `gap`: with
-   gap, 2N items span 2N items + (2N-1) gaps while one set spans N + (N-1),
-   so translateX(-50%) lands half a gap short of the seam and the loop
-   visibly jumps. Per-item margin makes -50% exactly one set. Never pauses. */
+   Seamless infinite loop in real brand colours. Spacing is per-item margin,
+   NOT flex `gap`: with gap, 2N items span 2N + (2N-1) gaps while one set spans
+   N + (N-1), so translateX(-50%) lands half a gap short of the seam and the
+   loop visibly jumps. Per-item margin makes -50% exactly one set. */
 .marquee-box {
   display: flex;
   width: max-content;
@@ -1068,34 +1062,42 @@ html[data-theme="light"] .chat-composer { background: #f6f8fa; border-color: rgb
 
 .marquee-item {
   flex-direction: column;
-  gap: 0.65rem;
-  width: 7rem;
-  margin-right: 2.75rem;
-  opacity: 0.5;
+  gap: 0.7rem;
+  width: 7.25rem;
+  margin-right: 2.5rem;
+  /* Desaturated at rest so the strip reads as one texture, full colour as you
+     reach it — the colour arriving is the reward for scrolling. */
+  filter: grayscale(0.55) opacity(0.55);
   transform: translateY(0);
-  transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: filter 0.5s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .marquee-item img {
-  width: 2.1rem;
-  height: 2.1rem;
+  width: 2.15rem;
+  height: 2.15rem;
   object-fit: contain;
-  transition: filter 0.45s ease, transform 0.3s ease;
+  transition: transform 0.3s ease, filter 0.4s ease;
 }
 .marquee-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.05em;
+  font-size: 0.73rem;
+  letter-spacing: 0.04em;
   white-space: nowrap;
-  color: #98a3af;
-  transition: color 0.45s ease;
+  color: var(--muted);
+  transition: color 0.5s ease;
 }
 
-.marquee-wrap.is-focused .marquee-item { opacity: 1; transform: translateY(-6px); }
-.marquee-wrap.is-focused .marquee-item img {
-  filter: drop-shadow(0 6px 14px rgba(131, 156, 181, 0.45));
+.marquee-wrap.is-focused .marquee-item {
+  filter: grayscale(0) opacity(1);
+  transform: translateY(-6px);
 }
-.marquee-wrap.is-focused .marquee-label { color: #d9ecff; }
-html[data-theme="light"] .marquee-wrap.is-focused .marquee-label { color: #2b3a47; }
-.marquee-item:hover img { transform: scale(1.16); }
+.marquee-wrap.is-focused .marquee-label { color: var(--text); }
+.marquee-item:hover { filter: grayscale(0) opacity(1) !important; }
+.marquee-item:hover img { transform: scale(1.18); }
+
+/* A few brands' official colours are near-black (Express, Next.js, Socket.IO,
+   Three.js). Flagged by the generator via WCAG luminance and flipped for
+   whichever ground they'd disappear against. */
+html:not([data-theme="light"]) .marquee-item.invert-on-dark img { filter: invert(1); }
+html[data-theme="light"] .marquee-item.invert-on-light img { filter: invert(1); }
 
 @media (prefers-reduced-motion: reduce) {
   .marquee-box { animation: none; }
@@ -1111,3 +1113,344 @@ html[data-theme="light"] .marquee-wrap.is-focused .marquee-label { color: #2b3a4
   height: 1px !important;
   opacity: 0 !important;
 }
+
+/* ==========================================================================
+   DESIGN TOKENS
+   One place for the palette. The accent is a violet -> cyan ramp: it reads as
+   "engineering" rather than "agency", and it already exists in the hero scene
+   (the purple lamp and cyan monitors), so the UI and the 3D agree instead of
+   competing.
+   ========================================================================== */
+:root {
+  --nav-h: 4.5rem;
+
+  --accent-1: #8b5cf6;   /* violet  */
+  --accent-2: #6366f1;   /* indigo  */
+  --accent-3: #22d3ee;   /* cyan    */
+  --accent-warm: #fbbf24;/* sun     */
+
+  --grad-accent: linear-gradient(120deg, var(--accent-1), var(--accent-2) 45%, var(--accent-3));
+  --grad-soft: linear-gradient(140deg, rgba(139,92,246,.16), rgba(34,211,238,.10));
+
+  --text: #e8eef6;
+  --muted: #94a3b8;
+  --surface: rgba(255, 255, 255, 0.035);
+  --hairline: rgba(255, 255, 255, 0.10);
+  --nav-bg: rgba(8, 9, 14, 0.72);
+  --nav-border: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="light"] {
+  --text: #0f172a;
+  --muted: #55637a;
+  --surface: rgba(15, 23, 42, 0.035);
+  --hairline: rgba(15, 23, 42, 0.11);
+  --nav-bg: rgba(248, 250, 252, 0.8);
+  --nav-border: rgba(15, 23, 42, 0.08);
+  --accent-1: #7c3aed;
+  --accent-3: #0891b2;
+}
+
+/* Push content clear of the now-fixed navbar. */
+.hero-layout { padding-top: var(--nav-h); }
+
+/* ===================== Shared button surface =====================
+   Resume, theme toggle and the assistant FAB all derive from this, so the
+   header controls read as one family instead of three separate widgets. */
+.btn-surface {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.btn-surface:hover {
+  transform: translateY(-1px);
+  border-color: transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    var(--grad-accent) border-box;
+  box-shadow: 0 6px 22px rgba(139, 92, 246, 0.22);
+}
+
+/* ---- Resume: same family, bigger ---- */
+.resume-btn {
+  height: 2.85rem;
+  padding: 0 1.15rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.resume-btn[aria-disabled="true"] { opacity: 0.4; pointer-events: none; }
+.resume-icon { display: inline-flex; animation: resume-bob 2.4s ease-in-out infinite; }
+.resume-btn:hover .resume-icon { animation-duration: 0.85s; }
+@keyframes resume-bob {
+  0%, 100% { transform: translateY(-2px); }
+  50%      { transform: translateY(3px); }
+}
+@media (max-width: 900px) {
+  .resume-btn span:last-child { display: none; }
+  .resume-btn { width: 2.85rem; padding: 0; }
+}
+
+/* ---- Theme toggle: bigger, and the icon rotates through sun+moon ---- */
+.theme-toggle {
+  position: relative;
+  width: 2.85rem;
+  height: 2.85rem;
+  flex: none;
+  overflow: hidden;
+}
+.theme-toggle-track {
+  position: relative;
+  width: 1.15rem;
+  height: 1.15rem;
+}
+.theme-toggle-track svg {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+}
+/* Sun keeps its warm colour, moon its cool one, and they swap by rotating
+   through each other rather than cross-fading. */
+.theme-toggle .icon-sun  { color: var(--accent-warm); }
+.theme-toggle .icon-moon { color: var(--accent-3); }
+
+html:not([data-theme="light"]) .icon-sun  { transform: rotate(0deg) scale(1); opacity: 1; }
+html:not([data-theme="light"]) .icon-moon { transform: rotate(120deg) scale(0.4); opacity: 0; }
+html[data-theme="light"] .icon-sun  { transform: rotate(-120deg) scale(0.4); opacity: 0; }
+html[data-theme="light"] .icon-moon { transform: rotate(0deg) scale(1); opacity: 1; }
+
+.theme-toggle:hover .theme-toggle-track svg { filter: drop-shadow(0 0 8px currentColor); }
+
+/* ===================== Profile avatar ===================== */
+.avatar {
+  position: relative;
+  width: 2.6rem;
+  height: 2.6rem;
+  flex: none;
+  border-radius: 999px;
+  padding: 2px;
+  background: var(--grad-accent);
+}
+.avatar img,
+.avatar .avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  object-fit: cover;
+  object-position: center 22%;
+  display: block;
+  background: #0b0d13;
+}
+.avatar .avatar-fallback {
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.brand-name { display: flex; flex-direction: column; line-height: 1.05; }
+.brand-name b { font-size: 0.98rem; font-weight: 650; color: var(--text); }
+.brand-name i {
+  font-style: normal;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+@media (max-width: 640px) {
+  .brand-name i { display: none; }
+}
+
+/* ===================== Hero CTA arrow =====================
+   Bounces continuously so the button itself carries the "there is more below"
+   signal. Replaces the separate scroll cue that sat between the hero and the
+   next section and duplicated the same message. */
+.cta-arrow {
+  color: currentColor;
+  animation: cta-arrow-bob 1.7s cubic-bezier(0.45, 0, 0.35, 1) infinite;
+}
+.cta-wrapper:hover .cta-arrow { animation-duration: 0.75s; }
+@keyframes cta-arrow-bob {
+  0%, 100% { transform: translateY(-3px); opacity: 0.75; }
+  50%      { transform: translateY(4px);  opacity: 1; }
+}
+
+/* ===================== Hero polish ===================== */
+.hero-text h1 {
+  letter-spacing: -0.022em;
+}
+/* Third line picks up the accent ramp, so the eye lands on "Deliver Results"
+   rather than treating all three lines as equal weight. */
+.hero-text h1:last-of-type {
+  background: var(--grad-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Ambient wash behind the hero copy — gives the text a ground to sit on so it
+   doesn't float directly against the 3D scene. */
+#hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60rem 34rem at 12% 38%, rgba(139, 92, 246, 0.13), transparent 65%),
+    radial-gradient(46rem 30rem at 78% 22%, rgba(34, 211, 238, 0.08), transparent 62%);
+  pointer-events: none;
+  z-index: 1;
+}
+html[data-theme="light"] #hero::before {
+  background:
+    radial-gradient(60rem 34rem at 12% 38%, rgba(124, 58, 237, 0.10), transparent 65%),
+    radial-gradient(46rem 30rem at 78% 22%, rgba(8, 145, 178, 0.07), transparent 62%);
+}
+
+.hero-badge {
+  border: 1px solid var(--hairline);
+  background: var(--grad-soft);
+  backdrop-filter: blur(8px);
+}
+
+/* Section headings share the accent underline treatment. */
+.hero-badge p { color: var(--text); }
+
+/* ===================== Cursor: accent gradient ===================== */
+.cursor-dot {
+  background: #fff;
+}
+.cursor-ring {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(transparent, transparent) padding-box,
+    var(--grad-accent) border-box;
+}
+.has-cursor-fx.cursor-active .cursor-ring {
+  border-width: 2px;
+  background:
+    linear-gradient(rgba(139, 92, 246, 0.10), rgba(34, 211, 238, 0.10)) padding-box,
+    var(--grad-accent) border-box;
+}
+/* The lamp behind the pointer, on the same ramp. */
+.cursor-bulb {
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.17) 0%,
+    rgba(99, 102, 241, 0.10) 34%,
+    rgba(34, 211, 238, 0.05) 54%,
+    transparent 70%
+  );
+}
+html[data-theme="light"] .cursor-bulb {
+  background: radial-gradient(
+    circle,
+    rgba(124, 58, 237, 0.12) 0%,
+    rgba(99, 102, 241, 0.07) 34%,
+    rgba(8, 145, 178, 0.04) 54%,
+    transparent 70%
+  );
+}
+
+/* ===================== Cards on the accent system ===================== */
+.card-border {
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+}
+.tech-card-animated-bg { background: var(--grad-soft); }
+
+.footer, .footer-container { border-color: var(--hairline); }
+
+/* The original marquee fades hardcode black, which renders as a solid black
+   block on the light theme. Drive both edges from a token instead. */
+:root { --page-bg: #000000; }
+html[data-theme="light"] { --page-bg: #f4f6f8; }
+
+.gradient-edge:nth-of-type(1) {
+  background: linear-gradient(90deg, var(--page-bg) 0%, transparent 100%) !important;
+}
+.gradient-edge:nth-of-type(2) {
+  background: linear-gradient(-90deg, var(--page-bg) 0%, transparent 100%) !important;
+}
+
+/* ===================== Project screenshot placeholders =====================
+   The tutorial's screenshots were still in place — a car-rental app captioned
+   "Six Independent Microservices", and one frame containing the literal string
+   adrian@jsmastery.pro. Showing someone else's product as your own is exactly
+   the problem this whole project set out to remove, so they are deleted rather
+   than left in until real captures exist. */
+.shot-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+  min-height: 14rem;
+  border-radius: inherit;
+  background:
+    radial-gradient(90% 120% at 20% 10%, rgba(139, 92, 246, 0.28), transparent 60%),
+    radial-gradient(90% 120% at 85% 90%, rgba(34, 211, 238, 0.22), transparent 60%),
+    #0d1017;
+  color: #e8eef6;
+  text-align: center;
+  padding: 1.5rem;
+}
+.shot-placeholder.alt {
+  background:
+    radial-gradient(90% 120% at 80% 10%, rgba(99, 102, 241, 0.3), transparent 60%),
+    radial-gradient(90% 120% at 15% 90%, rgba(139, 92, 246, 0.2), transparent 60%),
+    #0d1017;
+}
+.shot-placeholder.alt2 {
+  background:
+    radial-gradient(90% 120% at 50% 0%, rgba(34, 211, 238, 0.26), transparent 62%),
+    radial-gradient(90% 120% at 10% 100%, rgba(99, 102, 241, 0.22), transparent 60%),
+    #0d1017;
+}
+.shot-placeholder span {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.shot-placeholder b {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+/* Initials sit behind the photo, so a missing or slow image shows the mark
+   rather than an empty ring. */
+.avatar { display: inline-grid; }
+.avatar > * { grid-area: 1 / 1; }
+.avatar::after {
+  content: "SS";
+  grid-area: 1 / 1;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #0b0d13;
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  z-index: 0;
+}
+.avatar img { position: relative; z-index: 1; }
