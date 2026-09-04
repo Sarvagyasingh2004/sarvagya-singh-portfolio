@@ -2,7 +2,7 @@
 
 import { Environment, Float, PerspectiveCamera, View, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 /**
@@ -16,9 +16,16 @@ import * as THREE from "three";
  * that was asked for, and avoids a second event system entirely.
  */
 const Model = ({ model, spin }) => {
-  const { scene } = useGLTF(model.modelPath);
+  const { scene: cached } = useGLTF(model.modelPath);
   const group = useRef(null);
   const baseY = model.rotation?.[1] ?? 0;
+
+  // Clone per instance. useGLTF caches by path and returns the SAME object,
+  // and a three.js Object3D can only belong to one scene graph at a time - so
+  // two cards pointing at the same .glb meant the second silently stole the
+  // model from the first and one card rendered empty. Cloning makes the list
+  // safe to extend with repeated paths.
+  const scene = useMemo(() => cached.clone(true), [cached]);
 
   useEffect(() => {
     // The three.js logo's own material is near-black and vanishes on the dark
