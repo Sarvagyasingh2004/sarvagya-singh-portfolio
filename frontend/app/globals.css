@@ -1293,12 +1293,13 @@ html[data-theme="light"] .icon-moon { transform: rotate(0deg) scale(1); opacity:
 }
 
 /* ===================== Hero polish ===================== */
-.hero-text h1 {
-  letter-spacing: -0.022em;
-}
+.hero-text h1 { letter-spacing: -0.022em; }
+/* Each line is now a span inside the single h1, so it needs to be a block
+   to keep the original stacked layout. */
+.hero-text .hero-line { display: block; }
 /* Third line picks up the accent ramp, so the eye lands on "Deliver Results"
    rather than treating all three lines as equal weight. */
-.hero-text h1:last-of-type {
+.hero-text .hero-line:last-child {
   background: var(--grad-accent);
   -webkit-background-clip: text;
   background-clip: text;
@@ -1919,7 +1920,7 @@ html[data-theme="light"] .hero-text .slide img {
   filter: invert(1) brightness(0.35) saturate(0.9);
 }
 html[data-theme="light"] .hero-text h1 { color: #0f172a; }
-html[data-theme="light"] .hero-text h1:last-of-type {
+html[data-theme="light"] .hero-text .hero-line:last-child {
   background: var(--grad-accent);
   -webkit-background-clip: text;
   background-clip: text;
@@ -2721,16 +2722,20 @@ html[data-theme="light"] .stack-shot-empty span { color: rgba(15, 23, 42, 0.55);
 .brand-name b { font-size: 0.97rem; letter-spacing: -0.01em; line-height: 1.15; }
 .brand-name i { font-size: 0.6rem; letter-spacing: 0.15em; line-height: 1.2; }
 
-/* (3) Nav items: real hit areas, and the underline sits clear of the pill */
+/* (3) Nav items.
+   Radius stays the pill it always was - only the SPACING changed. The
+   underline keeps its original position just under the label; the pill simply
+   gets more bottom padding so there is clear air between the underline and
+   the pill's own bottom edge instead of the two touching. */
 .navbar nav.desktop ul { gap: 0.15rem; }
 .navbar nav.desktop ul li {
-  padding: 0.5rem 1rem;
-  border-radius: 0.6rem;
+  border-radius: 999px;
+  padding: 0.5rem 1rem 0.72rem;
 }
 .navbar nav.desktop ul li .underline {
-  /* Was overlapping the pill's own bottom edge. */
-  bottom: -0.28rem;
+  bottom: 0.34rem;
   height: 2px;
+  border-radius: 999px;
 }
 .navbar nav.desktop ul li:hover .underline {
   width: calc(100% - 2rem);

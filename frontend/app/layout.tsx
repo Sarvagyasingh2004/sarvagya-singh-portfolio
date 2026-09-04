@@ -37,7 +37,6 @@ export const metadata: Metadata = {
     images: ["/images/og.png"],
   },
   robots: { index: true, follow: true },
-  icons: { icon: "/images/Favicon.png" },
 };
 
 // Person schema is what surfaces this site when a recruiter googles the name.

@@ -86,7 +86,7 @@ const ExperienceSection = () => {
                         <CompanyLogo src={card.logoPath} name={card.company} />
                       </div>
                       <div>
-                        <h1 className="font-semibold text-3xl">{card.title}</h1>
+                        <h3 className="font-semibold text-3xl">{card.title}</h3>
                         <p className="my-5 text-white-50">🗓️ {card.date}</p>
                         <p className="text-[#839cb5] italic">
                           Responsibilities

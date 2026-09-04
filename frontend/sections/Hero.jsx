@@ -15,7 +15,7 @@ import AnimatedCounter from "../components/AnimatedCounter";
 const Hero = () => {
   useGSAP(() => {
     gsap.fromTo(
-      ".hero-text h1",
+      ".hero-text .hero-line",
       {
         y: 50,
         opacity: 0,
@@ -40,7 +40,10 @@ const Hero = () => {
         <header className="flex flex-col justify-center md:w-full w-screen md:px-20 px-5">
           <div className="flex flex-col gap-7">
             <div className="hero-text">
+              {/* ONE h1 for the whole headline. The three lines were three separate
+                  h1 elements, which reads as three competing page titles. */}
               <h1>
+                <span className="hero-line">
                 Shaping
                 <span className="slide">
                   <span className="wrapper">
@@ -59,9 +62,10 @@ const Hero = () => {
                     ))}
                   </span>
                 </span>
+                </span>
+                <span className="hero-line">into Real Projects</span>
+                <span className="hero-line">that Deliver Results</span>
               </h1>
-              <h1>into Real Projects</h1>
-              <h1>that Deliver Results</h1>
             </div>
             <p className="text-white-50 md:text-xl relative z-10 pointer-events-none">
               Hi, I'm Sarvagya, a developer based in India with passion to learn
