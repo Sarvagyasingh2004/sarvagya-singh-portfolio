@@ -4,23 +4,29 @@ import { View } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 
 /**
- * The one WebGL context behind every tech-stack icon.
+ * The single WebGL context behind every tech-stack icon.
  *
- * Fixed to the viewport and pointer-events: none, so it never intercepts
- * clicks or scrolling — drei's View.Port scissors each <View> into the box of
- * the element it tracks.
+ * Two things are load-bearing here:
+ *
+ *  - `eventSource` points at the document, because the <View> elements live
+ *    elsewhere in the DOM than this canvas.
+ *  - `eventPrefix="client"` is REQUIRED alongside an external eventSource.
+ *    Without it R3F computes pointer coordinates relative to the canvas
+ *    instead of the viewport, so they never land inside a View's box and
+ *    nothing inside one — OrbitControls included — receives events.
+ *
+ * The canvas itself stays pointer-events: none so it can't swallow clicks
+ * across the whole page; each .tech-view re-enables them over its own box.
  */
 const TechCanvas = () => (
   <Canvas
     className="tech-shared-canvas"
     dpr={[1, 1.75]}
-    eventSource={typeof document !== "undefined" ? document.body : undefined}
+    eventSource={typeof document !== "undefined" ? document.documentElement : undefined}
+    eventPrefix="client"
     style={{
       position: "fixed",
       inset: 0,
-      // `none` here, re-enabled per-View in CSS: the canvas covers the whole
-      // viewport, so leaving it interactive would swallow every click on the
-      // page. drei's View forwards events from the element it tracks.
       pointerEvents: "none",
       zIndex: 1,
     }}

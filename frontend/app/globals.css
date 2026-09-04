@@ -624,7 +624,7 @@ html[data-theme="light"] .theme-toggle:hover {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 1rem;
 }
 
 .resume-btn {
@@ -1827,7 +1827,7 @@ html[data-theme="light"] .bg-\[\#cb7c2e\] { background-color: #d9954f !important
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   padding: 0.5rem;
   background: none;
   border: 0;
@@ -1839,18 +1839,20 @@ html[data-theme="light"] .bg-\[\#cb7c2e\] { background-color: #d9954f !important
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
+  /* Extra breathing room so the label sits clear of the model. */
+  gap: 1.5rem;
   width: 100%;
 }
 
-/* The box each <View> scissors into. Generous, since the model now owns the
-   space rather than sharing it with card chrome. */
+/* The box each <View> scissors into. Roomy on purpose: the models are drawn
+   to their own scale and a tight box clips their corners. */
 .tech-icon-wrapper,
 .tech-view {
   width: 100%;
-  height: clamp(10rem, 15vw, 13rem);
-  /* The pointer has to reach the shared canvas for drag-to-spin to work. */
+  height: clamp(13rem, 19vw, 17rem);
+  /* Pointer must reach the shared canvas here for drag-to-spin. */
   pointer-events: auto;
+  touch-action: none;
 }
 
 .tech-item p {
@@ -1859,7 +1861,12 @@ html[data-theme="light"] .bg-\[\#cb7c2e\] { background-color: #d9954f !important
   font-weight: 600;
   color: var(--text);
   transition: color 0.3s ease;
+  margin-top: 0.35rem;
 }
+
+/* Hint that the models are grabbable. */
+.tech-view { cursor: grab; }
+.tech-view:active { cursor: grabbing; }
 .tech-item:hover p { color: var(--accent-1); }
 
 /* A soft pool of light under each model, standing in for the card. */
@@ -1951,4 +1958,11 @@ html[data-theme="light"] .hero-text h1:last-of-type {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Dragging a model must not select the label underneath it. */
+.tech-view {
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;   /* horizontal drag spins; vertical still scrolls */
 }

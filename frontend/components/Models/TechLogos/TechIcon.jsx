@@ -1,28 +1,28 @@
 "use client";
 
-import { Environment, Float, OrbitControls, PerspectiveCamera, View, useGLTF } from "@react-three/drei";
-import { Suspense, useEffect } from "react";
+import { Environment, Float, PerspectiveCamera, View, useGLTF } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { Suspense, useEffect, useRef } from "react";
 import * as THREE from "three";
 
 /**
- * One <View> per card, all sharing a SINGLE WebGL context.
+ * A tech logo rendered through the page's single shared WebGL context.
  *
- * Each card used to mount its own <Canvas>. With the hero and the contact
- * scene that made 7 live contexts on one page. Browsers cap concurrent WebGL
- * contexts in the mid-teens and silently drop the oldest — so with other tabs
- * open, some canvases simply fail to acquire a context and Chrome paints its
- * broken-content glyph. drei's <View> renders many viewports through one
- * shared renderer, taking the page from 7 contexts to 2.
+ * Rotation is driven by pointer events on the DOM element rather than by
+ * OrbitControls. Routing events into a <View> means R3F has to map viewport
+ * coordinates onto each viewport's box, and in practice the drag never
+ * reached the controls — it just selected the label text underneath. Reading
+ * pointer deltas directly is deterministic, gives exactly the sideways spin
+ * that was asked for, and avoids a second event system entirely.
  */
-const Model = ({ model }) => {
+const Model = ({ model, spin }) => {
   const { scene } = useGLTF(model.modelPath);
+  const group = useRef(null);
+  const baseY = model.rotation?.[1] ?? 0;
 
   useEffect(() => {
-    // The three.js logo ships with a near-black material that vanishes on the
-    // dark card. Forcing it white fixed that but made it vanish on the light
-    // one instead, so it gets a mid-tone slate that holds contrast against
-    // both grounds. Matched on the model file rather than the card label, so
-    // renaming a card can't silently break it.
+    // The three.js logo's own material is near-black and vanishes on the dark
+    // card; a mid-tone slate reads against both grounds.
     if (!model.modelPath.includes("three.js")) return;
     scene.traverse((child) => {
       if (child.isMesh && child.name === "Object_5") {
@@ -35,9 +35,26 @@ const Model = ({ model }) => {
     });
   }, [scene, model.modelPath]);
 
+  useFrame(() => {
+    if (!group.current) return;
+    // No idle spin: the models rest facing forward so every logo stays
+    // readable. An earlier version drifted continuously and, after a few
+    // seconds on the page, every model had rotated edge-on to the camera.
+    // Momentum after a drag decays rather than stopping dead.
+    if (!spin.current.dragging) {
+      spin.current.velocity *= 0.93;
+      if (Math.abs(spin.current.velocity) < 0.0002) spin.current.velocity = 0;
+      spin.current.angle += spin.current.velocity;
+    }
+    // ADD to the authored rotation rather than replacing it. Several models
+    // carry a baked-in Y rotation (Node is -PI/2, Git is -PI/4) that orients
+    // them toward the camera; overwriting it turned those edge-on.
+    group.current.rotation.y = baseY + spin.current.angle;
+  });
+
   return (
-    <Float speed={5.5} rotationIntensity={0.5} floatIntensity={0.9}>
-      <group scale={model.scale} rotation={model.rotation}>
+    <Float speed={4} rotationIntensity={0.15} floatIntensity={0.7}>
+      <group ref={group} scale={model.scale} rotation={model.rotation}>
         <primitive object={scene} />
       </group>
     </Float>
@@ -45,20 +62,52 @@ const Model = ({ model }) => {
 };
 
 const TechIcon = ({ model }) => {
+  const spin = useRef({ angle: 0, velocity: 0, dragging: false });
+  const lastX = useRef(0);
+
+  const onPointerDown = (e) => {
+    spin.current.dragging = true;
+    spin.current.velocity = 0;
+    lastX.current = e.clientX;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e) => {
+    if (!spin.current.dragging) return;
+    const dx = e.clientX - lastX.current;
+    lastX.current = e.clientX;
+    spin.current.angle += dx * 0.012;
+    spin.current.velocity = dx * 0.012;
+  };
+
+  const endDrag = (e) => {
+    if (!spin.current.dragging) return;
+    spin.current.dragging = false;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* pointer already released */
+    }
+  };
+
   return (
-    // <View> renders its own element and tracks itself — the earlier version
-    // paired it with a separate anchor div, so the tracked box was the View's
-    // own unsized element and every viewport scissored to zero.
-    <View className="tech-view">
-        <PerspectiveCamera makeDefault position={[0, 0, 6.5]} fov={45} />
-        <ambientLight intensity={0.4} />
-        <directionalLight position={[5, 5, 5]} intensity={1.1} />
-        {/* Environment fetches an HDR and suspends, so it shares the boundary
-            with the model rather than sitting outside it. */}
-        <Suspense fallback={null}>
-          <Environment preset="city" />
-          <Model model={model} />
-        </Suspense>
+    <View
+      className="tech-view"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      onLostPointerCapture={endDrag}
+    >
+      <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={45} />
+      <ambientLight intensity={0.45} />
+      <directionalLight position={[5, 5, 5]} intensity={1.15} />
+      {/* Environment fetches an HDR and suspends, so it shares the boundary
+          with the model rather than sitting outside it. */}
+      <Suspense fallback={null}>
+        <Environment preset="city" />
+        <Model model={model} spin={spin} />
+      </Suspense>
     </View>
   );
 };
