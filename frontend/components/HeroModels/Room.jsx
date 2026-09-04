@@ -2,12 +2,14 @@
 
 import { useMemo, useRef } from "react";
 import { useGLTF, useTexture } from "@react-three/drei";
+import { useThemeName } from "@/lib/useTheme";
 import { EffectComposer, SelectiveBloom } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 
 export function Room(props) {
   const { nodes, materials } = useGLTF("/models/optimized-room.glb");
+  const isDay = useThemeName() === "light";
   const screensRef = useRef();
   const matcapTexture = useTexture("/images/textures/mat1.png");
 
@@ -23,11 +25,17 @@ export function Room(props) {
       body: new THREE.MeshPhongMaterial({ map: matcapTexture }),
       table: new THREE.MeshPhongMaterial({ color: "#582f0e" }),
       radiator: new THREE.MeshPhongMaterial({ color: "#fff" }),
-      comp: new THREE.MeshStandardMaterial({ color: "#fff" }),
+      // The monitors read as self-lit. At night that glow is the point; in
+      // daylight the same white surface takes the full ambient on top of it
+      // and blows out to a flat white slab. Dimmer and slightly warm by day.
+      comp: new THREE.MeshStandardMaterial({
+        color: isDay ? "#9fb2c9" : "#fff",
+        roughness: isDay ? 0.55 : 0.3,
+      }),
       pillow: new THREE.MeshPhongMaterial({ color: "#8338ec" }),
       chair: new THREE.MeshPhongMaterial({ color: "#000" }),
     }),
-    [matcapTexture]
+    [matcapTexture, isDay]
   );
 
   const curtainMaterial = materials2.curtain;

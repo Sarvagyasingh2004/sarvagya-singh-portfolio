@@ -1306,16 +1306,50 @@ html[data-theme="light"] .icon-moon { transform: rotate(0deg) scale(1); opacity:
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(60rem 34rem at 12% 38%, rgba(139, 92, 246, 0.13), transparent 65%),
-    radial-gradient(46rem 30rem at 78% 22%, rgba(34, 211, 238, 0.08), transparent 62%);
   pointer-events: none;
   z-index: 1;
+  /* Carried all the way to 100%. Stopping at 62% left a visible elliptical
+     edge behind the room, which read as a light sphere sitting in the scene. */
+  background:
+    radial-gradient(
+      68rem 42rem at 10% 40%,
+      rgba(139, 92, 246, 0.13) 0%,
+      rgba(129, 96, 246, 0.085) 26%,
+      rgba(119, 100, 245, 0.05) 46%,
+      rgba(109, 104, 244, 0.025) 64%,
+      rgba(99, 108, 243, 0.01) 80%,
+      transparent 100%
+    ),
+    radial-gradient(
+      58rem 40rem at 80% 26%,
+      rgba(99, 102, 241, 0.08) 0%,
+      rgba(99, 102, 241, 0.05) 28%,
+      rgba(99, 102, 241, 0.028) 50%,
+      rgba(99, 102, 241, 0.012) 70%,
+      rgba(99, 102, 241, 0.004) 86%,
+      transparent 100%
+    );
 }
 html[data-theme="light"] #hero::before {
   background:
-    radial-gradient(60rem 34rem at 12% 38%, rgba(124, 58, 237, 0.10), transparent 65%),
-    radial-gradient(46rem 30rem at 78% 22%, rgba(8, 145, 178, 0.07), transparent 62%);
+    radial-gradient(
+      68rem 42rem at 10% 40%,
+      rgba(124, 58, 237, 0.10) 0%,
+      rgba(118, 70, 238, 0.065) 26%,
+      rgba(112, 82, 239, 0.038) 46%,
+      rgba(106, 94, 240, 0.018) 64%,
+      rgba(99, 102, 241, 0.007) 80%,
+      transparent 100%
+    ),
+    radial-gradient(
+      58rem 40rem at 80% 26%,
+      rgba(99, 102, 241, 0.06) 0%,
+      rgba(99, 102, 241, 0.036) 28%,
+      rgba(99, 102, 241, 0.02) 50%,
+      rgba(99, 102, 241, 0.009) 70%,
+      rgba(99, 102, 241, 0.003) 86%,
+      transparent 100%
+    );
 }
 
 .hero-badge {
@@ -2079,3 +2113,81 @@ html[data-theme="light"] .navbar.scrolled {
   box-shadow: 0 1px 0 var(--nav-border), 0 8px 30px rgba(15, 23, 42, 0.07);
 }
 .navbar.not-scrolled { box-shadow: none; }
+
+/* ==========================================================================
+   HERO — decorative background plate
+   bg.png is a fixed-width image pinned top-left, so it ends in a hard
+   vertical seam partway across the hero. Masked so it dissolves instead.
+   ========================================================================== */
+#hero > div:first-child {
+  -webkit-mask-image: linear-gradient(
+    100deg,
+    #000 0%,
+    #000 30%,
+    rgba(0, 0, 0, 0.55) 55%,
+    rgba(0, 0, 0, 0.15) 78%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    100deg,
+    #000 0%,
+    #000 30%,
+    rgba(0, 0, 0, 0.55) 55%,
+    rgba(0, 0, 0, 0.15) 78%,
+    transparent 100%
+  );
+  opacity: 0.75;
+}
+html[data-theme="light"] #hero > div:first-child { opacity: 0.35; }
+
+/* ==========================================================================
+   HERO — intro line legibility over the canvas
+   The sentence runs under the 3D room, so its tail ("...and code.") sat on
+   top of the model. A shadow matched to the page ground lifts it off the
+   scene without putting a visible plate behind the text.
+   ========================================================================== */
+.hero-text + p,
+#hero header p {
+  position: relative;
+  z-index: 20;
+  color: var(--text);
+  font-weight: 500;
+  text-shadow:
+    0 1px 2px var(--page-bg),
+    0 0 10px var(--page-bg),
+    0 0 22px var(--page-bg);
+}
+html[data-theme="light"] #hero header p {
+  color: #1e293b;
+  text-shadow:
+    0 1px 2px #f4f6f8,
+    0 0 10px #f4f6f8,
+    0 0 24px #f4f6f8;
+}
+
+/* ==========================================================================
+   HERO CANVAS EDGE
+   The WebGL canvas is 70% wide, pinned right, so its left boundary lands
+   around x=512 on a 1440px viewport. A transparent WebGL surface still
+   composites slightly differently from the page behind it, which showed as a
+   faint vertical seam running the full height of the hero. Feathering the
+   canvas edges dissolves that boundary.
+   ========================================================================== */
+.hero-3d-layout {
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 5%,
+    rgba(0, 0, 0, 0.85) 12%,
+    #000 20%,
+    #000 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 5%,
+    rgba(0, 0, 0, 0.85) 12%,
+    #000 20%,
+    #000 100%
+  );
+}
