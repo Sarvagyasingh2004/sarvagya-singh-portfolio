@@ -736,35 +736,35 @@ html[data-theme="light"] { --cursor-rgb: 109, 40, 217; }
    being carried around. */
 .cursor-bulb {
   z-index: 0;
-  width: 26rem;
-  height: 26rem;
-  margin: -13rem 0 0 -13rem;
+  width: 32rem;
+  height: 32rem;
+  margin: -16rem 0 0 -16rem;
   border-radius: 999px;
   transition: opacity 0.6s ease;
   /* Many closely-spaced stops running all the way to 100%: a ramp that ends
      early (transparent 70%) leaves a visible circular edge. */
   background: radial-gradient(
     circle closest-side,
-    rgba(139, 92, 246, 0.13) 0%,
-    rgba(129, 96, 246, 0.10) 22%,
-    rgba(119, 100, 245, 0.07) 40%,
-    rgba(109, 104, 244, 0.045) 56%,
-    rgba(99, 108, 243, 0.026) 70%,
-    rgba(99, 108, 243, 0.012) 82%,
-    rgba(99, 108, 243, 0.004) 92%,
+    rgba(167, 139, 250, 0.30) 0%,
+    rgba(150, 110, 248, 0.23) 22%,
+    rgba(135, 100, 246, 0.16) 40%,
+    rgba(120, 104, 245, 0.10) 56%,
+    rgba(105, 108, 244, 0.055) 70%,
+    rgba(99, 108, 243, 0.025) 82%,
+    rgba(99, 108, 243, 0.008) 92%,
     transparent 100%
   );
 }
 html[data-theme="light"] .cursor-bulb {
   background: radial-gradient(
     circle closest-side,
-    rgba(124, 58, 237, 0.10) 0%,
-    rgba(118, 70, 238, 0.075) 22%,
-    rgba(112, 82, 239, 0.052) 40%,
-    rgba(106, 94, 240, 0.033) 56%,
-    rgba(99, 102, 241, 0.019) 70%,
-    rgba(99, 102, 241, 0.009) 82%,
-    rgba(99, 102, 241, 0.003) 92%,
+    rgba(124, 58, 237, 0.20) 0%,
+    rgba(118, 70, 238, 0.15) 22%,
+    rgba(112, 82, 239, 0.105) 40%,
+    rgba(106, 94, 240, 0.065) 56%,
+    rgba(99, 102, 241, 0.036) 70%,
+    rgba(99, 102, 241, 0.016) 82%,
+    rgba(99, 102, 241, 0.005) 92%,
     transparent 100%
   );
 }
@@ -1828,80 +1828,6 @@ html[data-theme="light"] .socials .icon img { filter: invert(1) brightness(0.45)
 
 
 
-/* ==========================================================================
-   TECH STACK — free-floating models, no card
-   The models were being squeezed inside a fixed card well that was smaller
-   than they needed. The chrome is gone: each model floats in open space, is
-   draggable, and only the label sits beneath it.
-   ========================================================================== */
-.tech-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: clamp(1rem, 3vw, 2.5rem);
-  align-items: stretch;
-}
-
-.tech-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem;
-  background: none;
-  border: 0;
-  border-radius: 0;
-  overflow: visible;
-}
-
-.tech-item-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* Extra breathing room so the label sits clear of the model. */
-  gap: 1.5rem;
-  width: 100%;
-}
-
-/* The box each <View> scissors into. Roomy on purpose: the models are drawn
-   to their own scale and a tight box clips their corners. */
-.tech-icon-wrapper,
-.tech-view {
-  width: 100%;
-  height: clamp(13rem, 19vw, 17rem);
-  /* Pointer must reach the shared canvas here for drag-to-spin. */
-  pointer-events: auto;
-  touch-action: none;
-}
-
-.tech-item p {
-  text-align: center;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text);
-  transition: color 0.3s ease;
-  margin-top: 0.35rem;
-}
-
-/* Hint that the models are grabbable. */
-.tech-view { cursor: grab; }
-.tech-view:active { cursor: grabbing; }
-.tech-item:hover p { color: var(--accent-1); }
-
-/* A soft pool of light under each model, standing in for the card. */
-.tech-item-content::after {
-  content: "";
-  order: -1;
-  position: absolute;
-  width: 8rem;
-  height: 8rem;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.13), transparent 68%);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-.tech-item { position: relative; }
-.tech-item:hover .tech-item-content::after { opacity: 1; }
 
 /* ==========================================================================
    TWEAKS
@@ -1958,9 +1884,9 @@ button:hover .send-plane { animation-duration: 0.9s; }
 
 /* Smaller, tighter lamp — the 46rem version washed too much of the page. */
 .cursor-bulb {
-  width: 26rem;
-  height: 26rem;
-  margin: -13rem 0 0 -13rem;
+  width: 32rem;
+  height: 32rem;
+  margin: -16rem 0 0 -16rem;
 }
 
 /* Light theme: the rotating hero words carried dark pills from the dark
@@ -2206,4 +2132,265 @@ html[data-theme="light"] #hero header p {
 html[data-theme="light"] .contact-canvas-wrap {
   background: linear-gradient(160deg, #d8d5f7 0%, #c9c6f2 55%, #bcb9ee 100%);
   border-color: rgba(15, 23, 42, 0.08);
+}
+
+/* ==========================================================================
+   TECH CONSTELLATION
+   Models on an arc, each wired down into a central monogram. No card chrome —
+   the models sit in open space and the wires carry the structure.
+   ========================================================================== */
+.constellation {
+  position: relative;
+  width: 100%;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  padding-bottom: clamp(9rem, 16vw, 14rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.constellation-wires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+.constellation-wire {
+  stroke: url(#wire);
+  stroke-width: 1.15;
+  /* Drawn on load so the structure assembles rather than just appearing. */
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 1400;
+  animation: wire-draw 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes wire-draw { to { stroke-dashoffset: 0; } }
+
+.constellation-arc {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(1.25rem, 4vw, 3.5rem);
+  width: 100%;
+}
+
+.constellation-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* The labels were sitting on the models; the arc offsets below pull the
+     outer nodes up, which closed the gap further. */
+  gap: 1rem;
+  /* Lifts the outer nodes so the row reads as an arc, not a straight line. */
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.constellation-node:nth-child(1),
+.constellation-node:nth-child(5) { transform: translateY(-2.6rem); }
+.constellation-node:nth-child(2),
+.constellation-node:nth-child(4) { transform: translateY(-1.1rem); }
+.constellation-node:hover { transform: translateY(-3.4rem); }
+.constellation-node:nth-child(3):hover { transform: translateY(-1rem); }
+
+/* Smaller than the previous card version — the models are one element in a
+   composition now, not the whole section. */
+.constellation-model,
+.constellation-model .tech-view {
+  width: clamp(5rem, 8vw, 7rem);
+  height: clamp(5rem, 8vw, 7rem);
+}
+.constellation-model .tech-view {
+  pointer-events: auto;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+.constellation-model .tech-view:active { cursor: grabbing; }
+
+.constellation-node p {
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: var(--muted);
+  transition: color 0.3s ease;
+  max-width: 7rem;
+}
+.constellation-node:hover p { color: var(--text); }
+
+/* ---- The hub ---- */
+.constellation-core {
+  position: absolute;
+  bottom: clamp(1.5rem, 4vw, 3.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  width: clamp(9rem, 15vw, 13rem);
+  height: clamp(9rem, 15vw, 13rem);
+  display: grid;
+  place-items: center;
+}
+.constellation-core > * { grid-area: 1 / 1; }
+
+.core-orb {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle closest-side,
+    rgba(167, 139, 250, 0.55) 0%,
+    rgba(139, 92, 246, 0.35) 32%,
+    rgba(99, 102, 241, 0.16) 56%,
+    rgba(91, 110, 245, 0.05) 76%,
+    transparent 100%
+  );
+  animation: core-breathe 5s ease-in-out infinite;
+}
+html[data-theme="light"] .core-orb {
+  background: radial-gradient(
+    circle closest-side,
+    rgba(139, 92, 246, 0.35) 0%,
+    rgba(124, 58, 237, 0.22) 32%,
+    rgba(99, 102, 241, 0.10) 56%,
+    rgba(91, 110, 245, 0.03) 76%,
+    transparent 100%
+  );
+}
+@keyframes core-breathe {
+  0%, 100% { transform: scale(1);    opacity: 0.9; }
+  50%      { transform: scale(1.06); opacity: 1; }
+}
+
+.core-ring {
+  width: 128%;
+  height: 46%;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 999px;
+  transform: rotateX(72deg);
+  animation: core-spin 22s linear infinite;
+}
+.core-ring-2 {
+  width: 168%;
+  height: 58%;
+  border-color: rgba(139, 92, 246, 0.16);
+  animation-duration: 34s;
+  animation-direction: reverse;
+}
+html[data-theme="light"] .core-ring { border-color: rgba(124, 58, 237, 0.26); }
+html[data-theme="light"] .core-ring-2 { border-color: rgba(124, 58, 237, 0.14); }
+@keyframes core-spin {
+  from { transform: rotateX(72deg) rotate(0deg); }
+  to   { transform: rotateX(72deg) rotate(360deg); }
+}
+
+.core-logo { display: grid; place-items: center; }
+.logo-mark.is-glowing {
+  filter: drop-shadow(0 0 14px rgba(167, 139, 250, 0.85))
+    drop-shadow(0 0 34px rgba(139, 92, 246, 0.45));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .constellation-wire { animation: none; stroke-dashoffset: 0; }
+  .core-orb, .core-ring { animation: none; }
+}
+
+@media (max-width: 640px) {
+  .constellation-node:nth-child(n) { transform: none; }
+  .constellation { padding-bottom: 11rem; }
+}
+
+/* Brand mark in the navbar */
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: none;
+  border-radius: 0.7rem;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+}
+.brand:hover .brand-mark { border-color: var(--accent-edge); }
+
+/* ==========================================================================
+   THEME SWITCH
+   Transitions are suppressed for one frame while data-theme flips. Elements
+   carried different durations, so on switch the backgrounds, borders and text
+   each settled at their own pace — the button labels arrived visibly late.
+   ========================================================================== */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+}
+
+/* ==========================================================================
+   BUTTON HIERARCHY — final pass
+   Primary (CTA) and secondary (Resume) now share one hover language: a filled
+   circle grows out from behind the icon and the label shifts to meet it.
+   ========================================================================== */
+
+/* The violet glow read as a stray highlight sitting under the button on a
+   light ground. Tightened and tinted to the surface it sits on. */
+.cta-button {
+  box-shadow: 0 2px 10px rgba(109, 92, 246, 0.22);
+}
+.cta-wrapper:hover .cta-button,
+button:hover > .cta-button {
+  box-shadow: 0 4px 16px rgba(109, 92, 246, 0.3);
+}
+html[data-theme="light"] .cta-button {
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+}
+html[data-theme="light"] .cta-wrapper:hover .cta-button,
+html[data-theme="light"] button:hover > .cta-button {
+  box-shadow: 0 4px 14px rgba(109, 92, 246, 0.26);
+}
+
+/* ---- Resume: same converging-circle hover as the CTA ---- */
+.resume-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.resume-btn .resume-fill {
+  position: absolute;
+  right: 0.42rem;
+  top: 50%;
+  width: 1.9rem;
+  height: 1.9rem;
+  margin-top: -0.95rem;
+  border-radius: 999px;
+  background: var(--grad-accent);
+  transform: scale(0.35);
+  opacity: 0;
+  z-index: -1;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
+}
+.resume-btn:hover .resume-fill {
+  /* Grows out from behind the icon to flood the whole pill, mirroring the
+     CTA's bg-circle. */
+  transform: scale(7);
+  opacity: 1;
+}
+.resume-btn .resume-icon,
+.resume-btn .resume-label {
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s ease 0.06s;
+}
+.resume-btn:hover .resume-icon,
+.resume-btn:hover .resume-label { color: #fff; }
+.resume-btn:hover { border-color: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  .resume-btn .resume-fill { transition: opacity 0.2s ease; }
+  .resume-btn:hover .resume-fill { transform: scale(7); }
 }

@@ -5,7 +5,7 @@ import { navLinks } from "@/constants";
 import ScrollProgress from "./ScrollProgress";
 import ThemeToggle from "./ThemeToggle";
 import ResumeButton from "./ResumeButton";
-import Avatar from "./Avatar";
+import Logo from "./Logo";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -24,7 +24,7 @@ const Navbar = () => {
     <header className={`navbar ${scrolled ? "scrolled" : "not-scrolled"}`}>
       <div className="inner">
         <a href="#hero" className="brand" aria-label="Sarvagya Singh — home">
-          <Avatar />
+          <span className="brand-mark"><Logo size={30} /></span>
           <span className="brand-name">
             <b>Sarvagya Singh</b>
             <i>Full-Stack Engineer</i>

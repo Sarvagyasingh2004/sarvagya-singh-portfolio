@@ -1,73 +1,129 @@
 "use client";
 
-import TitleHeader from "../components/TitleHeader";
-import { techStackIcons } from "@/constants";
 import dynamic from "next/dynamic";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import TitleHeader from "../components/TitleHeader";
+import Logo from "../components/Logo";
+import { techStackIcons } from "@/constants";
 
-// WebGL can't be server-rendered, and a static export prerenders everything —
-// so the canvas loads on the client only.
-const TechIcon = dynamic(() => import("../components/Models/TechLogos/TechIcon.jsx"), { ssr: false });
-const TechCanvas = dynamic(() => import("../components/Models/TechLogos/TechCanvas.jsx"), { ssr: false });
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+const TechIcon = dynamic(
+  () => import("../components/Models/TechLogos/TechIcon.jsx"),
+  { ssr: false }
+);
+const TechCanvas = dynamic(
+  () => import("../components/Models/TechLogos/TechCanvas.jsx"),
+  { ssr: false }
+);
+
+/**
+ * The stack as a constellation rather than a row of cards.
+ *
+ * Each model sits on an arc above a central monogram, with an SVG curve
+ * running from it down into the core. The curves are measured from the live
+ * DOM after layout rather than hardcoded, so they stay attached at any
+ * viewport width.
+ */
 const TechStack = () => {
-  const gridRef = useRef(null);
-  useGSAP(() => {
-    gsap.fromTo(
-      ".tech-card",
-      {
-        y: 50,
-        opacity: 0,
-      },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 1,
-        ease: "power2.inOut",
-        stagger: 0.2,
-        scrollTrigger: {
-          trigger: "#skills",
-          start: "top center",
-        },
-      }
-    );
+  const wrapRef = useRef(null);
+  const coreRef = useRef(null);
+  const nodeRefs = useRef([]);
+  const [paths, setPaths] = useState([]);
+  const [box, setBox] = useState({ w: 0, h: 0 });
+
+  useEffect(() => {
+    const measure = () => {
+      const wrap = wrapRef.current;
+      const core = coreRef.current;
+      if (!wrap || !core) return;
+
+      const w = wrap.getBoundingClientRect();
+      const c = core.getBoundingClientRect();
+      setBox({ w: w.width, h: w.height });
+
+      const cx = c.left + c.width / 2 - w.left;
+      const cy = c.top + c.height / 2 - w.top;
+
+      setPaths(
+        nodeRefs.current.filter(Boolean).map((el) => {
+          const r = el.getBoundingClientRect();
+          const x = r.left + r.width / 2 - w.left;
+          const y = r.top + r.height - w.top - 8;
+          // Control points pulled toward the core's vertical axis, so every
+          // curve funnels into the centre like fibre into a hub.
+          return `M ${x} ${y} C ${x} ${y + (cy - y) * 0.45}, ${cx + (x - cx) * 0.12} ${cy - (cy - y) * 0.3}, ${cx} ${cy}`;
+        })
+      );
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (wrapRef.current) ro.observe(wrapRef.current);
+    window.addEventListener("resize", measure);
+    // Re-measure once fonts settle, since they shift the arc's height.
+    const t = setTimeout(measure, 400);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+      clearTimeout(t);
+    };
   }, []);
+
   return (
     <div id="skills" className="flex-center section-padding">
       <div className="w-full h-full md:px-10 px-5">
         <TitleHeader
           title="My Preferred Tech Stack"
-          sub="🤝 The Skills I Bring to the Table"
+          sub="The Skills I Bring to the Table"
         />
-        <div className="tech-grid" ref={gridRef}>
-          {techStackIcons.map((techStackIcon) => (
-            <div
-              key={techStackIcon.name}
-              className="tech-item group"
-            >
-              {/* The tech-card-animated-bg div is used to create a background animation when the 
-                  component is hovered. */}
-              <div className="tech-item-content">
-                {/* The tech-icon-wrapper div contains the TechIconCardExperience component, 
-                    which renders the 3D model of the tech stack icon. */}
-                <div className="tech-icon-wrapper">
-                  <TechIcon model={techStackIcon} />
-                </div>
-                {/* The padding-x and w-full classes are used to add horizontal padding to the 
-                    text and make it take up the full width of the component. */}
-                <div className="w-full">
-                  {/* The p tag contains the name of the tech stack icon. */}
-                  <p>{techStackIcon.name}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      {/* The single shared canvas every <View> above renders through. */}
-      <TechCanvas trackRef={gridRef} />
+        <div className="constellation" ref={wrapRef}>
+          {/* Connector curves sit behind everything. */}
+          <svg
+            className="constellation-wires"
+            viewBox={`0 0 ${box.w || 1} ${box.h || 1}`}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="wire" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgba(167,139,250,0.05)" />
+                <stop offset="55%" stopColor="rgba(139,92,246,0.35)" />
+                <stop offset="100%" stopColor="rgba(91,110,245,0.7)" />
+              </linearGradient>
+            </defs>
+            {paths.map((d, i) => (
+              <path key={i} d={d} className="constellation-wire" fill="none" />
+            ))}
+          </svg>
+
+          <div className="constellation-arc">
+            {techStackIcons.map((icon, i) => (
+              <div
+                key={icon.name}
+                className="constellation-node"
+                ref={(el) => (nodeRefs.current[i] = el)}
+              >
+                <div className="constellation-model">
+                  <TechIcon model={icon} />
+                </div>
+                <p>{icon.name}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* The hub. */}
+          <div className="constellation-core" ref={coreRef}>
+            <span className="core-orb" aria-hidden="true" />
+            <span className="core-ring" aria-hidden="true" />
+            <span className="core-ring core-ring-2" aria-hidden="true" />
+            <span className="core-logo">
+              <Logo size={64} glow />
+            </span>
+          </div>
+        </div>
+
+        <TechCanvas />
+      </div>
     </div>
   );
 };

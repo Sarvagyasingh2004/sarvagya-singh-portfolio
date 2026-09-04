@@ -16,7 +16,15 @@ const ThemeToggle = () => {
 
   const apply = (next: Theme) => {
     setTheme(next);
-    document.documentElement.dataset.theme = next;
+    // Kill every transition for one frame while the theme flips.
+    // Different elements carried different transition durations, so on switch
+    // backgrounds, borders and text each settled at their own pace and the
+    // button labels visibly arrived late. Suppressing transitions makes the
+    // swap atomic, then they're restored for normal interaction.
+    const root = document.documentElement;
+    root.classList.add("theme-switching");
+    root.dataset.theme = next;
+    window.setTimeout(() => root.classList.remove("theme-switching"), 60);
     try {
       localStorage.setItem(THEME_KEY, next);
     } catch {

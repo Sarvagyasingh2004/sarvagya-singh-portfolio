@@ -30,6 +30,7 @@ const ResumeButton = () => {
       onClick={(e) => disabled && e.preventDefault()}
       title={disabled ? "Resume not available right now" : "Download my resume (PDF)"}
     >
+      <span className="resume-fill" aria-hidden="true" />
       <span className="resume-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 3v11" />
@@ -37,7 +38,7 @@ const ResumeButton = () => {
           <path d="M4 19h16" />
         </svg>
       </span>
-      <span>Resume</span>
+      <span className="resume-label">Resume</span>
     </a>
   );
 };
