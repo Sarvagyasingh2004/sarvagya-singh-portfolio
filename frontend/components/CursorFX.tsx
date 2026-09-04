@@ -19,7 +19,12 @@ import { useEffect } from "react";
  *
  * Skipped entirely for coarse pointers (touch) and reduced-motion.
  */
-const INTERACTIVE = 'a, button, input, textarea, select, [role="button"], .tech-card, .card';
+const INTERACTIVE = 'a, button, input, textarea, select, [role="button"], .tech-item, .card';
+
+/** Ring follow speed, 0-1. Higher = tighter. 1 locks it to the dot. */
+const RING_FOLLOW = 0.55;
+/** Lamp follow speed. Deliberately slow — the drift is the effect. */
+const BULB_FOLLOW = 0.07;
 
 const CursorFX = () => {
   useEffect(() => {
@@ -37,22 +42,23 @@ const CursorFX = () => {
 
     let tx = window.innerWidth / 2;
     let ty = window.innerHeight / 2;
+    let rx = tx, ry = ty;
     let bx = tx, by = ty;
     let raf = 0;
 
     const onMove = (e: PointerEvent) => {
       tx = e.clientX;
       ty = e.clientY;
-      const t = `translate3d(${tx}px, ${ty}px, 0)`;
-      dot.style.transform = t;
-      ring.style.transform = t;
+      // The dot is exact; the ring eases toward it in the rAF loop.
+      dot.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
     };
 
     const tick = () => {
-      // Only the lamp lags now — that slow drift is what reads as a physical
-      // light being carried around. The dot and ring stay locked together.
-      bx += (tx - bx) * 0.07;
-      by += (ty - by) * 0.07;
+      rx += (tx - rx) * RING_FOLLOW;
+      ry += (ty - ry) * RING_FOLLOW;
+      bx += (tx - bx) * BULB_FOLLOW;
+      by += (ty - by) * BULB_FOLLOW;
+      ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
       bulb.style.transform = `translate3d(${bx}px, ${by}px, 0)`;
       raf = requestAnimationFrame(tick);
     };

@@ -131,7 +131,21 @@ const Contact = () => {
                       {loading ? "Sending..." : "Send Message"}
                     </p>
                     <div className="arrow-wrapper">
-                      <img src="/images/arrow-down.svg" alt="arrow" />
+                      <svg
+                        className="send-plane"
+                        viewBox="0 0 24 24"
+                        width="17"
+                        height="17"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.9"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M21.5 2.5L11 13" />
+                        <path d="M21.5 2.5l-6.6 19-3.9-8.5L2.5 9.1z" />
+                      </svg>
                     </div>
                   </div>
                 </button>

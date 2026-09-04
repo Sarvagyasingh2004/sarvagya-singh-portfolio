@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useGLTF, useTexture } from "@react-three/drei";
 import { EffectComposer, SelectiveBloom } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
@@ -11,33 +11,32 @@ export function Room(props) {
   const screensRef = useRef();
   const matcapTexture = useTexture("/images/textures/mat1.png");
 
-  const curtainMaterial = new THREE.MeshPhongMaterial({
-    color: "#d90429",
-  });
+  // All seven materials in ONE memo.
+  //
+  // They used to be constructed in the render body, so every re-render built
+  // seven brand-new material objects that three.js swapped onto every mesh in
+  // the room. That swap is the flicker — much bigger than the single light
+  // that was fixed earlier, and the reason it persisted after that fix.
+  const materials2 = useMemo(
+    () => ({
+      curtain: new THREE.MeshPhongMaterial({ color: "#d90429" }),
+      body: new THREE.MeshPhongMaterial({ map: matcapTexture }),
+      table: new THREE.MeshPhongMaterial({ color: "#582f0e" }),
+      radiator: new THREE.MeshPhongMaterial({ color: "#fff" }),
+      comp: new THREE.MeshStandardMaterial({ color: "#fff" }),
+      pillow: new THREE.MeshPhongMaterial({ color: "#8338ec" }),
+      chair: new THREE.MeshPhongMaterial({ color: "#000" }),
+    }),
+    [matcapTexture]
+  );
 
-  const bodyMaterial = new THREE.MeshPhongMaterial({
-    map: matcapTexture,
-  });
-
-  const tableMaterial = new THREE.MeshPhongMaterial({
-    color: "#582f0e",
-  });
-
-  const radiatorMaterial = new THREE.MeshPhongMaterial({
-    color: "#fff",
-  });
-
-  const compMaterial = new THREE.MeshStandardMaterial({
-    color: "#fff",
-  });
-
-  const pillowMaterial = new THREE.MeshPhongMaterial({
-    color: "#8338ec",
-  });
-
-  const chairMaterial = new THREE.MeshPhongMaterial({
-    color: "#000",
-  });
+  const curtainMaterial = materials2.curtain;
+  const bodyMaterial = materials2.body;
+  const tableMaterial = materials2.table;
+  const radiatorMaterial = materials2.radiator;
+  const compMaterial = materials2.comp;
+  const pillowMaterial = materials2.pillow;
+  const chairMaterial = materials2.chair;
 
   return (
     <group {...props} dispose={null}>
