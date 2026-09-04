@@ -242,12 +242,16 @@ section {
     @apply absolute top-0 xl:left-[35.5vw] md:left-10 left-5 h-full flex justify-center;
   }
 
+  /* A black bar GSAP scales down (scaleY) to progressively reveal the
+     gradient line beneath it. It only ever needs to be as wide as that line —
+     at w-28 it was 28x wider and painted over the company logo and the
+     bullet copy sitting beside it. Also sits BELOW the logo now. */
   .timeline {
-    @apply absolute z-30 h-[110%] -top-10 w-14 md:w-28 bg-black;
+    @apply absolute z-10 h-[110%] -top-10 w-1 bg-black;
   }
 
   .timeline-logo {
-    @apply md:size-20 size-10 flex-none rounded-full flex justify-center items-center md:-translate-y-7 border border-black-50 bg-black-100;
+    @apply relative z-30 md:size-20 size-10 flex-none rounded-full flex justify-center items-center md:-translate-y-7 border border-black-50 bg-black-100 overflow-hidden;
   }
 
   .exp-card-wrapper {
@@ -759,17 +763,15 @@ html[data-theme="light"] .scroll-cue-mouse { border-color: rgba(16, 21, 27, 0.28
   margin: -2.5px 0 0 -2.5px;
 }
 
-/* Hide the native cursor only where the custom one is actually active, and
-   never on text inputs where the caret matters. */
+/* Native cursor off across the ENTIRE page whenever the custom pointer is
+   active — no grab over canvases, no auto over inputs, no text I-beam. The
+   dot and ring are the only pointer anywhere on the site.
+   `* ` is deliberate: without it, elements that set their own cursor (buttons,
+   links, canvases, form fields) each reassert a native cursor. */
 .has-cursor-fx,
-.has-cursor-fx a,
-.has-cursor-fx button,
-.has-cursor-fx .tech-card,
-.has-cursor-fx .card { cursor: none; }
-.has-cursor-fx input,
-.has-cursor-fx textarea,
-.has-cursor-fx select { cursor: auto; }
-.has-cursor-fx canvas { cursor: grab; }
+.has-cursor-fx * {
+  cursor: none !important;
+}
 
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
   .has-cursor-fx, .has-cursor-fx * { cursor: auto !important; }
@@ -1213,7 +1215,7 @@ html[data-theme="light"] .icon-moon { transform: rotate(0deg) scale(1); opacity:
   height: 100%;
   border-radius: 999px;
   object-fit: cover;
-  object-position: center 22%;
+  object-position: center 42%;
   display: block;
   background: #0b0d13;
 }
@@ -1658,3 +1660,71 @@ textarea:focus-visible {
   outline-offset: 3px;
   border-radius: 4px;
 }
+
+/* Inline star row — replaces five star.png requests per card. */
+.card-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-bottom: 1.1rem;
+  color: var(--accent-warm);
+}
+
+/* Avatar/monogram sizing, shared by the navbar, experience and testimonials. */
+.testimonial-avatar {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: none;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.testimonial-avatar img,
+.testimonial-avatar .company-monogram { width: 100%; height: 100%; }
+.testimonial-avatar img { object-fit: cover; }
+
+/* ===================== Lamp behind the pointer =====================
+   Reverted from the ink-trail experiment. Sits at z-index 0 — BEHIND the
+   content, never over it — and dims over canvases so the 3D scenes stay
+   readable. The dot and ring remain visible over canvases; the native grab
+   cursor is not used anywhere. */
+.cursor-bulb {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 46rem;
+  height: 46rem;
+  margin: -23rem 0 0 -23rem;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+  transition: opacity 0.6s ease;
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.17) 0%,
+    rgba(99, 102, 241, 0.10) 34%,
+    rgba(34, 211, 238, 0.05) 54%,
+    transparent 70%
+  );
+}
+html[data-theme="light"] .cursor-bulb {
+  background: radial-gradient(
+    circle,
+    rgba(124, 58, 237, 0.13) 0%,
+    rgba(99, 102, 241, 0.07) 34%,
+    rgba(8, 145, 178, 0.05) 54%,
+    transparent 70%
+  );
+}
+.has-cursor-fx .cursor-bulb { opacity: 1; }
+.has-cursor-fx.cursor-hidden .cursor-bulb { opacity: 0; }
+.has-cursor-fx.cursor-over-canvas .cursor-bulb { opacity: 0.22; }
+
+/* Company logo fills its circular well without distorting a wide mark. */
+.timeline-logo img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+}
+.timeline-logo .company-monogram { width: 100%; height: 100%; font-size: 0.95rem; }

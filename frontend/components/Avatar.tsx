@@ -1,33 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import SmartImage from "./SmartImage";
 
 /**
  * Profile mark in the navbar.
  *
- * Falls back to initials if the photo is missing, so the header never shows a
- * broken image. Save the photo to `public/images/profile.jpg` — cropped square
- * and centred on the face; `object-position: center 22%` biases toward the top
- * of the frame, which is where the face sits in a standing photo.
+ * Save the photo to `public/images/profile.jpg` — square crop, centred on the
+ * face. Until it exists, the monogram shows; no broken image ever renders.
  */
-const Avatar = () => {
-  const [failed, setFailed] = useState(false);
-
-  return (
-    <span className="avatar">
-      {failed ? (
-        <span className="avatar-fallback" aria-hidden="true">SS</span>
-      ) : (
-        <img
-          src="/images/profile.jpg"
-          alt=""
-          width="42"
-          height="42"
-          onError={() => setFailed(true)}
-        />
-      )}
-    </span>
-  );
-};
+const Avatar = () => (
+  <span className="avatar">
+    <SmartImage
+      src="/images/profile.jpg"
+      alt=""
+      width={42}
+      height={42}
+      fallback={<span className="avatar-fallback" aria-hidden="true">SS</span>}
+    />
+  </span>
+);
 
 export default Avatar;

@@ -12,7 +12,7 @@ const HeroExperience = () => {
   const isTablet = useMediaQuery({ maxWidth: 1024 });
   const isMobile = useMediaQuery({ maxWidth: 767 });
   return (
-    <Canvas camera={{ position: [0, 0, 15], fov: 45 }}>
+    <Canvas dpr={[1, 1.75]} camera={{ position: [0, 0, 15], fov: 45 }}>
       <HeroLights />
       <Particles count={100} />
       {/* Zoom stays off: OrbitControls captures the wheel, which hijacks page

@@ -1,5 +1,6 @@
 import TitleHeader from "../components/TitleHeader";
 import GlowCard from "../components/GlowCard.jsx";
+import CompanyLogo from "../components/CompanyLogo.jsx";
 // Original markup and classes, unchanged. The only difference is that the
 // entries arrive as a prop, read from the Google Sheet at build time, instead
 // of being hardcoded. Renders nothing at all when none are approved yet — an
@@ -19,10 +20,10 @@ const Testimonials = ({ testimonials = [] }) => {
         />
         <div className="lg:columns-3 md:columns-2 columns-1 mt-16">
           {testimonials.map(({ name, mentions, imgPath, review }, index) => (
-            <GlowCard index={index} card={{ review }} key={index}>
+            <GlowCard index={index} card={{ review }} key={index} stars>
               <div className="flex items-center gap-3">
-                <div>
-                  <img src={imgPath} alt={name} />
+                <div className="testimonial-avatar">
+                  <CompanyLogo src={imgPath} name={name} />
                 </div>
                 <div>
                   <p className="font-bold">{name}</p>

@@ -117,7 +117,7 @@ const expCards = [
     title: "Software Development Engineer (Full-Stack) — Kraftshala",
     date: "March 2026 - September 2026",
     company: "Kraftshala",
-    logoPath: "/images/companies/kraftshala.png",
+    logoPath: "/images/companies/kraftshala.jpg",
     review:
       "Owned features end-to-end across a Node/TypeScript/MySQL backend and a React/Redux internal ops platform. 331 commits across both repositories.",
     responsibilities: [
@@ -133,7 +133,7 @@ const expCards = [
     title: "Full-Stack Developer — BWS",
     date: "July 2025 - December 2025",
     company: "BWS",
-    logoPath: "/images/companies/bws.png",
+    logoPath: "/images/companies/bws.jpg",
     review:
       "Built and deployed the company's website chatbot and lead-capture flow on the MERN stack, then optimized the site's performance and on-page SEO.",
     responsibilities: [
@@ -147,7 +147,7 @@ const expCards = [
     title: "Teaching Assistant — Coding Blocks",
     date: "May 2024 - August 2024",
     company: "Coding Blocks",
-    logoPath: "/images/companies/coding-blocks.png",
+    logoPath: "/images/companies/coding-blocks.jpg",
     review:
       "Mentored 100+ students through Java, data structures and algorithms via doubt sessions and one-on-one code review.",
     responsibilities: [

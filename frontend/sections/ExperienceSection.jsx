@@ -68,7 +68,7 @@ const ExperienceSection = () => {
             {expCards.map((card, index) => (
               <div className="exp-card-wrapper" key={index}>
                 <div className="xl:w-2/6">
-                  <GlowCard card={card} index={index}>
+                  <GlowCard index={index}>
                     <div className="exp-summary">
                       <p className="exp-company">{card.company}</p>
                       <p className="exp-review">{card.review}</p>

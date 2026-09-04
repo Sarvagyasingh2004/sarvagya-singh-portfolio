@@ -1,13 +1,11 @@
 # Company logos
 
-Save the three logos here, square, transparent PNG, ~256×256:
+    kraftshala.jpg      290x174  (wide — object-fit: contain letterboxes it)
+    bws.jpg             200x200
+    coding-blocks.jpg   200x200
 
-    kraftshala.png
-    bws.png
-    coding-blocks.png
+Referenced from `constants/index.js` -> `expCards[].logoPath`.
 
-Until a file exists the card falls back to a lettered monogram, so a missing
-logo never renders as a broken image.
-
-The previous files (logo1/2/3.png) were the tutorial template's Hostinger,
-Docker and Appwrite marks — they were rendering next to your real employers.
+`CompanyLogo` preloads each file and only swaps it in once it loads, falling
+back to a lettered monogram otherwise — so replacing or renaming one of these
+degrades to a designed mark rather than a broken image.

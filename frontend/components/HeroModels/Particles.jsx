@@ -49,9 +49,12 @@ const Particles = ({ count = 200 }) => {
       </bufferGeometry>
       <pointsMaterial
         color="#ffffff"
-        size={0.05}
+        size={0.06}
+        // sizeAttenuation keeps a flake's screen size tied to its distance, so
+        // it doesn't pop between one and two pixels as it falls.
+        sizeAttenuation
         transparent
-        opacity={0.9}
+        opacity={0.85}
         depthWrite={false}
       />
     </points>

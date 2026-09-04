@@ -33,9 +33,9 @@ const normalize = (row: Record<string, unknown>): Testimonial => ({
   name: String(row.name).trim(),
   mentions: String(row.mentions ?? "").trim(),
   review: String(row.review).trim(),
-  // Submitters don't upload photos; a shared placeholder keeps the card layout
-  // intact without inventing a face.
-  imgPath: String(row.imgPath ?? "/images/person.png"),
+  // Submitters don't upload photos. An empty value makes the card render a
+  // monogram rather than requesting a file that does not exist.
+  imgPath: String(row.imgPath ?? ""),
 });
 
 export async function getTestimonials(): Promise<Testimonial[]> {
