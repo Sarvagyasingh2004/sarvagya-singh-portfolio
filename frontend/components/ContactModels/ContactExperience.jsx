@@ -8,46 +8,69 @@ import { useThemeName } from "@/lib/useTheme";
 import Computer from "../Models/Computer";
 
 /**
- * The contact scene, themed to the site's violet -> indigo ramp.
+ * A real desk in a real room.
  *
- * It shipped on the template's orange (#cb7c2e wrapper, #a46b2d ground,
- * #ffd9b3 keys), which was the last thing on the page still wearing a colour
- * from outside the palette. Both the ground plane and the lighting now derive
- * from the same accent as the rest of the site, in both themes.
+ * The GLB already carries accurate materials — wood desk, beige tower, black
+ * chair — so nothing needs recolouring. An earlier pass pushed the site's
+ * violet ramp through the lights and the floor, which flattened all of that
+ * into one monochrome tint. The lighting is neutral again and only the TIME OF
+ * DAY changes with the theme:
+ *
+ *   light — midday sun through a window: warm key, cool sky bounce, pale
+ *           floor. Reads as an office in daylight.
+ *   dark  — the same room at night: a warm desk lamp as the key, faint cool
+ *           moonlight as fill, and a cyan spill from the monitor. Reads as a
+ *           room lit from inside, not a purple void.
  */
 const ContactExperience = () => {
   const isDay = useThemeName() === "light";
 
-  // Ground reads a shade deeper than the wrapper behind it, so the plane
-  // still reads as a floor rather than merging into the panel.
-  const ground = isDay ? "#cac7f0" : "#312a5c";
-  const keyLight = isDay ? "#ffffff" : "#c9b6ff";
-  const fillLight = isDay ? "#e8ecff" : "#8b7fe8";
+  // Real floor tones: pale oak by day, the same boards unlit at night.
+  const floor = isDay ? "#c4b49c" : "#3a322a";
 
   return (
     <Canvas shadows dpr={[1, 1.75]} camera={{ position: [0, 3, 8], fov: 45 }}>
-      <ambientLight intensity={isDay ? 1.1 : 0.55} color={fillLight} />
-
-      <directionalLight
-        position={[5, 5, 3]}
-        intensity={isDay ? 2.2 : 1.9}
-        color={keyLight}
-      />
-
-      <directionalLight
-        position={[5, 9, 1]}
-        castShadow
-        intensity={isDay ? 2.4 : 2.1}
-        color={keyLight}
-      />
-
-      {/* A cool counter-light on the opposite side keeps the shadow side from
-          going flat black, and echoes the cyan end of the site's ramp. */}
-      <directionalLight
-        position={[-6, 4, -2]}
-        intensity={isDay ? 0.7 : 0.75}
-        color={isDay ? "#e4ecff" : "#7b74d8"}
-      />
+      {isDay ? (
+        <>
+          {/* Sun. Slightly warm and high, casting the shadows. */}
+          <directionalLight
+            position={[6, 8, 4]}
+            intensity={2.6}
+            color="#fff3dd"
+            castShadow
+            shadow-mapSize={[1024, 1024]}
+          />
+          {/* Sky fill so the shadow side stays readable without going blue. */}
+          <ambientLight intensity={0.85} color="#f3f1ea" />
+          <hemisphereLight intensity={0.7} color="#eef4ff" groundColor="#b9a888" />
+          {/* Bounce off the floor, back into the underside of the desk. */}
+          <directionalLight position={[-4, 1.5, 3]} intensity={0.45} color="#ffeed6" />
+        </>
+      ) : (
+        <>
+          {/* Desk lamp — the key light at night, warm and close. */}
+          <pointLight
+            position={[1.6, 2.6, 1.2]}
+            intensity={26}
+            distance={12}
+            decay={2}
+            color="#ffb768"
+            castShadow
+            shadow-mapSize={[1024, 1024]}
+          />
+          {/* Monitor spill: cool, low, from where the screen sits. */}
+          <pointLight
+            position={[0, 1.4, -0.6]}
+            intensity={9}
+            distance={7}
+            decay={2}
+            color="#8fd8ff"
+          />
+          {/* Moonlight through the window — just enough to shape the room. */}
+          <directionalLight position={[-5, 6, -3]} intensity={0.32} color="#9fb6d9" />
+          <ambientLight intensity={0.16} color="#5d6b85" />
+        </>
+      )}
 
       <OrbitControls
         enableZoom={false}
@@ -63,7 +86,7 @@ const ContactExperience = () => {
           rotation={[-Math.PI / 2, 0, 0]}
         >
           <planeGeometry args={[30, 30]} />
-          <meshStandardMaterial color={ground} roughness={0.85} />
+          <meshStandardMaterial color={floor} roughness={0.9} metalness={0} />
         </mesh>
       </group>
 
