@@ -1632,13 +1632,26 @@ button:hover > .cta-button { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.35); }
    heading. Every scroll target needs to stop clear of it. */
 section[id],
 #hero, #about, #work, #experience, #skills, #contact, #testimonials {
-  scroll-margin-top: calc(var(--nav-h) + 1.25rem);
+  /* Just clears the fixed navbar. The previous +1.25rem pushed the heading
+     down far enough that the section's own bottom went past the fold. */
+  scroll-margin-top: var(--nav-h);
 }
 
 /* Section rhythm: the original mixed md:mt-40, my-20 and section-padding, so
    gaps between sections were uneven. One vertical step everywhere. */
 #about, #work, #experience, #skills, #contact, #testimonials {
-  padding-block: clamp(4rem, 9vw, 7.5rem);
+  /* Roughly halved. The previous 7.5rem top and bottom meant a section that
+     was already a full screen tall overflowed as soon as you jumped to it. */
+  padding-block: clamp(2.25rem, 4.5vw, 3.75rem);
+}
+
+/* Each anchor target should sit inside one screen once scrolled to, rather
+   than starting at the top and running past the fold. */
+#about, #skills, #contact {
+  min-height: calc(100svh - var(--nav-h));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 #experience { margin-top: 0 !important; }
 
@@ -2350,6 +2363,15 @@ html.theme-switching *::after {
   transition-delay: 0s !important;
 }
 
+/* ...but the toggle's own icon rotation must survive the switch. The rule
+   above lists only colour-ish properties, so it silently dropped `transform`
+   and the sun/moon snapped between states instead of sweeping through. */
+html.theme-switching .theme-toggle-track svg {
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s ease !important;
+}
+
 /* ==========================================================================
    BUTTON HIERARCHY — final pass
    Primary (CTA) and secondary (Resume) now share one hover language: a filled
@@ -2409,3 +2431,70 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
   .resume-btn .resume-fill { transition: opacity 0.2s ease; }
   .resume-btn:hover .resume-fill { transform: scale(7); }
 }
+
+/* ==========================================================================
+   CONTACT — form and canvas share one height
+   The two columns sized themselves independently, so the panel and the form
+   card ended on different baselines. A single grid row makes both stretch to
+   the taller of the two, and the canvas fills whatever that resolves to.
+   ========================================================================== */
+#contact .grid-12-cols {
+  align-items: stretch;
+}
+#contact .grid-12-cols > div { display: flex; }
+#contact .grid-12-cols > div > * { width: 100%; }
+
+#contact form { height: 100%; }
+#contact .xl\:col-span-5 > div { height: 100%; }
+
+/* Capped so the whole section — eyebrow, heading, form and scene — fits one
+   screen instead of the form growing unbounded. */
+#contact .grid-12-cols > div,
+.contact-canvas-wrap {
+  max-height: min(30rem, calc(100svh - var(--nav-h) - 13rem));
+  min-height: 22rem;
+}
+#contact form { gap: 1.15rem; }
+#contact textarea { min-height: 5.5rem; }
+
+/* ==========================================================================
+   FOOTER RULE
+   Was fading almost immediately from both ends, so the middle never reached
+   full strength. Solid across the centre ~55vw, then falls away.
+   ========================================================================== */
+.section-rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--accent-1) 20%, transparent) 12%,
+    color-mix(in srgb, var(--accent-1) 70%, transparent) 22%,
+    color-mix(in srgb, var(--accent-1) 85%, transparent) 50%,
+    color-mix(in srgb, var(--accent-1) 70%, transparent) 78%,
+    color-mix(in srgb, var(--accent-1) 20%, transparent) 88%,
+    transparent 100%
+  );
+}
+
+/* ==========================================================================
+   WORK — fit one screen
+   The showcase ran 942px against a 900px viewport, so jumping to it always
+   clipped. The media wells are the whole overage: they were sized for
+   screenshots that don't exist yet.
+   ========================================================================== */
+#work {
+  min-height: calc(100svh - var(--nav-h));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#work .showcaselayout { gap: clamp(1rem, 2.5vw, 2rem); }
+#work .image-wrapper { max-height: min(20rem, 34svh); }
+#work .shot-placeholder { min-height: 0; height: 100%; }
+#work .first-project-wrapper .image-wrapper { max-height: min(22rem, 38svh); }
+#work .project-list-wrapper { gap: clamp(0.75rem, 2vw, 1.5rem); }
+#work .project-list-wrapper .image-wrapper { max-height: min(9rem, 16svh); }
+#work h2 { font-size: clamp(1.05rem, 1.6vw, 1.5rem); line-height: 1.3; }
+#work .text-content { gap: 0.5rem; }
+#work .text-content p { font-size: clamp(0.86rem, 1.05vw, 1rem); line-height: 1.55; }
+#work > div > p { margin-bottom: clamp(1rem, 2vw, 1.75rem); }

@@ -26,7 +26,7 @@ const ContactExperience = () => {
   const isDay = useThemeName() === "light";
 
   // Real floor tones: pale oak by day, the same boards unlit at night.
-  const floor = isDay ? "#c4b49c" : "#4d4238";
+  const floor = isDay ? "#c4b49c" : "#5b4f42";
 
   return (
     <Canvas shadows dpr={[1, 1.75]} camera={{ position: [0, 3, 8], fov: 45 }}>
@@ -51,8 +51,8 @@ const ContactExperience = () => {
           {/* Desk lamp — the key light at night, warm and close. */}
           <pointLight
             position={[1.6, 2.6, 1.2]}
-            intensity={46}
-            distance={16}
+            intensity={62}
+            distance={20}
             decay={2}
             color="#ffb768"
             castShadow
@@ -67,13 +67,16 @@ const ContactExperience = () => {
             color="#8fd8ff"
           />
           {/* Moonlight through the window — just enough to shape the room. */}
-          <directionalLight position={[-5, 6, -3]} intensity={0.55} color="#a9bfe0" />
+          <directionalLight position={[-5, 6, -3]} intensity={0.75} color="#b4c7e4" />
           {/* Lifted from 0.16: the room read as an unlit void with a floating
               monitor. Enough ambient to see the chair, floor and walls, while
               still clearly night. */}
-          <ambientLight intensity={0.42} color="#7b8aa6" />
+          <ambientLight intensity={0.62} color="#8b98b2" />
           {/* Warm bounce off the desk surface back into the room. */}
-          <pointLight position={[0, 0.4, 2.5]} intensity={7} distance={11} decay={2} color="#ffcf9a" />
+          <pointLight position={[0, 0.4, 2.5]} intensity={11} distance={13} decay={2} color="#ffd6a8" />
+          {/* A ceiling bulb overhead, so the room is lit from inside rather
+              than only by the desk. */}
+          <pointLight position={[0, 5, 0]} intensity={18} distance={17} decay={1.7} color="#ffe4bd" />
         </>
       )}
 

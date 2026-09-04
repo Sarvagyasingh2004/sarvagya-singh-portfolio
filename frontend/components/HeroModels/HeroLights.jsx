@@ -62,28 +62,43 @@ const HeroLights = () => {
 
   return (
     <>
-      {/* lamp's light */}
+      {/* Ceiling bulb: directly above the room, aimed down at the floor.
+          The originals all sat out in front of the geometry (z = 4-6), which
+          lit the room from the camera's side and read as a light source
+          outside the screen rather than one hanging in the room. */}
       <spotLight
-        position={[2, 5, 6]}
-        angle={0.15}
-        penumbra={0.2}
-        intensity={100}
-        color="white"
+        position={[0.5, 7.5, -0.5]}
+        target-position={[0.5, 0, -0.5]}
+        angle={0.75}
+        penumbra={0.9}
+        intensity={190}
+        distance={22}
+        decay={1.4}
+        color="#fff1d6"
       />
-      {/* bluish overhead lamp */}
+      {/* The bulb's own warm pool, close to the ceiling. */}
+      <pointLight
+        position={[0.5, 6.2, -0.5]}
+        intensity={22}
+        distance={14}
+        decay={1.8}
+        color="#ffdca8"
+      />
+      {/* Cold spill from the monitors, low and behind the desk. */}
       <spotLight
-        position={[4, 5, 4]}
-        angle={0.3}
-        penumbra={0.5}
-        intensity={40}
+        position={[3, 2.2, 0.5]}
+        angle={0.6}
+        penumbra={1}
+        intensity={26}
+        distance={12}
         color="#4cc9f0"
       />
-      {/* purplish side fill */}
-      <spotLight
-        position={[-3, 5, 5]}
-        angle={0.4}
-        penumbra={1}
-        intensity={60}
+      {/* Purple bounce off the far wall, kept inside the room. */}
+      <pointLight
+        position={[-2.5, 3, -1.5]}
+        intensity={14}
+        distance={13}
+        decay={2}
         color="#9d4edd"
       />
       <primitive
@@ -92,8 +107,7 @@ const HeroLights = () => {
         rotation={[-Math.PI / 4, Math.PI / 4, 0]}
         intensity={15}
       />
-      <pointLight position={[0, 1, 0]} intensity={10} color="#7209b7" />
-      <pointLight position={[1, 2, -2]} intensity={10} color="#0d00a4" />
+      <pointLight position={[0, 1, 0]} intensity={6} distance={9} color="#7209b7" />
     </>
   );
 };
