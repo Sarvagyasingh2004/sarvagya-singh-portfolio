@@ -1,26 +1,36 @@
 "use client";
 
-import { Environment, Float, OrbitControls, useGLTF } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
+import { Environment, Float, PerspectiveCamera, View, useGLTF } from "@react-three/drei";
 import { Suspense, useEffect } from "react";
 import * as THREE from "three";
 
-// useGLTF must be called by a component rendered INSIDE <Canvas>. Called from
-// the parent (as it was), the suspension unwinds past the Canvas entirely and
-// the canvas mounts with nothing in it — sized, with a live GL context, but
-// drawing nothing.
+/**
+ * One <View> per card, all sharing a SINGLE WebGL context.
+ *
+ * Each card used to mount its own <Canvas>. With the hero and the contact
+ * scene that made 7 live contexts on one page. Browsers cap concurrent WebGL
+ * contexts in the mid-teens and silently drop the oldest — so with other tabs
+ * open, some canvases simply fail to acquire a context and Chrome paints its
+ * broken-content glyph. drei's <View> renders many viewports through one
+ * shared renderer, taking the page from 7 contexts to 2.
+ */
 const Model = ({ model }) => {
   const { scene } = useGLTF(model.modelPath);
 
   useEffect(() => {
-    // The three.js logo ships with a dark material that disappears on a dark
-    // card, so it gets forced to white. The original guarded on the label
-    // "Interactive Developer"; these entries were renamed, so match the model
-    // file instead — a rename can't silently break it again.
+    // The three.js logo ships with a near-black material that vanishes on the
+    // dark card. Forcing it white fixed that but made it vanish on the light
+    // one instead, so it gets a mid-tone slate that holds contrast against
+    // both grounds. Matched on the model file rather than the card label, so
+    // renaming a card can't silently break it.
     if (!model.modelPath.includes("three.js")) return;
     scene.traverse((child) => {
       if (child.isMesh && child.name === "Object_5") {
-        child.material = new THREE.MeshStandardMaterial({ color: "white" });
+        child.material = new THREE.MeshStandardMaterial({
+          color: "#8f9bb0",
+          roughness: 0.35,
+          metalness: 0.1,
+        });
       }
     });
   }, [scene, model.modelPath]);
@@ -36,18 +46,20 @@ const Model = ({ model }) => {
 
 const TechIcon = ({ model }) => {
   return (
-    <Canvas>
-      <ambientLight intensity={0.3} />
-      <directionalLight position={[5, 5, 5]} intensity={1} />
-      <OrbitControls enableZoom={false} enablePan={false} />
-      {/* One boundary around everything that loads. <Environment> fetches an
-          HDR and suspends too — leaving it outside a boundary was the other
-          half of the blank-canvas bug. */}
-      <Suspense fallback={null}>
-        <Environment preset="city" />
-        <Model model={model} />
-      </Suspense>
-    </Canvas>
+    // <View> renders its own element and tracks itself — the earlier version
+    // paired it with a separate anchor div, so the tracked box was the View's
+    // own unsized element and every viewport scissored to zero.
+    <View className="tech-view">
+        <PerspectiveCamera makeDefault position={[0, 0, 6.5]} fov={45} />
+        <ambientLight intensity={0.4} />
+        <directionalLight position={[5, 5, 5]} intensity={1.1} />
+        {/* Environment fetches an HDR and suspends, so it shares the boundary
+            with the model rather than sitting outside it. */}
+        <Suspense fallback={null}>
+          <Environment preset="city" />
+          <Model model={model} />
+        </Suspense>
+    </View>
   );
 };
 

@@ -37,24 +37,22 @@ const CursorFX = () => {
 
     let tx = window.innerWidth / 2;
     let ty = window.innerHeight / 2;
-    let rx = tx, ry = ty;
     let bx = tx, by = ty;
     let raf = 0;
 
     const onMove = (e: PointerEvent) => {
       tx = e.clientX;
       ty = e.clientY;
-      dot.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+      const t = `translate3d(${tx}px, ${ty}px, 0)`;
+      dot.style.transform = t;
+      ring.style.transform = t;
     };
 
     const tick = () => {
-      // Ring follows quickly, lamp slowly. That difference in lag is what
-      // reads as a physical light being carried around.
-      rx += (tx - rx) * 0.18;
-      ry += (ty - ry) * 0.18;
+      // Only the lamp lags now — that slow drift is what reads as a physical
+      // light being carried around. The dot and ring stay locked together.
       bx += (tx - bx) * 0.07;
       by += (ty - by) * 0.07;
-      ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
       bulb.style.transform = `translate3d(${bx}px, ${by}px, 0)`;
       raf = requestAnimationFrame(tick);
     };

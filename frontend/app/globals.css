@@ -552,7 +552,7 @@ html[data-theme="light"] textarea {
 }
 
 html[data-theme="light"] .cta-button .text { color: #ffffff; }
-html[data-theme="light"] .cta-wrapper .cta-button { background-color: #10151b; }
+html[data-theme="light"] .cta-button { background-color: #10151b; }
 
 /* Theme transition, skipped for anyone who asked for reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
@@ -1097,8 +1097,8 @@ html[data-theme="light"] .marquee-item.invert-on-light img { filter: invert(1); 
   --accent-3: #22d3ee;   /* cyan    */
   --accent-warm: #fbbf24;/* sun     */
 
-  --grad-accent: linear-gradient(120deg, var(--accent-1), var(--accent-2) 45%, var(--accent-3));
-  --grad-soft: linear-gradient(140deg, rgba(139,92,246,.16), rgba(34,211,238,.10));
+  --grad-accent: linear-gradient(135deg, #8b5cf6 0%, #6d5cf6 55%, #5b6ef5 100%);
+  --grad-soft: linear-gradient(140deg, rgba(139,92,246,.14), rgba(99,102,241,.08));
 
   --text: #e8eef6;
   --muted: #94a3b8;
@@ -1605,14 +1605,15 @@ html[data-theme="light"] { --cursor-trail: 109, 40, 217; } /* violet-700 on ligh
 
 /* ===================== CTA on the accent ramp =====================
    Was a pale blue that matched nothing else on the page. */
-.cta-wrapper .cta-button {
+.cta-button {
   background: var(--grad-accent);
   border: 0;
 }
 .cta-wrapper .cta-button .text,
-.cta-wrapper .cta-button .cta-arrow { color: #fff; }
-.cta-wrapper .cta-button .bg-circle { background: rgba(255, 255, 255, 0.16); }
-.cta-wrapper:hover .cta-button { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.35); }
+.cta-button .cta-arrow { color: #fff; }
+.cta-button .bg-circle { background: rgba(255, 255, 255, 0.16); }
+.cta-wrapper:hover .cta-button,
+button:hover > .cta-button { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.35); }
 
 /* ==========================================================================
    UI CONSISTENCY PASS
@@ -1728,3 +1729,131 @@ html[data-theme="light"] .cursor-bulb {
   object-fit: contain;
 }
 .timeline-logo .company-monogram { width: 100%; height: 100%; font-size: 0.95rem; }
+
+/* Each <View> is its own sized box; the shared canvas scissors to it. */
+.tech-view { width: 100%; height: 100%; min-height: 9rem; }
+
+/* ==========================================================================
+   BUTTON HIERARCHY
+   Everything was wearing the same gradient, which flattened the hierarchy and
+   read as decoration rather than emphasis. One primary action carries the
+   accent; secondary controls are quiet glass and only pick up the accent on
+   hover.
+   ========================================================================== */
+
+/* --- Secondary: Resume, theme toggle --- */
+.btn-surface {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  box-shadow: none;
+}
+.btn-surface:hover {
+  transform: translateY(-1px);
+  background: var(--surface-hover);
+  border-color: var(--accent-edge);
+  box-shadow: 0 4px 18px rgba(109, 92, 246, 0.16);
+}
+.resume-btn { background: var(--surface); color: var(--text); }
+.resume-btn:hover { background: var(--surface-hover); }
+
+:root {
+  --surface-hover: rgba(255, 255, 255, 0.07);
+  --accent-edge: rgba(139, 92, 246, 0.55);
+}
+html[data-theme="light"] {
+  --surface-hover: rgba(15, 23, 42, 0.06);
+  --accent-edge: rgba(124, 58, 237, 0.45);
+}
+
+/* --- Primary: the one CTA --- */
+.cta-button {
+  background: var(--grad-accent);
+  border: 0;
+  box-shadow: 0 4px 20px rgba(109, 92, 246, 0.28);
+  transition: box-shadow 0.35s ease, transform 0.35s ease;
+}
+.cta-wrapper:hover .cta-button,
+button:hover > .cta-button {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(109, 92, 246, 0.42);
+}
+.cta-button .text { color: #fff; }
+
+/* The arrow well was solid white — too heavy, and it fought the button.
+   Translucent white keeps it legible while reading as part of the surface. */
+.cta-button .arrow-wrapper {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.cta-wrapper:hover .cta-button .arrow-wrapper,
+button:hover > .cta-button .arrow-wrapper {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.cta-button .cta-arrow { color: #fff; }
+.cta-button .bg-circle { background: rgba(255, 255, 255, 0.12); }
+
+/* ==========================================================================
+   LIGHT THEME PASS
+   The original stylesheet hardcodes dark values in a number of places that the
+   token layer alone doesn't reach.
+   ========================================================================== */
+
+/* Form fields were dark-on-light. */
+html[data-theme="light"] input,
+html[data-theme="light"] textarea {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  color: #0f172a;
+}
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder { color: #94a3b8; }
+html[data-theme="light"] label { color: #334155; }
+
+/* Cards carried a dark fill from --color-black-100. */
+html[data-theme="light"] .card-border,
+html[data-theme="light"] .tech-card,
+html[data-theme="light"] .about-facts {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.10);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+/* The pill behind each section eyebrow. */
+html[data-theme="light"] .hero-badge {
+  background: rgba(139, 92, 246, 0.10);
+  border-color: rgba(139, 92, 246, 0.22);
+  color: #4c1d95;
+}
+html[data-theme="light"] .hero-badge p { color: #4c1d95; }
+
+/* Body copy and headings inside cards inherited the dark-theme muted token. */
+html[data-theme="light"] .text-white-50,
+html[data-theme="light"] .exp-review,
+html[data-theme="light"] .about-copy p { color: #475569; }
+html[data-theme="light"] .about-copy p:first-child { color: #0f172a; }
+
+/* The timeline mask is literally bg-black — invisible on a light ground. */
+html[data-theme="light"] .timeline { background: #f4f6f8; }
+html[data-theme="light"] .timeline-logo {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+/* Chat panel + FAB. */
+html[data-theme="light"] .chat-fab { background: #0f172a; color: #e8eef6; }
+
+/* Footer + section rules. */
+html[data-theme="light"] .footer,
+html[data-theme="light"] .footer-container { border-color: rgba(15, 23, 42, 0.10); }
+html[data-theme="light"] .footer a,
+html[data-theme="light"] .footer p { color: #475569; }
+
+/* Social icons are white PNGs. */
+html[data-theme="light"] .socials .icon img { filter: invert(1) brightness(0.45); }
+
+/* The contact scene's orange ground is very loud against a light page. */
+html[data-theme="light"] .bg-\[\#cb7c2e\] { background-color: #d9954f !important; }

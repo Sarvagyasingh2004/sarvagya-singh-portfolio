@@ -3,13 +3,16 @@
 import TitleHeader from "../components/TitleHeader";
 import { techStackIcons } from "@/constants";
 import dynamic from "next/dynamic";
+import { useRef } from "react";
 
 // WebGL can't be server-rendered, and a static export prerenders everything —
 // so the canvas loads on the client only.
 const TechIcon = dynamic(() => import("../components/Models/TechLogos/TechIcon.jsx"), { ssr: false });
+const TechCanvas = dynamic(() => import("../components/Models/TechLogos/TechCanvas.jsx"), { ssr: false });
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 const TechStack = () => {
+  const gridRef = useRef(null);
   useGSAP(() => {
     gsap.fromTo(
       ".tech-card",
@@ -37,7 +40,7 @@ const TechStack = () => {
           title="My Preferred Tech Stack"
           sub="🤝 The Skills I Bring to the Table"
         />
-        <div className="tech-grid">
+        <div className="tech-grid" ref={gridRef}>
           {techStackIcons.map((techStackIcon) => (
             <div
               key={techStackIcon.name}
@@ -63,6 +66,9 @@ const TechStack = () => {
           ))}
         </div>
       </div>
+
+      {/* The single shared canvas every <View> above renders through. */}
+      <TechCanvas trackRef={gridRef} />
     </div>
   );
 };
