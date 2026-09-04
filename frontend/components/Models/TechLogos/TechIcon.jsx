@@ -99,7 +99,7 @@ const TechIcon = ({ model }) => {
       onPointerCancel={endDrag}
       onLostPointerCapture={endDrag}
     >
-      <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={45} />
+      <PerspectiveCamera makeDefault position={[0, 0, 9.5]} fov={45} />
       <ambientLight intensity={0.45} />
       <directionalLight position={[5, 5, 5]} intensity={1.15} />
       {/* Environment fetches an HDR and suspends, so it shares the boundary

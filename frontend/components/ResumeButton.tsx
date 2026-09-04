@@ -1,31 +1,63 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-// API routes are same-origin now — no cross-origin base URL, no CORS.
-const API_URL = "";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * Occupies the slot where "Contact me" used to sit. Contact moved into the
- * nav links, so the one button in the header is the highest-intent action:
- * getting the resume.
+ * Resume download.
+ *
+ * The hover fill grows from the edge the pointer actually crossed: enter from
+ * below and it rises, enter from the left and it sweeps right. Worked out from
+ * the pointer's position relative to the button's box on pointerenter, then
+ * expressed as a transform-origin on the fill layer — so it stays one
+ * compositor-friendly scale animation rather than four separate ones.
  */
+type Edge = "top" | "right" | "bottom" | "left";
+
 const ResumeButton = () => {
   const [ready, setReady] = useState<boolean | null>(null);
+  const [edge, setEdge] = useState<Edge>("bottom");
+  const ref = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/resume/status`)
+    fetch("/api/resume/status")
       .then((r) => r.json())
       .then((d) => setReady(Boolean(d.available)))
       .catch(() => setReady(false));
+  }, []);
+
+  const onEnter = useCallback((e: React.PointerEvent) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    // Offset from the centre, normalised to -1..1 on each axis. The dominant
+    // axis gives the direction and its sign gives the side.
+    //
+    // A previous version compared raw distance-to-each-edge and picked the
+    // minimum, which mis-resolved on a wide short button: the left/right
+    // distances were both ~0.5 of the width and won the comparison before the
+    // much smaller vertical distance was ever reached.
+    const nx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+    const ny = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+    const next: Edge =
+      Math.abs(nx) > Math.abs(ny)
+        ? nx < 0
+          ? "left"
+          : "right"
+        : ny < 0
+          ? "top"
+          : "bottom";
+    setEdge(next);
   }, []);
 
   const disabled = ready === false;
 
   return (
     <a
-      href={`${API_URL}/api/resume`}
+      ref={ref}
+      href="/api/resume"
       className="btn-surface resume-btn"
+      data-edge={edge}
+      onPointerEnter={onEnter}
       aria-disabled={disabled}
       onClick={(e) => disabled && e.preventDefault()}
       title={disabled ? "Resume not available right now" : "Download my resume (PDF)"}

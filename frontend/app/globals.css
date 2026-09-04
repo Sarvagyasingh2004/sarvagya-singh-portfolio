@@ -1118,6 +1118,8 @@ html[data-theme="light"] .marquee-item.invert-on-light img { filter: invert(1); 
    ========================================================================== */
 :root {
   --nav-h: 4.5rem;
+  --theme-t: 320ms;
+  --theme-e: cubic-bezier(0.4, 0, 0.2, 1);
 
   --accent-1: #8b5cf6;   /* violet  */
   --accent-2: #6366f1;   /* indigo  */
@@ -2125,8 +2127,8 @@ html[data-theme="light"] #hero header p {
    ========================================================================== */
 .contact-canvas-wrap {
   background:
-    radial-gradient(120% 90% at 62% 78%, rgba(255, 176, 106, 0.14), transparent 62%),
-    linear-gradient(170deg, #23201d 0%, #1b1917 58%, #141312 100%);
+    radial-gradient(120% 90% at 62% 74%, rgba(255, 186, 120, 0.22), transparent 66%),
+    linear-gradient(170deg, #35302a 0%, #29241f 58%, #201c18 100%);
   border: 1px solid var(--hairline);
   cursor: grab;
 }
@@ -2147,7 +2149,8 @@ html[data-theme="light"] .contact-canvas-wrap {
   position: relative;
   width: 100%;
   margin-top: clamp(2.5rem, 5vw, 4rem);
-  padding-bottom: clamp(9rem, 16vw, 14rem);
+  /* Taller, so the threads have real length between the arc and the hub. */
+  padding-bottom: clamp(14rem, 24vw, 22rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2179,7 +2182,7 @@ html[data-theme="light"] .contact-canvas-wrap {
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-end;
-  gap: clamp(1.25rem, 4vw, 3.5rem);
+  gap: clamp(2rem, 6vw, 6rem);
   width: 100%;
 }
 
@@ -2194,9 +2197,9 @@ html[data-theme="light"] .contact-canvas-wrap {
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .constellation-node:nth-child(1),
-.constellation-node:nth-child(5) { transform: translateY(-2.6rem); }
+.constellation-node:nth-child(5) { transform: translateY(-3.6rem); }
 .constellation-node:nth-child(2),
-.constellation-node:nth-child(4) { transform: translateY(-1.1rem); }
+.constellation-node:nth-child(4) { transform: translateY(-1.6rem); }
 .constellation-node:hover { transform: translateY(-3.4rem); }
 .constellation-node:nth-child(3):hover { transform: translateY(-1rem); }
 
@@ -2204,8 +2207,10 @@ html[data-theme="light"] .contact-canvas-wrap {
    composition now, not the whole section. */
 .constellation-model,
 .constellation-model .tech-view {
-  width: clamp(5rem, 8vw, 7rem);
-  height: clamp(5rem, 8vw, 7rem);
+  /* Square and roomy. The three.js wireframe is the widest of the five and
+     was clipping its own viewport corners at the previous size. */
+  width: clamp(6.5rem, 10vw, 9rem);
+  height: clamp(6.5rem, 10vw, 9rem);
 }
 .constellation-model .tech-view {
   pointer-events: auto;
@@ -2327,11 +2332,22 @@ html[data-theme="light"] .core-ring-2 { border-color: rgba(124, 58, 237, 0.14); 
    carried different durations, so on switch the backgrounds, borders and text
    each settled at their own pace — the button labels arrived visibly late.
    ========================================================================== */
-html.theme-switching,
 html.theme-switching *,
 html.theme-switching *::before,
 html.theme-switching *::after {
-  transition: none !important;
+  /* Every theme-affected property moves on ONE clock. The stagger, not the
+     animation, was the problem: mismatched durations meant a label's colour
+     landed after its background had already changed. */
+  transition:
+    background-color var(--theme-t) var(--theme-e),
+    background-image var(--theme-t) var(--theme-e),
+    border-color var(--theme-t) var(--theme-e),
+    color var(--theme-t) var(--theme-e),
+    fill var(--theme-t) var(--theme-e),
+    stroke var(--theme-t) var(--theme-e),
+    box-shadow var(--theme-t) var(--theme-e),
+    opacity var(--theme-t) var(--theme-e) !important;
+  transition-delay: 0s !important;
 }
 
 /* ==========================================================================
@@ -2349,15 +2365,14 @@ html.theme-switching *::after {
 button:hover > .cta-button {
   box-shadow: 0 4px 16px rgba(109, 92, 246, 0.3);
 }
-html[data-theme="light"] .cta-button {
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
-}
+html[data-theme="light"] .cta-button { box-shadow: none; }
 html[data-theme="light"] .cta-wrapper:hover .cta-button,
-html[data-theme="light"] button:hover > .cta-button {
-  box-shadow: 0 4px 14px rgba(109, 92, 246, 0.26);
-}
+html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
 
-/* ---- Resume: same converging-circle hover as the CTA ---- */
+/* ---- Resume: fill enters from whichever edge the pointer crossed ----
+   The fill is a single scaled layer whose transform-origin is set from the
+   edge measured in JS. One compositor-friendly scale animation covers all
+   four directions instead of four separate keyframes. */
 .resume-btn {
   position: relative;
   overflow: hidden;
@@ -2365,30 +2380,26 @@ html[data-theme="light"] button:hover > .cta-button {
 }
 .resume-btn .resume-fill {
   position: absolute;
-  right: 0.42rem;
-  top: 50%;
-  width: 1.9rem;
-  height: 1.9rem;
-  margin-top: -0.95rem;
-  border-radius: 999px;
-  background: var(--grad-accent);
-  transform: scale(0.35);
-  opacity: 0;
+  inset: 0;
   z-index: -1;
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.3s ease;
+  background: var(--grad-accent);
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.resume-btn:hover .resume-fill {
-  /* Grows out from behind the icon to flood the whole pill, mirroring the
-     CTA's bg-circle. */
-  transform: scale(7);
-  opacity: 1;
-}
+.resume-btn[data-edge="bottom"] .resume-fill { transform-origin: bottom center; transform: scaleY(0); }
+.resume-btn[data-edge="top"]    .resume-fill { transform-origin: top center;    transform: scaleY(0); }
+.resume-btn[data-edge="left"]   .resume-fill { transform-origin: left center;   transform: scaleX(0); }
+.resume-btn[data-edge="right"]  .resume-fill { transform-origin: right center;  transform: scaleX(0); }
+
+.resume-btn:hover[data-edge="bottom"] .resume-fill,
+.resume-btn:hover[data-edge="top"]    .resume-fill { transform: scaleY(1); }
+.resume-btn:hover[data-edge="left"]   .resume-fill,
+.resume-btn:hover[data-edge="right"]  .resume-fill { transform: scaleX(1); }
+
 .resume-btn .resume-icon,
 .resume-btn .resume-label {
   position: relative;
   z-index: 1;
-  transition: color 0.3s ease 0.06s;
+  transition: color 0.28s ease 0.08s;
 }
 .resume-btn:hover .resume-icon,
 .resume-btn:hover .resume-label { color: #fff; }
