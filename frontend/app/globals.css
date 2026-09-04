@@ -1826,8 +1826,7 @@ html[data-theme="light"] .footer p { color: #475569; }
 /* Social icons are white PNGs. */
 html[data-theme="light"] .socials .icon img { filter: invert(1) brightness(0.45); }
 
-/* The contact scene's orange ground is very loud against a light page. */
-html[data-theme="light"] .bg-\[\#cb7c2e\] { background-color: #d9954f !important; }
+
 
 /* ==========================================================================
    TECH STACK — free-floating models, no card
@@ -2190,4 +2189,21 @@ html[data-theme="light"] #hero header p {
     #000 20%,
     #000 100%
   );
+}
+
+/* ==========================================================================
+   CONTACT SCENE PANEL
+   Was bg-[#cb7c2e] — the last hardcoded colour on the page from outside the
+   palette. Now on the accent ramp, and a shade lighter than the 3D ground so
+   the floor inside the scene still separates from the panel.
+   ========================================================================== */
+.contact-canvas-wrap {
+  background: linear-gradient(160deg, #3a2f6b 0%, #2a2350 55%, #221d44 100%);
+  border: 1px solid var(--hairline);
+  cursor: grab;
+}
+.contact-canvas-wrap:active { cursor: grabbing; }
+html[data-theme="light"] .contact-canvas-wrap {
+  background: linear-gradient(160deg, #d8d5f7 0%, #c9c6f2 55%, #bcb9ee 100%);
+  border-color: rgba(15, 23, 42, 0.08);
 }
