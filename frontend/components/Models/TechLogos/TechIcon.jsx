@@ -1,6 +1,6 @@
 "use client";
 
-import { Environment, Float, PerspectiveCamera, View, useGLTF } from "@react-three/drei";
+import { Environment, Float, OrbitControls, PerspectiveCamera, View, useGLTF } from "@react-three/drei";
 import { Suspense, useEffect } from "react";
 import * as THREE from "three";
 

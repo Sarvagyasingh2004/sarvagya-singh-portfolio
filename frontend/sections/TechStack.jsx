@@ -44,12 +44,11 @@ const TechStack = () => {
           {techStackIcons.map((techStackIcon) => (
             <div
               key={techStackIcon.name}
-              className="card-border tech-card overflow-hidden group xl:rounded-full rounded-lg"
+              className="tech-item group"
             >
               {/* The tech-card-animated-bg div is used to create a background animation when the 
                   component is hovered. */}
-              <div className="tech-card-animated-bg" />
-              <div className="tech-card-content">
+              <div className="tech-item-content">
                 {/* The tech-icon-wrapper div contains the TechIconCardExperience component, 
                     which renders the 3D model of the tech stack icon. */}
                 <div className="tech-icon-wrapper">
@@ -57,7 +56,7 @@ const TechStack = () => {
                 </div>
                 {/* The padding-x and w-full classes are used to add horizontal padding to the 
                     text and make it take up the full width of the component. */}
-                <div className="padding-x w-full">
+                <div className="w-full">
                   {/* The p tag contains the name of the tech stack icon. */}
                   <p>{techStackIcon.name}</p>
                 </div>

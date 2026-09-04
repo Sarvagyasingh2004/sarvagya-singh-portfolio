@@ -18,6 +18,9 @@ const TechCanvas = () => (
     style={{
       position: "fixed",
       inset: 0,
+      // `none` here, re-enabled per-View in CSS: the canvas covers the whole
+      // viewport, so leaving it interactive would swallow every click on the
+      // page. drei's View forwards events from the element it tracks.
       pointerEvents: "none",
       zIndex: 1,
     }}

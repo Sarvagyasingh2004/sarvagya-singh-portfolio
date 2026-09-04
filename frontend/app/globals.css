@@ -707,73 +707,115 @@ html[data-theme="light"] .scroll-cue-mouse { border-color: rgba(16, 21, 27, 0.28
   .scroll-cue-mouse i, .scroll-cue-chevrons svg, .theme-icon { animation: none; }
 }
 
-/* ===================== Custom pointer + lamp =====================
-   Only shown once the script confirms a fine pointer, so touch devices and
-   reduced-motion users keep the native cursor and see no layers at all. */
+/* ==========================================================================
+   CUSTOM POINTER — single source of truth
+   Rewritten as ONE block: repeated appends had left three overlapping
+   .cursor-dot / .cursor-ring definitions and the cascade decided which
+   margins won, which is why the dot drifted off the ring's centre.
+
+   Both layers are translated to the SAME point every move, and each is offset
+   by exactly half its own size, so they are concentric by construction.
+   ========================================================================== */
+:root                    { --cursor-rgb: 167, 139, 250; }
+html[data-theme="light"] { --cursor-rgb: 109, 40, 217; }
+
 .cursor-dot,
 .cursor-ring,
+.cursor-bulb {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+}
 
 .cursor-dot {
-  z-index: 9999;
+  /* Above everything, including the chat panel (170) and navbar (100). */
+  z-index: 2147483647;
   width: 8px;
   height: 8px;
-  margin: -4px 0 0 -4px;
+  margin: -4px 0 0 -4px;          /* half of 8px */
   border-radius: 999px;
-  background: #fff;
-  /* Inverts whatever is underneath, so it stays visible on both themes and
-     over the WebGL scenes without needing a colour per context. */
-  mix-blend-mode: difference;
-  transition: opacity 0.3s ease, width 0.25s ease, height 0.25s ease, margin 0.25s ease;
+  background: rgb(var(--cursor-rgb));
+  box-shadow: 0 0 10px rgba(var(--cursor-rgb), 0.85);
+  transition: opacity 0.3s ease, width 0.25s ease, height 0.25s ease,
+    margin 0.25s ease;
 }
 
 .cursor-ring {
-  z-index: 9998;
+  z-index: 2147483646;
   width: 34px;
   height: 34px;
-  margin: -17px 0 0 -17px;
-  border: 1px solid rgba(131, 156, 181, 0.6);
+  margin: -17px 0 0 -17px;        /* half of 34px */
   border-radius: 999px;
+  background: transparent;        /* hollow — never hides content */
+  border: 1.5px solid rgba(var(--cursor-rgb), 0.8);
+  box-shadow: 0 0 16px rgba(var(--cursor-rgb), 0.25);
   transition: opacity 0.3s ease, width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    height 0.28s cubic-bezier(0.22, 1, 0.36, 1), margin 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.28s ease, background 0.28s ease;
+    height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    margin 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease;
 }
 
-/* The lamp sits behind the content, never over it. */
+/* The lamp sits BEHIND content and lags, which is what reads as a light
+   being carried around. */
+.cursor-bulb {
+  z-index: 0;
+  width: 46rem;
+  height: 46rem;
+  margin: -23rem 0 0 -23rem;
+  border-radius: 999px;
+  transition: opacity 0.6s ease;
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.17) 0%,
+    rgba(99, 102, 241, 0.10) 34%,
+    rgba(91, 110, 245, 0.05) 54%,
+    transparent 70%
+  );
+}
+html[data-theme="light"] .cursor-bulb {
+  background: radial-gradient(
+    circle,
+    rgba(124, 58, 237, 0.13) 0%,
+    rgba(99, 102, 241, 0.07) 34%,
+    rgba(56, 89, 214, 0.04) 54%,
+    transparent 70%
+  );
+}
 
 .has-cursor-fx .cursor-dot,
-.has-cursor-fx .cursor-ring { opacity: 1; }
+.has-cursor-fx .cursor-ring,
+.has-cursor-fx .cursor-bulb { opacity: 1; }
 
 .has-cursor-fx.cursor-hidden .cursor-dot,
 .has-cursor-fx.cursor-hidden .cursor-ring,
+.has-cursor-fx.cursor-hidden .cursor-bulb { opacity: 0; }
 
-/* Over a canvas the lamp fades right down — an earlier version washed the
-   3D scenes out, which is why the effect was pulled the first time. */
+/* Dim the lamp over a canvas so it never washes out the 3D scenes. The dot
+   and ring stay fully visible there. */
+.has-cursor-fx.cursor-over-canvas .cursor-bulb { opacity: 0.22; }
 
-/* Expand over anything interactive. */
 .has-cursor-fx.cursor-active .cursor-ring {
-  width: 62px;
-  height: 62px;
-  margin: -31px 0 0 -31px;
-  border-color: rgba(217, 236, 255, 0.85);
-  background: rgba(217, 236, 255, 0.07);
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;        /* half of 60px */
+  border-color: rgba(var(--cursor-rgb), 1);
 }
 .has-cursor-fx.cursor-active .cursor-dot {
   width: 5px;
   height: 5px;
-  margin: -2.5px 0 0 -2.5px;
+  margin: -2.5px 0 0 -2.5px;      /* half of 5px */
 }
 
-/* Native cursor off across the ENTIRE page whenever the custom pointer is
-   active — no grab over canvases, no auto over inputs, no text I-beam. The
-   dot and ring are the only pointer anywhere on the site.
-   `* ` is deliberate: without it, elements that set their own cursor (buttons,
-   links, canvases, form fields) each reassert a native cursor. */
+/* Native cursor off across the ENTIRE page. The descendant selector is
+   deliberate: without it, elements that set their own cursor (buttons, links,
+   canvases, inputs) each reassert a native one. */
 .has-cursor-fx,
-.has-cursor-fx * {
-  cursor: none !important;
-}
+.has-cursor-fx * { cursor: none !important; }
 
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .cursor-dot, .cursor-ring, .cursor-bulb { display: none !important; }
   .has-cursor-fx, .has-cursor-fx * { cursor: auto !important; }
 }
 
@@ -1301,14 +1343,6 @@ html[data-theme="light"] #hero::before {
 .hero-badge p { color: var(--text); }
 
 /* ===================== Cursor: accent gradient ===================== */
-.cursor-dot {
-  background: #fff;
-}
-.cursor-ring {
-}
-.has-cursor-fx.cursor-active .cursor-ring {
-  border-width: 2px;
-}
 /* The lamp behind the pointer, on the same ramp. */
 
 /* ===================== Cards on the accent system ===================== */
@@ -1410,54 +1444,9 @@ html[data-theme="light"] { --page-bg: #f4f6f8; }
 :root       { --cursor-trail: 167, 139, 250; }  /* violet-400 on dark  */
 html[data-theme="light"] { --cursor-trail: 109, 40, 217; } /* violet-700 on light */
 
-.cursor-trail {
-  position: fixed;
-  inset: 0;
-  z-index: 9997;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.has-cursor-fx .cursor-trail { opacity: 1; }
 
-.cursor-dot {
-  z-index: 9999;
-  width: 7px;
-  height: 7px;
-  margin: -3.5px 0 0 -3.5px;
-  border-radius: 999px;
-  background: rgb(var(--cursor-trail));
-  box-shadow: 0 0 10px rgba(var(--cursor-trail), 0.8);
-  transition: opacity 0.3s ease, width 0.25s ease, height 0.25s ease, margin 0.25s ease;
-}
 
-.cursor-ring {
-  z-index: 9998;
-  width: 32px;
-  height: 32px;
-  margin: -16px 0 0 -16px;
-  border-radius: 999px;
-  /* Transparent centre — nothing behind the pointer is obscured. */
-  background: transparent;
-  border: 1.5px solid rgba(var(--cursor-trail), 0.75);
-  box-shadow: 0 0 16px rgba(var(--cursor-trail), 0.22);
-  transition: opacity 0.3s ease, width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    margin 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.28s ease;
-}
 
-.has-cursor-fx.cursor-active .cursor-ring {
-  width: 58px;
-  height: 58px;
-  margin: -29px 0 0 -29px;
-  border-color: rgba(var(--cursor-trail), 1);
-}
-.has-cursor-fx.cursor-active .cursor-dot {
-  width: 4px;
-  height: 4px;
-  margin: -2px 0 0 -2px;
-}
 
 /* ===================== About + Now ===================== */
 .about-grid {
@@ -1601,7 +1590,6 @@ html[data-theme="light"] { --cursor-trail: 109, 40, 217; } /* violet-700 on ligh
   font-weight: 700;
   letter-spacing: 0.02em;
 }
-.timeline-logo img { object-fit: contain; }
 
 /* ===================== CTA on the accent ramp =====================
    Was a pale blue that matched nothing else on the page. */
@@ -1683,50 +1671,14 @@ textarea:focus-visible {
 .testimonial-avatar .company-monogram { width: 100%; height: 100%; }
 .testimonial-avatar img { object-fit: cover; }
 
-/* ===================== Lamp behind the pointer =====================
-   Reverted from the ink-trail experiment. Sits at z-index 0 — BEHIND the
-   content, never over it — and dims over canvases so the 3D scenes stay
-   readable. The dot and ring remain visible over canvases; the native grab
-   cursor is not used anywhere. */
-.cursor-bulb {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 0;
-  width: 46rem;
-  height: 46rem;
-  margin: -23rem 0 0 -23rem;
-  border-radius: 999px;
-  pointer-events: none;
-  opacity: 0;
-  will-change: transform;
-  transition: opacity 0.6s ease;
-  background: radial-gradient(
-    circle,
-    rgba(139, 92, 246, 0.17) 0%,
-    rgba(99, 102, 241, 0.10) 34%,
-    rgba(34, 211, 238, 0.05) 54%,
-    transparent 70%
-  );
-}
-html[data-theme="light"] .cursor-bulb {
-  background: radial-gradient(
-    circle,
-    rgba(124, 58, 237, 0.13) 0%,
-    rgba(99, 102, 241, 0.07) 34%,
-    rgba(8, 145, 178, 0.05) 54%,
-    transparent 70%
-  );
-}
-.has-cursor-fx .cursor-bulb { opacity: 1; }
-.has-cursor-fx.cursor-hidden .cursor-bulb { opacity: 0; }
-.has-cursor-fx.cursor-over-canvas .cursor-bulb { opacity: 0.22; }
 
-/* Company logo fills its circular well without distorting a wide mark. */
+/* Fills the circular well edge to edge. `contain` left each mark floating at
+   its own aspect ratio inside the circle. */
 .timeline-logo img {
-  width: 78%;
-  height: 78%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 999px;
 }
 .timeline-logo .company-monogram { width: 100%; height: 100%; font-size: 0.95rem; }
 
@@ -1857,3 +1809,71 @@ html[data-theme="light"] .socials .icon img { filter: invert(1) brightness(0.45)
 
 /* The contact scene's orange ground is very loud against a light page. */
 html[data-theme="light"] .bg-\[\#cb7c2e\] { background-color: #d9954f !important; }
+
+/* ==========================================================================
+   TECH STACK — free-floating models, no card
+   The models were being squeezed inside a fixed card well that was smaller
+   than they needed. The chrome is gone: each model floats in open space, is
+   draggable, and only the label sits beneath it.
+   ========================================================================== */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: clamp(1rem, 3vw, 2.5rem);
+  align-items: stretch;
+}
+
+.tech-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.tech-item-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+/* The box each <View> scissors into. Generous, since the model now owns the
+   space rather than sharing it with card chrome. */
+.tech-icon-wrapper,
+.tech-view {
+  width: 100%;
+  height: clamp(10rem, 15vw, 13rem);
+  /* The pointer has to reach the shared canvas for drag-to-spin to work. */
+  pointer-events: auto;
+}
+
+.tech-item p {
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  transition: color 0.3s ease;
+}
+.tech-item:hover p { color: var(--accent-1); }
+
+/* A soft pool of light under each model, standing in for the card. */
+.tech-item-content::after {
+  content: "";
+  order: -1;
+  position: absolute;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.13), transparent 68%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.tech-item { position: relative; }
+.tech-item:hover .tech-item-content::after { opacity: 1; }
