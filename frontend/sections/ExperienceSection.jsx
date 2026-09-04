@@ -3,6 +3,7 @@
 import TitleHeader from "../components/TitleHeader";
 import { expCards } from "@/constants";
 import GlowCard from "../components/GlowCard.jsx";
+import CompanyLogo from "../components/CompanyLogo.jsx";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/all";
@@ -68,8 +69,9 @@ const ExperienceSection = () => {
               <div className="exp-card-wrapper" key={index}>
                 <div className="xl:w-2/6">
                   <GlowCard card={card} index={index}>
-                    <div>
-                      <img src={card.imgPath} alt={card.title} />
+                    <div className="exp-summary">
+                      <p className="exp-company">{card.company}</p>
+                      <p className="exp-review">{card.review}</p>
                     </div>
                   </GlowCard>
                 </div>
@@ -81,7 +83,7 @@ const ExperienceSection = () => {
                     </div>
                     <div className="expText flex xl:gap-20 md:gap-10 gap-5 relative z-20">
                       <div className="timeline-logo">
-                        <img src={card.logoPath} alt="logo" />
+                        <CompanyLogo src={card.logoPath} name={card.company} />
                       </div>
                       <div>
                         <h1 className="font-semibold text-3xl">{card.title}</h1>

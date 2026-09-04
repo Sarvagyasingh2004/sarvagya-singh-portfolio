@@ -6,37 +6,35 @@ import { useFrame } from "@react-three/fiber";
 const Particles = ({ count = 200 }) => {
   const mesh = useRef();
 
-  const particles = useMemo(() => {
-    const temp = [];
+  // The starting positions AND the buffer are built together, once.
+  //
+  // The flicker: `new Float32Array(count * 3)` used to sit in the render body.
+  // Every re-render produced a fresh array holding the ORIGINAL start
+  // positions, R3F saw a new `array` prop on <bufferAttribute>, and the whole
+  // snowfall snapped back to the top — which reads as flickering.
+  const { positions, speeds } = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    const speeds = new Float32Array(count);
     for (let i = 0; i < count; i++) {
-      temp.push({
-        position: [
-          (Math.random() - 0.5) * 10,
-          Math.random() * 10 + 5, // higher starting point
-          (Math.random() - 0.5) * 10,
-        ],
-        speed: 0.005 + Math.random() * 0.001,
-      });
+      positions[i * 3] = (Math.random() - 0.5) * 10;
+      positions[i * 3 + 1] = Math.random() * 10 + 5;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+      speeds[i] = 0.005 + Math.random() * 0.001;
     }
-    return temp;
+    return { positions, speeds };
   }, [count]);
 
   useFrame(() => {
-    const positions = mesh.current.geometry.attributes.position.array;
+    // Guard: the points can unmount mid-frame when the canvas is torn down.
+    if (!mesh.current) return;
+    const attr = mesh.current.geometry.attributes.position;
+    const arr = attr.array;
     for (let i = 0; i < count; i++) {
-      let y = positions[i * 3 + 1];
-      y -= particles[i].speed;
-      if (y < -2) y = Math.random() * 10 + 5;
-      positions[i * 3 + 1] = y;
+      const y = i * 3 + 1;
+      arr[y] -= speeds[i];
+      if (arr[y] < -2) arr[y] = Math.random() * 10 + 5;
     }
-    mesh.current.geometry.attributes.position.needsUpdate = true;
-  });
-
-  const positions = new Float32Array(count * 3);
-  particles.forEach((p, i) => {
-    positions[i * 3] = p.position[0];
-    positions[i * 3 + 1] = p.position[1];
-    positions[i * 3 + 2] = p.position[2];
+    attr.needsUpdate = true;
   });
 
   return (

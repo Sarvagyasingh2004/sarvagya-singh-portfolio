@@ -708,14 +708,6 @@ html[data-theme="light"] .scroll-cue-mouse { border-color: rgba(16, 21, 27, 0.28
    reduced-motion users keep the native cursor and see no layers at all. */
 .cursor-dot,
 .cursor-ring,
-.cursor-bulb {
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  opacity: 0;
-  will-change: transform;
-}
 
 .cursor-dot {
   z-index: 9999;
@@ -743,40 +735,15 @@ html[data-theme="light"] .scroll-cue-mouse { border-color: rgba(16, 21, 27, 0.28
 }
 
 /* The lamp sits behind the content, never over it. */
-.cursor-bulb {
-  z-index: 0;
-  width: 46rem;
-  height: 46rem;
-  margin: -23rem 0 0 -23rem;
-  border-radius: 999px;
-  background: radial-gradient(
-    circle,
-    rgba(131, 156, 181, 0.16) 0%,
-    rgba(93, 74, 168, 0.09) 38%,
-    transparent 68%
-  );
-  transition: opacity 0.6s ease;
-}
-html[data-theme="light"] .cursor-bulb {
-  background: radial-gradient(
-    circle,
-    rgba(61, 95, 128, 0.13) 0%,
-    rgba(93, 74, 168, 0.06) 38%,
-    transparent 68%
-  );
-}
 
 .has-cursor-fx .cursor-dot,
 .has-cursor-fx .cursor-ring { opacity: 1; }
-.has-cursor-fx .cursor-bulb { opacity: 1; }
 
 .has-cursor-fx.cursor-hidden .cursor-dot,
 .has-cursor-fx.cursor-hidden .cursor-ring,
-.has-cursor-fx.cursor-hidden .cursor-bulb { opacity: 0; }
 
 /* Over a canvas the lamp fades right down — an earlier version washed the
    3D scenes out, which is why the effect was pulled the first time. */
-.has-cursor-fx.cursor-over-canvas .cursor-bulb { opacity: 0.22; }
 
 /* Expand over anything interactive. */
 .has-cursor-fx.cursor-active .cursor-ring {
@@ -805,7 +772,6 @@ html[data-theme="light"] .cursor-bulb {
 .has-cursor-fx canvas { cursor: grab; }
 
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
-  .cursor-dot, .cursor-ring, .cursor-bulb { display: none !important; }
   .has-cursor-fx, .has-cursor-fx * { cursor: auto !important; }
 }
 
@@ -1177,6 +1143,7 @@ html[data-theme="light"] {
   background:
     linear-gradient(var(--surface), var(--surface)) padding-box,
     var(--grad-accent) border-box;
+  background-clip: padding-box, border-box;
   box-shadow: 0 6px 22px rgba(139, 92, 246, 0.22);
 }
 
@@ -1336,36 +1303,11 @@ html[data-theme="light"] #hero::before {
   background: #fff;
 }
 .cursor-ring {
-  border: 1.5px solid transparent;
-  background:
-    linear-gradient(transparent, transparent) padding-box,
-    var(--grad-accent) border-box;
 }
 .has-cursor-fx.cursor-active .cursor-ring {
   border-width: 2px;
-  background:
-    linear-gradient(rgba(139, 92, 246, 0.10), rgba(34, 211, 238, 0.10)) padding-box,
-    var(--grad-accent) border-box;
 }
 /* The lamp behind the pointer, on the same ramp. */
-.cursor-bulb {
-  background: radial-gradient(
-    circle,
-    rgba(139, 92, 246, 0.17) 0%,
-    rgba(99, 102, 241, 0.10) 34%,
-    rgba(34, 211, 238, 0.05) 54%,
-    transparent 70%
-  );
-}
-html[data-theme="light"] .cursor-bulb {
-  background: radial-gradient(
-    circle,
-    rgba(124, 58, 237, 0.12) 0%,
-    rgba(99, 102, 241, 0.07) 34%,
-    rgba(8, 145, 178, 0.04) 54%,
-    transparent 70%
-  );
-}
 
 /* ===================== Cards on the accent system ===================== */
 .card-border {
@@ -1454,3 +1396,265 @@ html[data-theme="light"] { --page-bg: #f4f6f8; }
   z-index: 0;
 }
 .avatar img { position: relative; z-index: 1; }
+
+/* ==========================================================================
+   POINTER — dot, hollow ring, ink trail
+   The ring must stay HOLLOW. The previous version used
+   `linear-gradient(...) padding-box, var(--grad-accent) border-box` without a
+   matching `background-clip`, so the gradient painted the whole element and
+   the ring became an opaque disc that hid whatever was under it.
+   Using a border-image keeps the fill genuinely transparent.
+   ========================================================================== */
+:root       { --cursor-trail: 167, 139, 250; }  /* violet-400 on dark  */
+html[data-theme="light"] { --cursor-trail: 109, 40, 217; } /* violet-700 on light */
+
+.cursor-trail {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.has-cursor-fx .cursor-trail { opacity: 1; }
+
+.cursor-dot {
+  z-index: 9999;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 999px;
+  background: rgb(var(--cursor-trail));
+  box-shadow: 0 0 10px rgba(var(--cursor-trail), 0.8);
+  transition: opacity 0.3s ease, width 0.25s ease, height 0.25s ease, margin 0.25s ease;
+}
+
+.cursor-ring {
+  z-index: 9998;
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  border-radius: 999px;
+  /* Transparent centre — nothing behind the pointer is obscured. */
+  background: transparent;
+  border: 1.5px solid rgba(var(--cursor-trail), 0.75);
+  box-shadow: 0 0 16px rgba(var(--cursor-trail), 0.22);
+  transition: opacity 0.3s ease, width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    margin 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.28s ease;
+}
+
+.has-cursor-fx.cursor-active .cursor-ring {
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  border-color: rgba(var(--cursor-trail), 1);
+}
+.has-cursor-fx.cursor-active .cursor-dot {
+  width: 4px;
+  height: 4px;
+  margin: -2px 0 0 -2px;
+}
+
+/* ===================== About + Now ===================== */
+.about-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 3rem;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .about-grid { grid-template-columns: minmax(0, 1fr); gap: 2.25rem; }
+}
+
+.about-copy { display: flex; flex-direction: column; gap: 1.35rem; }
+.about-copy p {
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  /* Keeps running text near 65 characters, which is where prose reads best. */
+  max-width: 62ch;
+}
+.about-copy p:first-child { color: var(--text); font-size: 1.15rem; }
+
+.about-side { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.about-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 0.9rem;
+  background: var(--surface);
+  overflow: hidden;
+}
+.about-facts > div {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--hairline);
+}
+.about-facts > div:last-child { border-bottom: 0; }
+.about-facts dt {
+  font-size: 0.72rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  align-self: center;
+}
+.about-facts dd { margin: 0; color: var(--text); font-size: 0.92rem; line-height: 1.5; }
+
+.now-card {
+  border: 1px solid var(--hairline);
+  border-radius: 0.9rem;
+  padding: 1.25rem;
+  background:
+    linear-gradient(var(--page-bg), var(--page-bg)) padding-box,
+    var(--grad-accent) border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
+}
+.now-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.6rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text);
+  font-weight: 600;
+}
+.now-updated {
+  margin-left: auto;
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  color: var(--muted);
+  font-weight: 400;
+}
+.now-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: #4ade80;
+  box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.65);
+  animation: now-pulse 2.4s ease-out infinite;
+}
+.now-dot:not(.available) { background: var(--muted); animation: none; }
+@keyframes now-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); }
+  70%  { box-shadow: 0 0 0 0.5rem rgba(74, 222, 128, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+.now-headline {
+  margin: 0 0 0.75rem;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+.now-card ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
+.now-card li {
+  position: relative;
+  padding-left: 1rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+.now-card li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 0.3rem;
+  height: 0.3rem;
+  border-radius: 999px;
+  background: var(--accent-1);
+}
+
+/* ===================== Experience card body ===================== */
+.exp-summary { display: flex; flex-direction: column; gap: 0.6rem; }
+.exp-company {
+  font-size: 0.72rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--accent-3);
+  margin: 0;
+}
+.exp-review { margin: 0; color: var(--muted); font-size: 1rem; line-height: 1.65; }
+
+.company-monogram {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--grad-accent);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.timeline-logo img { object-fit: contain; }
+
+/* ===================== CTA on the accent ramp =====================
+   Was a pale blue that matched nothing else on the page. */
+.cta-wrapper .cta-button {
+  background: var(--grad-accent);
+  border: 0;
+}
+.cta-wrapper .cta-button .text,
+.cta-wrapper .cta-button .cta-arrow { color: #fff; }
+.cta-wrapper .cta-button .bg-circle { background: rgba(255, 255, 255, 0.16); }
+.cta-wrapper:hover .cta-button { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.35); }
+
+/* ==========================================================================
+   UI CONSISTENCY PASS
+   ========================================================================== */
+
+/* Anchor targets were landing under the fixed navbar, clipping each section's
+   heading. Every scroll target needs to stop clear of it. */
+section[id],
+#hero, #about, #work, #experience, #skills, #contact, #testimonials {
+  scroll-margin-top: calc(var(--nav-h) + 1.25rem);
+}
+
+/* Section rhythm: the original mixed md:mt-40, my-20 and section-padding, so
+   gaps between sections were uneven. One vertical step everywhere. */
+#about, #work, #experience, #skills, #contact, #testimonials {
+  padding-block: clamp(4rem, 9vw, 7.5rem);
+}
+#experience { margin-top: 0 !important; }
+
+/* Headings shared one size but not one treatment. */
+.hero-badge p,
+.exp-company {
+  font-variant-numeric: tabular-nums;
+}
+h2, h3 { text-wrap: balance; }
+
+/* Long section headings were running the full page width. */
+.flex-center > div > .flex.flex-col.items-center > h2 { max-width: 22ch; }
+
+/* Cards: one radius and one border across abilities, tech, experience and
+   about, instead of three different values. */
+.card-border, .about-facts, .now-card, .tech-card { border-radius: 0.9rem; }
+
+/* The chat FAB overlapped the footer's right column on narrow screens. */
+@media (max-width: 640px) {
+  .footer-container { padding-bottom: 4.5rem; }
+}
+
+/* Focus ring on the accent, matching the rest of the system. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent-1);
+  outline-offset: 3px;
+  border-radius: 4px;
+}

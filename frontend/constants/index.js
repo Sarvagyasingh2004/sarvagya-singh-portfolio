@@ -8,6 +8,10 @@ import techIcons from "./tech-icons.js";
 
 const navLinks = [
   {
+    name: "About",
+    link: "#about",
+  },
+  {
     name: "Work",
     link: "#work",
   },
@@ -106,14 +110,14 @@ const techStackIcons = [
 
 // `review` keeps the original field name, but it is now a first-person
 // statement of ownership rather than an invented third-party quote.
-// REPLACE_ME: imgPath / logoPath are still the template's generic images —
-// swap for real company logos or project screenshots when you have them.
+// REPLACE_ME: drop real square PNGs into public/images/companies/ — see the
+// README there. Until they exist each card shows a lettered monogram instead.
 const expCards = [
   {
     title: "Software Development Engineer (Full-Stack) — Kraftshala",
     date: "March 2026 - September 2026",
-    imgPath: "/images/exp1.png",
-    logoPath: "/images/logo1.png",
+    company: "Kraftshala",
+    logoPath: "/images/companies/kraftshala.png",
     review:
       "Owned features end-to-end across a Node/TypeScript/MySQL backend and a React/Redux internal ops platform. 331 commits across both repositories.",
     responsibilities: [
@@ -128,8 +132,8 @@ const expCards = [
   {
     title: "Full-Stack Developer — BWS",
     date: "July 2025 - December 2025",
-    imgPath: "/images/exp2.png",
-    logoPath: "/images/logo2.png",
+    company: "BWS",
+    logoPath: "/images/companies/bws.png",
     review:
       "Built and deployed the company's website chatbot and lead-capture flow on the MERN stack, then optimized the site's performance and on-page SEO.",
     responsibilities: [
@@ -142,8 +146,8 @@ const expCards = [
   {
     title: "Teaching Assistant — Coding Blocks",
     date: "May 2024 - August 2024",
-    imgPath: "/images/exp3.png",
-    logoPath: "/images/logo3.png",
+    company: "Coding Blocks",
+    logoPath: "/images/companies/coding-blocks.png",
     review:
       "Mentored 100+ students through Java, data structures and algorithms via doubt sessions and one-on-one code review.",
     responsibilities: [
@@ -198,6 +202,37 @@ const projects = [
 
 // REPLACE_ME — all four. Do not deploy with placeholder hrefs.
 // Instagram and Facebook were dropped: they carry no signal for a dev portfolio.
+// About copy. Written from the résumé and verified work only — the incident
+// story is included deliberately: engineers who hide rollbacks read junior.
+const about = {
+  eyebrow: "About",
+  heading: "I build the boring infrastructure that other people build on.",
+  paragraphs: [
+    "I'm a full-stack engineer in Delhi NCR, graduating from MAIT (GGSIPU) in May 2026 with a 9.2 CGPA. Over the last year I shipped 331 commits across two production codebases — a Node/TypeScript/MySQL backend and a React/Redux operations platform used daily by a real team.",
+    "The work I'd most want to walk you through is a self-service alerting platform. Teams define a SQL rule and a threshold through an API; a per-minute cron evaluates them and posts to Google Chat. Because the SQL is user-supplied, it needed a validation layer that permits only SELECT and WITH and blocks DDL and DML. A few months later another engineer shipped two of their own alert features on top of it, without needing me. That's the part I'm proud of — not the feature, the fact that it became something someone else could build on.",
+    "I also broke production once. An SSO restriction I added locked some admins out of password sign-in. I caught it and rolled it back inside 48 hours. I'd rather tell you that up front than have you find it.",
+  ],
+  facts: [
+    { k: "Based in", v: "Delhi NCR, India" },
+    { k: "Education", v: "B.Tech CSE, MAIT — 9.2 CGPA, Top 25 GGSIPU" },
+    { k: "Strongest at", v: "APIs, query optimization, async pipelines" },
+    { k: "Currently", v: "Open to full-time roles" },
+  ],
+};
+
+// Availability. Update the date whenever the status changes — a stale "now"
+// block is worse than none.
+const now = {
+  updated: "September 2026",
+  status: "available",
+  headline: "Looking for a full-time backend or full-stack role.",
+  items: [
+    "Open to Delhi NCR, hybrid, or fully remote — including international remote.",
+    "Available to start immediately; my engagement at Kraftshala concluded in September 2026.",
+    "Currently deepening DSA and system design, and writing up the systems on this site as case studies.",
+  ],
+};
+
 const socialImgs = [
   {
     name: "GitHub",
@@ -214,12 +249,6 @@ const socialImgs = [
     url: "REPLACE_ME",
     imgPath: "/images/x.png",
   },
-];
-
-const expLogos = [
-  { name: "logo1", imgPath: "/images/logo1.png" },
-  { name: "logo2", imgPath: "/images/logo2.png" },
-  { name: "logo3", imgPath: "/images/logo3.png" },
 ];
 
 const techStackImgs = [
@@ -239,10 +268,11 @@ export {
   logoIconsList,
   counterItems,
   expCards,
-  expLogos,
   projects,
   techStackImgs,
   socialImgs,
+  about,
+  now,
   contactEmail,
   techStackIcons,
   navLinks,

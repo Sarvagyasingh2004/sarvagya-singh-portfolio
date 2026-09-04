@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/sections/Hero";
+import About from "@/sections/About";
 import ShowcaseSection from "@/sections/ShowcaseSection";
 import LogoSection from "@/sections/LogoSection";
 import FeatureCards from "@/sections/FeatureCards";
@@ -23,6 +24,7 @@ export default async function Home() {
       <CursorFX />
       <Navbar />
       <Hero />
+      <About />
       <ShowcaseSection />
       <LogoSection />
       <FeatureCards />
