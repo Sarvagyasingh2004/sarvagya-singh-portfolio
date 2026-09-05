@@ -197,15 +197,10 @@ const TechStack = () => {
       // - it enters from the bottom edge either way.
       const rise = (i, el) => Math.max(90, window.innerHeight - restingTop(el));
 
-      // Scrubbed, and therefore REVERSIBLE - it runs backwards as you scroll
-      // back up and forwards again on the way down.
-      //
-      // It used to be forward-only, so it played once and then sat finished.
-      // The pin still reserved its full run of scroll on every later pass
-      // though, which meant scrolling back up through the section, or coming
-      // back down to it, cost several screens of scrolling in which nothing
-      // moved. Tying it to the scrub means the scroll always drives something,
-      // and the section behaves the same way every time you pass it.
+      // Scrubbed, and therefore reversible - it runs backwards as you scroll
+      // back up and forwards again on the way down. The section is pinned for
+      // several screens, so a one-shot version would leave every later pass
+      // scrolling that whole distance with nothing moving.
       tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
@@ -288,8 +283,7 @@ const TechStack = () => {
 
     // Failsafe. The timeline's opening state hides the logos, the hub and the
     // strings, so anything that stops the trigger from driving it would leave
-    // the whole section blank - which is exactly how the contact form ended up
-    // invisible earlier. If the constellation is on screen and nothing has
+    // the section blank. If the constellation is on screen and nothing has
     // moved it, assemble it outright.
     const failsafe = setTimeout(() => {
       if (settled || !tl || !wrapRef.current) return;
@@ -386,10 +380,10 @@ const TechStack = () => {
           The shared WebGL canvas is position: fixed so it can cover the
           viewport and host every icon's <View>. This section is pinned, and
           GSAP pins by transforming the element - which re-anchors any fixed
-          descendant to that transform instead of the viewport. Left inside,
-          the canvas measured 1440x828 at y=7639 rather than filling the
-          screen, and the icons drawn into it went with it. Out here it has no
-          transformed ancestor to be captured by. */}
+          descendant to that transform instead of the viewport. A canvas left
+          inside would size and position itself to the section rather than the
+          screen, taking every icon drawn into it along. Out here there is no
+          transformed ancestor to capture it. */}
       {mounted ? createPortal(<TechCanvas />, document.body) : null}
     </div>
   );

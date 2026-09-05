@@ -556,11 +556,10 @@ html[data-theme="light"] textarea {
 }
 
 html[data-theme="light"] .cta-button .text { color: #ffffff; }
-/* The light-theme background-color flip that used to live here is gone. It was
-   the only reason the rule further down needed !important, and that !important
-   then blocked every state-driven background change on the button - the submit
-   button could never turn green on success. Removing the cause lets the normal
-   cascade decide. */
+/* Deliberately no background-color override for the light theme here: it would
+   need !important to beat the gradient, and that !important then blocks every
+   state-driven background on the button - the submit button could not turn
+   green on success. */
 
 /* Theme transition, skipped for anyone who asked for reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
@@ -2778,11 +2777,9 @@ html[data-theme="light"] .stack-shot-empty span { color: rgba(15, 23, 42, 0.55);
    (6) PRIMARY CTA — the disc converges into the arrow
    `.bg-circle` starts at 120% of the button and, on hover, shrinks to the
    arrow well's exact size and position (both size-10 at right-10), so the
-   surface colour gathers into the arrow.
-   It was switched off for a while because at rest it read as an opaque plate
-   over the gradient, and it was paired with a text colour swap whose 500ms
-   transition looked like a 1-2s lag on the label. Neither was the convergence
-   itself, so that is back - as a faint wash - while the label stays put.
+   surface colour gathers into the arrow. Kept faint at rest so it reads as a
+   sheen on the gradient rather than a plate over it, and the label holds still
+   throughout - a label that slides on hover just looks like a twitch.
    ========================================================================== */
 .cta-button .bg-circle {
   /* Faint enough at rest to read as a sheen on the gradient rather than a
@@ -3278,10 +3275,9 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
   }
 }
 
-/* One size for all three footer marks. The generated SVGs carry no width or
-   height attribute, so left alone they stretched to fill the 46px well while
-   the LinkedIn PNG kept its intrinsic 20px - the row rendered 46/20/46 and
-   read as a mistake. */
+/* One size for all three footer marks. The SVGs carry no width or height
+   attribute, so without this they stretch to fill the well while the LinkedIn
+   PNG holds its intrinsic 20px, and the row comes out uneven. */
 .socials .icon img {
   width: 20px;
   height: 20px;

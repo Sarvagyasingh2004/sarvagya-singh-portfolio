@@ -33,5 +33,20 @@ npm-debug.log*
 frontend/private/*
 !frontend/private/.gitkeep
 
+# TypeScript / Next build artifacts — regenerated on every build.
+# tsconfig.tsbuildinfo is a 636K cache that changes constantly; next-env.d.ts
+# is written by `next dev`. Next's own template ignores both.
+*.tsbuildinfo
+next-env.d.ts
+
+# Vercel CLI local linkage
+.vercel
+
+# Agent tooling — regenerated locally, not part of the project
+AGENTS.md
+CLAUDE.md
+.claude/
+CONTEXT.md
+
 # playwright-cli session artifacts
 .playwright-cli
