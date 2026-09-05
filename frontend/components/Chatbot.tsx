@@ -177,12 +177,6 @@ const Chatbot = () => {
             <span className={`chat-dot ${status}`} />
             sarvagya.ai &mdash; {status}
           </span>
-          <button
-            type="button"
-            className="chat-close"
-            aria-label="Close assistant"
-            onClick={() => { setOpen(false); fabRef.current?.focus(); }}
-          >✕</button>
         </div>
 
         <div className="chat-log" ref={logRef}>

@@ -150,12 +150,6 @@ const TechStack = () => {
     };
   }, [measure]);
 
-  // Progress survives a timeline rebuild. measure() runs again on resize, on
-  // fonts-ready and on the settle timeout, and each run replaces `paths`,
-  // which rebuilds the timeline below. Without this the sequence would snap
-  // back to the start under someone who was halfway through scrolling it.
-  const progressRef = useRef(0);
-
   useEffect(() => {
     if (!paths.length) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -165,7 +159,6 @@ const TechStack = () => {
     if (window.matchMedia("(max-width: 900px)").matches) return;
 
     let tl;
-    let st;
     let settled = false;
 
     const ctx = gsap.context(() => {
@@ -204,10 +197,34 @@ const TechStack = () => {
       // - it enters from the bottom edge either way.
       const rise = (i, el) => Math.max(90, window.innerHeight - restingTop(el));
 
-      // Built paused and driven by hand below, NOT wired to scrub. A scrubbed
-      // timeline plays backwards when you scroll back up; this one has to
-      // stay where it got to.
-      tl = gsap.timeline({ paused: true });
+      // Scrubbed, and therefore REVERSIBLE - it runs backwards as you scroll
+      // back up and forwards again on the way down.
+      //
+      // It used to be forward-only, so it played once and then sat finished.
+      // The pin still reserved its full run of scroll on every later pass
+      // though, which meant scrolling back up through the section, or coming
+      // back down to it, cost several screens of scrolling in which nothing
+      // moved. Tying it to the scrub means the scroll always drives something,
+      // and the section behaves the same way every time you pass it.
+      tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          // Pinned. Each stage takes half a screen of scrolling, and over that
+          // distance an unpinned section would have scrolled away long before
+          // the strings drew - the payoff would happen below the fold. Pinning
+          // holds it under the navbar so the whole thing plays in view.
+          start: () => "top " + navH() + "px",
+          end: () => "+=" + window.innerHeight * 0.5 * STAGES,
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          scrub: 0.8,
+          onUpdate: () => {
+            settled = true;
+          },
+        },
+      });
 
       tl
         // 1. One logo per stage. duration === stagger, so each starts exactly
@@ -216,13 +233,7 @@ const TechStack = () => {
         .fromTo(
           nodes,
           { opacity: 0, y: rise },
-          {
-            opacity: 1,
-            y: 0,
-            duration: unit,
-            ease: "power2.out",
-            stagger: unit,
-          },
+          { opacity: 1, y: 0, duration: unit, ease: "power2.out", stagger: unit },
           0
         )
         // 2. Then the monogram, from the same direction. xPercent is restated
@@ -244,68 +255,21 @@ const TechStack = () => {
           { opacity: 1, duration: unit, ease: "power2.out" },
           (nodes.length + 2) * unit
         );
-
-      // Total duration is exactly 1, so scroll progress maps straight onto it.
-      tl.progress(progressRef.current);
-
-      st = ScrollTrigger.create({
-        trigger: section,
-        // Pinned. Each stage is meant to take half a screen of scrolling, and
-        // over that distance an unpinned section would have scrolled away long
-        // before the strings drew - the payoff would happen below the fold.
-        // Pinning holds it under the navbar so the whole thing plays in view.
-        start: () => "top " + navH() + "px",
-        end: () => "+=" + window.innerHeight * 0.5 * STAGES,
-        pin: true,
-        pinSpacing: true,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        // Forward only. ScrollTrigger reports a progress that falls as well as
-        // rises; taking only the rises is what makes this play once per load -
-        // scroll back up and the constellation stays built rather than
-        // dismantling itself, and it never replays.
-        onUpdate: (self) => {
-          if (self.progress <= progressRef.current) return;
-          progressRef.current = self.progress;
-          settled = true;
-          // Tweened rather than assigned, which is what keeps it smooth: the
-          // timeline eases toward the scroll position instead of snapping to
-          // each wheel tick.
-          gsap.to(tl, {
-            progress: progressRef.current,
-            duration: 0.45,
-            ease: "power2.out",
-            overwrite: true,
-          });
-        },
-        onRefresh: (self) => {
-          // Arriving already past the section - a deep link, or a browser
-          // restoring scroll position - should show it finished, not frozen
-          // at frame one.
-          if (self.progress >= 1 && progressRef.current < 1) {
-            progressRef.current = 1;
-            settled = true;
-            tl.progress(1);
-          }
-        },
-      });
     }, wrapRef);
 
     // Clicking Skills means "show me the skills", not "put me at the start of
     // a four-screen animation". The plain anchor lands on the pin's start, so
-    // it is intercepted: finish the timeline, then scroll to where the pin
-    // releases, which is the assembled section sitting under the navbar.
-    // Refreshing first matters - the anchor was landing back in Work because
-    // the target was computed against positions that pinning had since moved.
+    // it is intercepted and aimed at where the pin releases instead - the
+    // scrub then resolves to the finished state on arrival. Refreshing first
+    // matters: the anchor was landing back in Work because the target was
+    // computed against positions that pinning had since moved.
     const onNavClick = (e) => {
       if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
       const link = e.target instanceof Element ? e.target.closest('a[href="#skills"]') : null;
-      if (!link || !st || !tl) return;
+      const st = tl && tl.scrollTrigger;
+      if (!link || !st) return;
       e.preventDefault();
       ScrollTrigger.refresh();
-      progressRef.current = 1;
-      settled = true;
-      tl.progress(1);
       window.scrollTo({ top: Math.ceil(st.end), behavior: "smooth" });
     };
     document.addEventListener("click", onNavClick);
@@ -331,10 +295,7 @@ const TechStack = () => {
       if (settled || !tl || !wrapRef.current) return;
       const r = wrapRef.current.getBoundingClientRect();
       const onScreen = r.top < window.innerHeight && r.bottom > 0;
-      if (onScreen) {
-        progressRef.current = 1;
-        tl.progress(1);
-      }
+      if (onScreen) tl.progress(1);
     }, 2600);
 
     return () => {
