@@ -1629,6 +1629,18 @@ html[data-theme="light"] { --cursor-trail: 109, 40, 217; } /* violet-700 on ligh
 }
 .cta-wrapper .cta-button .text,
 .cta-button .cta-arrow { color: #fff; }
+/* Pill radius, matching the Resume button's 999px. Three elements, not one:
+   `.cta-button` is the visible surface, and `.cta-wrapper` /
+   `.contact-submit` are the real <button> elements wrapping it - left square
+   they would have kept drawing a rectangular focus ring around a pill.
+   Nothing else changes: the converging disc is clipped by the button's own
+   overflow: hidden, so it simply follows the new radius. */
+.cta-wrapper,
+.cta-button,
+.contact-submit {
+  border-radius: 999px;
+}
+
 .cta-button .bg-circle { background: rgba(255, 255, 255, 0.16); }
 .cta-wrapper:hover .cta-button,
 button:hover > .cta-button { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.35); }
