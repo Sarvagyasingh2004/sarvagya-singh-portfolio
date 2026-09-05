@@ -3278,3 +3278,19 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
     transition: none;
   }
 }
+
+/* One size for all three footer marks. The generated SVGs carry no width or
+   height attribute, so left alone they stretched to fill the 46px well while
+   the LinkedIn PNG kept its intrinsic 20px - the row rendered 46/20/46 and
+   read as a mistake. */
+.socials .icon img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+@media (min-width: 768px) {
+  .socials .icon img {
+    width: 22px;
+    height: 22px;
+  }
+}

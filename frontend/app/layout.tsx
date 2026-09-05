@@ -3,7 +3,6 @@ import { themeInitScript } from "@/lib/theme";
 import { devtoolsVersionShim } from "@/lib/devtoolsShim";
 import "./globals.css";
 
-// REPLACE_ME_DOMAIN — swap for the real domain once purchased.
 const SITE = "https://REPLACE_ME_DOMAIN";
 
 export const metadata: Metadata = {
@@ -61,8 +60,13 @@ const personSchema = {
     "Node.js", "TypeScript", "React", "Express", "MySQL", "PostgreSQL",
     "MongoDB", "Redis", "RabbitMQ", "AWS", "Docker", "Next.js",
   ],
-  // REPLACE_ME — add GitHub / LinkedIn profile URLs.
-  sameAs: [] as string[],
+  // sameAs is what links this site to those profiles as one identity in
+  // Google's knowledge graph - worth keeping in step with the footer links.
+  sameAs: [
+    "https://github.com/Sarvagyasingh2004",
+    "https://www.linkedin.com/in/sarvagya-singh-1015722a4",
+    "https://leetcode.com/u/Sarvagyasingh_2004/",
+  ],
 };
 
 export default function RootLayout({

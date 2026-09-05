@@ -245,21 +245,27 @@ const now = {
   ],
 };
 
+// Footer icons are white on purpose: the light theme inverts them
+// (globals.css). X was dropped rather than shipped as a dead icon.
 const socialImgs = [
   {
     name: "GitHub",
-    url: "REPLACE_ME",
-    imgPath: "/images/logos/git.svg",
+    url: "https://github.com/Sarvagyasingh2004",
+    // The GitHub mark, not git.svg - that was Git's logo, a different thing.
+    imgPath: "/images/logos/github.svg",
   },
   {
     name: "LinkedIn",
-    url: "REPLACE_ME",
+    // The protocol is not optional. Given as "www.linkedin.com/..." an href
+    // resolves as a RELATIVE path and lands on /www.linkedin.com/... on this
+    // site instead of leaving it.
+    url: "https://www.linkedin.com/in/sarvagya-singh-1015722a4",
     imgPath: "/images/linkedin.png",
   },
   {
-    name: "X",
-    url: "REPLACE_ME",
-    imgPath: "/images/x.png",
+    name: "LeetCode",
+    url: "https://leetcode.com/u/Sarvagyasingh_2004/",
+    imgPath: "/images/logos/leetcode.svg",
   },
 ];
 
