@@ -151,15 +151,18 @@ const Chatbot = () => {
           if (!open) track("chat_open");
         }}
       >
-        {open ? (
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
-          </svg>
-        ) : (
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {/* Both icons stay mounted and swap by rotating through each other, the
+            way the theme toggle's sun and moon do. Rendering one OR the other
+            gave the browser nothing to animate between - the icon just
+            changed. */}
+        <span className="chat-fab-track" aria-hidden="true">
+          <svg className="icon-bubble" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8A8.5 8.5 0 0 1 12.5 20a8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5z" />
           </svg>
-        )}
+          <svg className="icon-x" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </span>
         {!open ? <span className="chat-fab-pulse" aria-hidden="true" /> : null}
       </button>
 

@@ -3340,3 +3340,33 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
 @media (prefers-reduced-motion: reduce), (pointer: coarse) {
   .cursor-ripple { display: none !important; }
 }
+
+/* ==========================================================================
+   CHAT FAB ICON SWAP
+   Both icons are mounted at once and rotate through each other, matching the
+   theme toggle's sun/moon. Conditional rendering swapped one for the other,
+   which gives the browser nothing to interpolate — the icon just changed.
+   ========================================================================== */
+.chat-fab-track {
+  position: relative;
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+.chat-fab-track svg {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.32s ease;
+}
+.chat-fab .icon-bubble { transform: rotate(0deg) scale(1); opacity: 1; }
+.chat-fab .icon-x      { transform: rotate(-120deg) scale(0.4); opacity: 0; }
+.chat-fab.is-open .icon-bubble { transform: rotate(120deg) scale(0.4); opacity: 0; }
+.chat-fab.is-open .icon-x      { transform: rotate(0deg) scale(1); opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-fab-track svg { transition: opacity 0.2s ease; }
+  .chat-fab .icon-x,
+  .chat-fab.is-open .icon-bubble { transform: none; }
+  .chat-fab .icon-bubble,
+  .chat-fab.is-open .icon-x { transform: none; }
+}

@@ -3,7 +3,7 @@ import { themeInitScript } from "@/lib/theme";
 import { devtoolsVersionShim } from "@/lib/devtoolsShim";
 import "./globals.css";
 
-const SITE = "https://REPLACE_ME_DOMAIN";
+const SITE = "https://sarvagyasingh.space";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),

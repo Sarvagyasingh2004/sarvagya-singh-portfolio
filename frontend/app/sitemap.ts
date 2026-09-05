@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE = "https://REPLACE_ME_DOMAIN";
+const SITE = "https://sarvagyasingh.space";
 
 // Required with output: "export" — without it Next treats these routes as
 // dynamic and the build fails when collecting page data.
