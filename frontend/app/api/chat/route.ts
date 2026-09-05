@@ -15,7 +15,7 @@ const body = z.object({
   sessionId: z.string().trim().min(1).max(64),
   history: z
     .array(z.object({ role: z.enum(["user", "model"]), text: z.string().max(4000) }))
-    .max(20)
+    .max(30)
     .optional()
     .default([]),
 });
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   }
 
   const ip = clientIp(req);
-  if (!rateLimit(`chat:${ip}`, 15, 60 * 60 * 1000).ok) {
+  if (!rateLimit(`chat:${ip}`, 30, 60 * 60 * 1000).ok) {
     return json({ error: "Too many messages. Please try again later." }, 429);
   }
 
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         const result = await ai.models.generateContentStream({
           model: env.geminiModel,
           contents,
-          config: { systemInstruction, maxOutputTokens: 1024, temperature: 0.3 },
+          config: { systemInstruction, maxOutputTokens: 2048, temperature: 0.3 },
         });
 
         for await (const chunk of result) {
