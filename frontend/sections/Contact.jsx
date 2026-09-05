@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import TitleHeader from "../components/TitleHeader";
 import Reveal from "../components/Reveal";
 import { contactEmail } from "@/constants";
@@ -9,6 +9,7 @@ import dynamic from "next/dynamic";
 // WebGL can't be server-rendered, and a static export prerenders everything —
 // so the canvas loads on the client only.
 const ContactExperience = dynamic(() => import("../components/ContactModels/ContactExperience"), { ssr: false });
+
 const Contact = () => {
   const formRef = useRef(null);
   const [form, setForm] = useState({
@@ -46,7 +47,63 @@ const Contact = () => {
     }
   };
 
+  // The button holds its "sent" face for a beat, then returns to idle so the
+  // form is obviously usable again.
+  useEffect(() => {
+    if (status.state !== "success") return;
+    const t = setTimeout(
+      () => setStatus((s) => (s.state === "success" ? { ...s, state: "idle" } : s)),
+      4200
+    );
+    return () => clearTimeout(t);
+  }, [status.state]);
+
+  // Fields arrive one after another as the section comes up, so the form reads
+  // as being assembled rather than pasted in.
+  //
+  // Deliberately an IntersectionObserver and CSS rather than a scrubbed GSAP
+  // tween. A gsap.from() applies its start state the moment it is created, and
+  // its ScrollTrigger start position is measured on mount - before the WebGL
+  // canvases on this page finish changing the document height. When that
+  // measurement went stale the trigger never fired and the from-state stuck,
+  // leaving every field and the submit button at opacity 0. A contact form
+  // that can be hidden by its own decoration is a bug, so:
+  //   - the markup renders visible; `armed` is what opts into hiding, and it is
+  //     only ever set for an element confirmed to be OFF screen
+  //   - a timeout guarantees the form reveals itself even if nothing else fires
+  const [armed, setArmed] = useState(false);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = formRef.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setShown(true);
+            io.disconnect();
+          } else {
+            // Off screen on first callback: safe to hide and animate in later.
+            setArmed(true);
+          }
+        }
+      },
+      { threshold: 0.12 }
+    );
+    io.observe(el);
+
+    const failsafe = setTimeout(() => setShown(true), 2600);
+    return () => {
+      io.disconnect();
+      clearTimeout(failsafe);
+    };
+  }, []);
+
   const loading = status.state === "sending";
+  const sent = status.state === "success";
 
   return (
     <section id="contact" className="flex-center section-padding">
@@ -61,9 +118,9 @@ const Contact = () => {
               <form
                 ref={formRef}
                 onSubmit={handleSubmit}
-                className="w-full flex flex-col gap-7"
+                className={`w-full flex flex-col gap-7 contact-form${armed ? " is-armed" : ""}${shown ? " is-in" : ""}`}
               >
-                <div>
+                <div className="contact-field" style={{ "--i": 0 }}>
                   <label htmlFor="name">Your name</label>
                   <input
                     type="text"
@@ -72,11 +129,13 @@ const Contact = () => {
                     value={form.name}
                     onChange={handleChange}
                     placeholder="What’s your good name?"
+                    autoComplete="name"
                     required
                   />
+                  <span className="field-line" aria-hidden="true" />
                 </div>
 
-                <div>
+                <div className="contact-field" style={{ "--i": 1 }}>
                   <label htmlFor="email">Your Email</label>
                   <input
                     type="email"
@@ -85,11 +144,13 @@ const Contact = () => {
                     value={form.email}
                     onChange={handleChange}
                     placeholder="What’s your email address?"
+                    autoComplete="email"
                     required
                   />
+                  <span className="field-line" aria-hidden="true" />
                 </div>
 
-                <div>
+                <div className="contact-field" style={{ "--i": 2 }}>
                   <label htmlFor="message">Your Message</label>
                   <textarea
                     id="message"
@@ -100,6 +161,7 @@ const Contact = () => {
                     rows="5"
                     required
                   />
+                  <span className="field-line" aria-hidden="true" />
                 </div>
 
                 {status.message ? (
@@ -110,6 +172,7 @@ const Contact = () => {
                       status.state === "error" ? "form-status is-error" : "form-status is-ok"
                     }
                   >
+                    <span className="form-status-dot" aria-hidden="true" />
                     {status.message}
                   </p>
                 ) : null}
@@ -125,28 +188,53 @@ const Contact = () => {
                   onChange={() => {}}
                 />
 
-                <button type="submit" disabled={loading}>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="contact-submit"
+                  style={{ "--i": 3 }}
+                  data-state={status.state}
+                >
                   <div className="cta-button group">
                     <div className="bg-circle" />
                     <p className="text">
-                      {loading ? "Sending..." : "Send Message"}
+                      {loading ? "Sending..." : sent ? "Message sent" : "Send Message"}
                     </p>
                     <div className="arrow-wrapper">
-                      <svg
-                        className="send-plane"
-                        viewBox="0 0 24 24"
-                        width="17"
-                        height="17"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.9"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M21.5 2.5L11 13" />
-                        <path d="M21.5 2.5l-6.6 19-3.9-8.5L2.5 9.1z" />
-                      </svg>
+                      {loading ? (
+                        <span className="cta-spinner" aria-hidden="true" />
+                      ) : sent ? (
+                        <svg
+                          className="send-check"
+                          viewBox="0 0 24 24"
+                          width="17"
+                          height="17"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="send-plane"
+                          viewBox="0 0 24 24"
+                          width="17"
+                          height="17"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.9"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M21.5 2.5L11 13" />
+                          <path d="M21.5 2.5l-6.6 19-3.9-8.5L2.5 9.1z" />
+                        </svg>
+                      )}
                     </div>
                   </div>
                 </button>

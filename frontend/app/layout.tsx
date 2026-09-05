@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { themeInitScript } from "@/lib/theme";
+import { devtoolsVersionShim } from "@/lib/devtoolsShim";
 import "./globals.css";
 
 // REPLACE_ME_DOMAIN — swap for the real domain once purchased.
@@ -72,6 +73,10 @@ export default function RootLayout({
       <head>
         {/* Applies the stored / time-of-day theme before first paint. */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        {/* Dev only: see lib/devtoolsShim. Must run before r3f registers. */}
+        {process.env.NODE_ENV !== "production" ? (
+          <script dangerouslySetInnerHTML={{ __html: devtoolsVersionShim }} />
+        ) : null}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}

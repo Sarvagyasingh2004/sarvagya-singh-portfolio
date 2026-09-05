@@ -556,7 +556,11 @@ html[data-theme="light"] textarea {
 }
 
 html[data-theme="light"] .cta-button .text { color: #ffffff; }
-html[data-theme="light"] .cta-button { background-color: #10151b; }
+/* The light-theme background-color flip that used to live here is gone. It was
+   the only reason the rule further down needed !important, and that !important
+   then blocked every state-driven background change on the button - the submit
+   button could never turn green on success. Removing the cause lets the normal
+   cascade decide. */
 
 /* Theme transition, skipped for anyone who asked for reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
@@ -2171,8 +2175,11 @@ html[data-theme="light"] .contact-canvas-wrap {
 .constellation {
   position: relative;
   width: 100%;
-  margin-top: clamp(2.5rem, 5vw, 4rem);
-  padding-bottom: clamp(13rem, 22vw, 20rem);
+  margin-top: clamp(1.5rem, 3vh, 2.75rem);
+  /* This is the run the strings travel. Keyed to viewport HEIGHT, not width,
+     because it has to grow on a tall screen and shrink on a short one for the
+     section to keep landing inside a single screen. */
+  padding-bottom: clamp(14rem, 40vh, 28rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2200,8 +2207,8 @@ html[data-theme="light"] .contact-canvas-wrap {
   stroke-width: 1.9;
   opacity: 0.95;
 }
-html[data-theme="light"] .wire-glow { opacity: 0.22; }
-html[data-theme="light"] .wire-core { opacity: 0.8; }
+html[data-theme="light"] .wire-glow { opacity: 0.18; }
+html[data-theme="light"] .wire-core { opacity: 0.72; }
 
 .constellation-arc {
   position: relative;
@@ -2214,18 +2221,24 @@ html[data-theme="light"] .wire-core { opacity: 0.8; }
   width: 100%;
 }
 
+/* Two elements because two things want to own `transform`: the node keeps
+   the hover lift in CSS, the inner wrapper is what the entrance timeline
+   animates. Sharing one element meant GSAP's inline transform beat the
+   stylesheet and the hover lift silently never ran. */
 .constellation-node {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  /* --arc-lift is written per node by JS from its distance to the centre, so
-     the arc holds for 5 logos or 15. */
-  transform: translateY(calc(var(--arc-lift, 0rem) * -1));
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
+.constellation-node-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
 .constellation-node:hover {
-  transform: translateY(calc((var(--arc-lift, 0rem) + 0.8rem) * -1));
+  transform: translateY(-0.8rem);
 }
 
 .constellation-model,
@@ -2256,7 +2269,9 @@ html[data-theme="light"] .wire-core { opacity: 0.8; }
 /* ---- The hub ---- */
 .constellation-core {
   position: absolute;
-  bottom: clamp(2rem, 5vw, 4rem);
+  /* Low in the padding. The hub is absolutely positioned, so dropping it
+     lengthens the run from the logos without making the section any taller. */
+  bottom: clamp(0.75rem, 2vh, 1.75rem);
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
@@ -2326,7 +2341,7 @@ html[data-theme="light"] .core-ring-2 { border-color: rgba(124, 58, 237, 0.15); 
 
 @media (prefers-reduced-motion: reduce) {
   .constellation-wire { stroke-dashoffset: 0 !important; stroke-dasharray: none !important; }
-  .constellation-node { opacity: 1 !important; }
+  .constellation-node-inner { opacity: 1 !important; transform: none !important; }
   .constellation-core { opacity: 1 !important; }
   .core-glow { opacity: 1 !important; animation: none; }
   .core-ring { animation: none; }
@@ -2455,18 +2470,23 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
 #contact .grid-12-cols > div { display: flex; }
 #contact .grid-12-cols > div > * { width: 100%; }
 
-#contact form { height: 100%; }
-#contact .xl\:col-span-5 > div { height: 100%; }
+/* The card sizes to the form, and the canvas column stretches to match it.
+   Forcing height:100% here made the card resolve against the grid row instead,
+   which capped it below the form's natural height and pushed the last field
+   and the button past its bottom edge. */
+#contact .xl\:col-span-5 > div { height: auto; }
 
-/* Capped so the whole section — eyebrow, heading, form and scene — fits one
-   screen instead of the form growing unbounded. */
+/* No max-height here any more. The column was capped at 30rem while the form
+   inside it was not and had overflow: visible, so the submit button hung 49px
+   below the card's rounded bottom edge. The form now sizes to its content and
+   the content itself is tight enough that the section still lands inside one
+   screen; the canvas stretches to match whatever the form resolves to. */
 #contact .grid-12-cols > div,
 .contact-canvas-wrap {
-  max-height: min(30rem, calc(100svh - var(--nav-h) - 13rem));
   min-height: 22rem;
 }
-#contact form { gap: 1.15rem; }
-#contact textarea { min-height: 5.5rem; }
+#contact form { gap: 0.9rem; }
+#contact textarea { min-height: 4.75rem; }
 
 /* ==========================================================================
    FOOTER RULE
@@ -2759,8 +2779,8 @@ html[data-theme="light"] .cta-button .text {
 }
 .cta-button,
 html[data-theme="light"] .cta-button {
-  background: var(--grad-accent) !important;
-  background-color: transparent !important;
+  background: var(--grad-accent);
+  background-color: transparent;
 }
 
 /* ==========================================================================
@@ -2997,13 +3017,213 @@ html[data-theme="light"] .mobile-nav-scrim { background: rgba(15, 23, 42, 0.34);
 
 /* Constellation labels were sitting on the models on small screens. */
 @media (max-width: 900px) {
-  .constellation-node { gap: 0.7rem; }
+  .constellation-node-inner { gap: 0.7rem; }
   .constellation-node p { margin-top: 0.15rem; line-height: 1.35; }
 }
 
 /* The 3D models render slightly beyond their viewport box, so a small gap
    left the label sitting on the logo. */
 @media (max-width: 900px) {
-  .constellation-node { gap: 1.15rem; }
+  .constellation-node-inner { gap: 1.15rem; }
   .constellation-arc { gap: 2rem 0.75rem; }
+}
+
+
+/* ==========================================================================
+   CONTACT FORM — fit and feel
+   Sizing above; everything below is the interaction layer. Focus is signalled
+   three ways at once (label colour, border, and a rule that wipes in under the
+   field) because one 1px border change is easy to miss on a dense form.
+   ========================================================================== */
+#contact .card-border { padding: clamp(1.35rem, 2.2vw, 1.9rem); }
+
+#contact form label {
+  margin-bottom: 0.42rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: color 0.28s ease;
+}
+#contact form input,
+#contact form textarea {
+  display: block;
+  padding: 0.72rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+#contact form textarea { resize: vertical; }
+
+.contact-field { position: relative; }
+.contact-field:focus-within label { color: var(--accent-1); }
+
+#contact form input:focus,
+#contact form textarea:focus {
+  border-color: rgba(139, 92, 246, 0.65);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+}
+/* The default ring is suppressed only because it is replaced by something
+   stronger: an accent border plus a 4px halo plus the rule below. */
+#contact form input:focus-visible,
+#contact form textarea:focus-visible { outline: none; }
+
+/* Wipes in from the left along the bottom edge of the field. */
+.field-line {
+  position: absolute;
+  left: 0.2rem;
+  right: 0.2rem;
+  bottom: 1px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--grad-accent);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+  pointer-events: none;
+}
+.contact-field:focus-within .field-line { opacity: 1; transform: scaleX(1); }
+
+/* :user-invalid, not :invalid - a required field is invalid the moment it
+   renders, and flagging an empty form nobody has touched yet is hostile. */
+#contact form input:user-invalid,
+#contact form textarea:user-invalid { border-color: rgba(248, 113, 113, 0.55); }
+.contact-field:has(:user-invalid) label { color: #f87171; }
+
+/* ---- Submit ---- */
+.contact-submit {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.contact-submit .cta-button {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease, background 0.45s ease;
+}
+.contact-submit:hover .cta-button { transform: translateY(-2px); }
+.contact-submit:active .cta-button {
+  transform: translateY(0) scale(0.988);
+  transition-duration: 0.12s;
+}
+.contact-submit[disabled] { cursor: progress; }
+.contact-submit .send-plane {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.contact-submit:hover .send-plane { transform: translate(2px, -2px) rotate(6deg); }
+
+/* In flight: a light sweeps across the button so it reads as working. */
+.contact-submit[data-state="sending"] .cta-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: cta-sheen 1.15s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes cta-sheen {
+  to { transform: translateX(100%); }
+}
+
+.cta-spinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: cta-spin 0.7s linear infinite;
+}
+@keyframes cta-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Landed: the button turns over to green and the tick snaps in. */
+.contact-submit[data-state="success"] .cta-button {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+}
+.send-check { animation: check-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes check-pop {
+  from { opacity: 0; transform: scale(0.4) rotate(-12deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+/* ---- Status line ---- */
+.form-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  animation: status-in 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes status-in {
+  from { opacity: 0; transform: translateY(6px); }
+}
+.form-status-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: 0.4rem;
+  border-radius: 999px;
+}
+.form-status.is-ok .form-status-dot {
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.16);
+}
+.form-status.is-error .form-status-dot {
+  background: #f87171;
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.16);
+}
+
+/* :not(:focus) matters. Without it this rule - same specificity family,
+   but later in the file - beat the focus rule above and the border never went
+   accent in light theme. It sets the RESTING border only; focus owns its own. */
+html[data-theme="light"] #contact form input:not(:focus),
+html[data-theme="light"] #contact form textarea:not(:focus) {
+  border-color: rgba(15, 23, 42, 0.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-submit .cta-button,
+  .contact-submit:hover .cta-button,
+  .contact-submit:active .cta-button { transform: none; }
+  .contact-submit .send-plane,
+  .contact-submit:hover .send-plane { transform: none; }
+  .contact-submit[data-state="sending"] .cta-button::after { animation: none; }
+  .cta-spinner { animation-duration: 1.6s; }
+  .send-check, .form-status { animation: none; }
+  .field-line { transition: opacity 0.2s ease; transform: scaleX(1); }
+}
+
+/* Staggered reveal. `is-armed` is only ever applied to a form confirmed to be
+   off screen, so the default render is visible - decoration can never be the
+   reason the contact form isn't there. */
+.contact-form.is-armed .contact-field,
+.contact-form.is-armed .contact-submit {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.contact-form.is-armed.is-in .contact-field,
+.contact-form.is-armed.is-in .contact-submit {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 75ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-form.is-armed .contact-field,
+  .contact-form.is-armed .contact-submit {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
