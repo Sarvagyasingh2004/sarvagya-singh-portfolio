@@ -2794,6 +2794,27 @@ html[data-theme="light"] .cta-button .text {
   /* No transition at all: there is nothing left to transition to. */
   transition: none !important;
   text-shadow: none;
+  /* The label held a `group-hover:-translate-x-5` from the template, which
+     slid it 20px left on hover and opened up the gap to the arrow. The colour
+     swap it was paired with is gone, so the shift has nothing left to make
+     room for - it just made the button look like it twitched.
+     It has to be `translate`, not `transform`: Tailwind v4 compiles
+     translate-x-* to the standalone `translate` property, so a
+     `transform: none` here is a no-op and the label kept moving
+     (measured translate 0px -> -20px on hover with transform reading none).
+     Both are pinned so nothing can shift it. */
+}
+
+/* Kept in a rule of its own, deliberately. Written alongside a `transform`
+   declaration, Lightning CSS folds the two together - it rewrote
+   `transform: none` to translate3d(0,0,0) and dropped `translate: none`
+   as redundant, which it is not: `translate` is a separate property and
+   Tailwind's hover rule sets it. Overriding Tailwind's own custom property is
+   also sturdier than fighting the compiled declaration, since that is what
+   `translate: var(--tw-translate-x) var(--tw-translate-y)` reads from. */
+.cta-button .text {
+  --tw-translate-x: 0px !important;
+  --tw-translate-y: 0px !important;
 }
 .cta-button,
 html[data-theme="light"] .cta-button {
