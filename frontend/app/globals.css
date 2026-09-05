@@ -1396,8 +1396,8 @@ html[data-theme="light"] { --page-bg: #f4f6f8; }
 
 /* ===================== Project screenshot placeholders =====================
    The tutorial's screenshots were still in place — a car-rental app captioned
-   "Six Independent Microservices", and one frame containing the literal string
-   adrian@jsmastery.pro. Showing someone else's product as your own is exactly
+   "Six Independent Microservices", and one frame containing the tutorial
+   author's email address. Showing someone else's product as your own is exactly
    the problem this whole project set out to remove, so they are deleted rather
    than left in until real captures exist. */
 .shot-placeholder {
