@@ -2764,13 +2764,30 @@ html[data-theme="light"] .stack-shot-empty span { color: rgba(15, 23, 42, 0.55);
 }
 
 /* ==========================================================================
-   (6) PRIMARY CTA — no plate behind the label, no colour flip
-   `.bg-circle` sat at 120% of the button, so at rest it was a pale disc
-   covering the whole surface. Its 500ms transition plus a text colour swap is
-   what read as a 1-2s lag before the label settled. The button already
-   carries the accent gradient, so the disc has no job.
+   (6) PRIMARY CTA — the disc converges into the arrow
+   `.bg-circle` starts at 120% of the button and, on hover, shrinks to the
+   arrow well's exact size and position (both size-10 at right-10), so the
+   surface colour gathers into the arrow.
+   It was switched off for a while because at rest it read as an opaque plate
+   over the gradient, and it was paired with a text colour swap whose 500ms
+   transition looked like a 1-2s lag on the label. Neither was the convergence
+   itself, so that is back - as a faint wash - while the label stays put.
    ========================================================================== */
-.cta-button .bg-circle { display: none !important; }
+.cta-button .bg-circle {
+  /* Faint enough at rest to read as a sheen on the gradient rather than a
+     plate over it. Gathering into the arrow then brightens the well and lets
+     the gradient come back to full saturation. */
+  background: rgba(255, 255, 255, 0.1);
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    right 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.45s ease;
+}
+.cta-button:hover .bg-circle { background: rgba(255, 255, 255, 0.34); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-button .bg-circle { transition: background-color 0.2s ease; }
+}
 .cta-button .text,
 html[data-theme="light"] .cta-button .text {
   color: #fff !important;

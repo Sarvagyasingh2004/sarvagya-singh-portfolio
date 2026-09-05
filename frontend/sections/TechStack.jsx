@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import TitleHeader from "../components/TitleHeader";
@@ -31,6 +32,17 @@ const WIRE_START_GAP = 14;
  * into. offsetLeft/offsetTop report layout position only, so the measurement
  * is the same whatever frame it happens to run on.
  */
+const documentTop = (el) => {
+  let y = 0;
+  let n = el;
+  let guard = 0;
+  while (n && guard++ < 24) {
+    y += n.offsetTop;
+    n = n.offsetParent;
+  }
+  return y;
+};
+
 const offsetWithin = (el, ancestor) => {
   let x = 0;
   let y = 0;
@@ -66,6 +78,10 @@ const TechStack = () => {
   // Where the wire gradient starts and ends, so the fade runs along the
   // strings themselves rather than across the whole section.
   const [grad, setGrad] = useState({ y1: 0, y2: 1 });
+  // Gates the portal below: createPortal needs document.body, so it can only
+  // run after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const measure = useCallback(() => {
     const wrap = wrapRef.current;
@@ -149,6 +165,7 @@ const TechStack = () => {
     if (window.matchMedia("(max-width: 900px)").matches) return;
 
     let tl;
+    let st;
     let settled = false;
 
     const ctx = gsap.context(() => {
@@ -157,6 +174,7 @@ const TechStack = () => {
       // transform in CSS (hover lift); an inline transform from GSAP on the
       // same element wins over the stylesheet and silently kills it.
       const nodes = gsap.utils.toArray(".constellation-node-inner");
+      const section = sectionRef.current;
 
       // GSAP owns dasharray as well as offset. Leaving dasharray to CSS while
       // animating offset made the draw resolve in one frame instead of
@@ -166,11 +184,25 @@ const TechStack = () => {
         gsap.set(wire, { strokeDasharray: len, strokeDashoffset: len });
       });
 
-      // How far below its resting place a piece starts. Keyed to viewport
-      // height rather than a fixed pixel count, so the rise reads the same on
-      // a laptop and a tall monitor. Function-based, so a rebuild after a
-      // resize picks up the new height.
-      const rise = () => window.innerHeight * 0.55;
+      const navH = () => {
+        const nav = document.querySelector(".navbar");
+        return nav ? nav.getBoundingClientRect().height : 72;
+      };
+
+      // One stage per logo, then one each for the hub, the strings and the
+      // glow. Derived from the node count, so adding Express or RabbitMQ
+      // lengthens the run on its own rather than needing the numbers retuned.
+      const STAGES = nodes.length + 3;
+      const unit = 1 / STAGES;
+
+      // Where a piece sits once it has landed, in viewport coordinates. The
+      // section is pinned at the navbar, so that is a layout sum rather than a
+      // rect - and layout is the only thing here a transform cannot corrupt.
+      const restingTop = (el) => navH() + (documentTop(el) - documentTop(section));
+      // Each piece starts at the bottom edge of the screen and rises to its
+      // place. The hub sits lower than the logos, so it naturally travels less
+      // - it enters from the bottom edge either way.
+      const rise = (i, el) => Math.max(90, window.innerHeight - restingTop(el));
 
       // Built paused and driven by hand below, NOT wired to scrub. A scrubbed
       // timeline plays backwards when you scroll back up; this one has to
@@ -178,12 +210,20 @@ const TechStack = () => {
       tl = gsap.timeline({ paused: true });
 
       tl
-        // 1. Logos rise from below the fold, one after another.
+        // 1. One logo per stage. duration === stagger, so each starts exactly
+        //    as the one before it lands: continuous, with no gap and no
+        //    overlap.
         .fromTo(
           nodes,
           { opacity: 0, y: rise },
-          { opacity: 1, y: 0, duration: 0.22, ease: "power2.out", stagger: 0.045 },
-          0.2
+          {
+            opacity: 1,
+            y: 0,
+            duration: unit,
+            ease: "power2.out",
+            stagger: unit,
+          },
+          0
         )
         // 2. Then the monogram, from the same direction. xPercent is restated
         //    because the hub is centred with translateX(-50%) in CSS, and
@@ -191,39 +231,46 @@ const TechStack = () => {
         .fromTo(
           coreRef.current,
           { opacity: 0, y: rise, scale: 0.82, xPercent: -50 },
-          { opacity: 1, y: 0, scale: 1, xPercent: -50, duration: 0.16, ease: "power2.out" },
-          0.58
+          { opacity: 1, y: 0, scale: 1, xPercent: -50, duration: unit, ease: "power2.out" },
+          nodes.length * unit
         )
         // 3. Only once there is something at both ends do the strings appear.
         //    All together, out from under the captions and down into the hub.
-        .to(wires, { strokeDashoffset: 0, duration: 0.2, ease: "power1.inOut" }, 0.72)
-        // 4. The strings land, and the monogram lights.
+        .to(wires, { strokeDashoffset: 0, duration: unit, ease: "power1.inOut" }, (nodes.length + 1) * unit)
+        // 4. The strings have landed, so the monogram lights.
         .fromTo(
           ".core-glow",
           { opacity: 0 },
-          { opacity: 1, duration: 0.12, ease: "power2.out" },
-          0.88
+          { opacity: 1, duration: unit, ease: "power2.out" },
+          (nodes.length + 2) * unit
         );
 
       // Total duration is exactly 1, so scroll progress maps straight onto it.
       tl.progress(progressRef.current);
 
-      // Forward only. ScrollTrigger reports a progress that falls as well as
-      // rises; taking only the rises is what makes this play once per load -
-      // scroll back up and the constellation stays built rather than
-      // dismantling itself, and it never replays.
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        // Ends at 12% of the viewport. A navbar jump parks the section top at
-        // ~8%, past that point, so clicking Skills still lands on a finished,
-        // lit constellation instead of a half-assembled one.
-        start: "top 95%",
-        end: "top 12%",
+      st = ScrollTrigger.create({
+        trigger: section,
+        // Pinned. Each stage is meant to take half a screen of scrolling, and
+        // over that distance an unpinned section would have scrolled away long
+        // before the strings drew - the payoff would happen below the fold.
+        // Pinning holds it under the navbar so the whole thing plays in view.
+        start: () => "top " + navH() + "px",
+        end: () => "+=" + window.innerHeight * 0.5 * STAGES,
+        pin: true,
+        pinSpacing: true,
+        anticipatePin: 1,
         invalidateOnRefresh: true,
+        // Forward only. ScrollTrigger reports a progress that falls as well as
+        // rises; taking only the rises is what makes this play once per load -
+        // scroll back up and the constellation stays built rather than
+        // dismantling itself, and it never replays.
         onUpdate: (self) => {
           if (self.progress <= progressRef.current) return;
           progressRef.current = self.progress;
           settled = true;
+          // Tweened rather than assigned, which is what keeps it smooth: the
+          // timeline eases toward the scroll position instead of snapping to
+          // each wheel tick.
           gsap.to(tl, {
             progress: progressRef.current,
             duration: 0.45,
@@ -244,6 +291,25 @@ const TechStack = () => {
       });
     }, wrapRef);
 
+    // Clicking Skills means "show me the skills", not "put me at the start of
+    // a four-screen animation". The plain anchor lands on the pin's start, so
+    // it is intercepted: finish the timeline, then scroll to where the pin
+    // releases, which is the assembled section sitting under the navbar.
+    // Refreshing first matters - the anchor was landing back in Work because
+    // the target was computed against positions that pinning had since moved.
+    const onNavClick = (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      const link = e.target instanceof Element ? e.target.closest('a[href="#skills"]') : null;
+      if (!link || !st || !tl) return;
+      e.preventDefault();
+      ScrollTrigger.refresh();
+      progressRef.current = 1;
+      settled = true;
+      tl.progress(1);
+      window.scrollTo({ top: Math.ceil(st.end), behavior: "smooth" });
+    };
+    document.addEventListener("click", onNavClick);
+
     // A ScrollTrigger records its start/end scroll positions when it is
     // created. This page keeps growing after that - three WebGL canvases and
     // the images mount, and the document height moves under it. When those
@@ -254,7 +320,7 @@ const TechStack = () => {
     const refresh = () => ScrollTrigger.refresh();
     if (document.readyState === "complete") requestAnimationFrame(refresh);
     else window.addEventListener("load", refresh, { once: true });
-    const settle = setTimeout(refresh, 1200);
+    const settleTimer = setTimeout(refresh, 1200);
 
     // Failsafe. The timeline's opening state hides the logos, the hub and the
     // strings, so anything that stops the trigger from driving it would leave
@@ -272,8 +338,9 @@ const TechStack = () => {
     }, 2600);
 
     return () => {
-      clearTimeout(settle);
+      clearTimeout(settleTimer);
       clearTimeout(failsafe);
+      document.removeEventListener("click", onNavClick);
       window.removeEventListener("load", refresh);
       ctx.revert();
     };
@@ -352,8 +419,17 @@ const TechStack = () => {
           </div>
         </div>
 
-        <TechCanvas />
       </div>
+
+      {/* Portalled to <body>, deliberately.
+          The shared WebGL canvas is position: fixed so it can cover the
+          viewport and host every icon's <View>. This section is pinned, and
+          GSAP pins by transforming the element - which re-anchors any fixed
+          descendant to that transform instead of the viewport. Left inside,
+          the canvas measured 1440x828 at y=7639 rather than filling the
+          screen, and the icons drawn into it went with it. Out here it has no
+          transformed ancestor to be captured by. */}
+      {mounted ? createPortal(<TechCanvas />, document.body) : null}
     </div>
   );
 };
