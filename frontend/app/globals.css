@@ -2269,9 +2269,10 @@ html[data-theme="light"] .wire-core { opacity: 0.72; }
 /* ---- The hub ---- */
 .constellation-core {
   position: absolute;
-  /* Low in the padding. The hub is absolutely positioned, so dropping it
-     lengthens the run from the logos without making the section any taller. */
-  bottom: clamp(0.75rem, 2vh, 1.75rem);
+  /* Low in the padding, and ~40px lower again since the rise animation went
+     in. The hub is absolutely positioned, so dropping it lengthens the run
+     from the logos without making the section any taller. */
+  bottom: clamp(-1.5rem, -2.45vh, -1rem);
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;

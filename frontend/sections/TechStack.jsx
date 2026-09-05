@@ -75,13 +75,20 @@ const TechStack = () => {
     const w = wrap.getBoundingClientRect();
     setBox({ w: wrap.offsetWidth, h: wrap.offsetHeight });
 
-    // The hub is scaled by the timeline, and scaling about the centre leaves
-    // the centre where it is - so a rect is safe here, and it also survives
-    // the mobile layout where the hub sits in normal flow instead of being
-    // absolutely positioned and translated.
+    // The hub's rect, corrected for whatever the timeline is currently doing
+    // to it.
+    //
+    // Scale is fine to read straight off the rect: scaling happens about the
+    // centre, so the centre does not move. Translation is NOT - and the
+    // entrance now lifts the hub in from below the fold. Measuring during that
+    // rise (a resize, or fonts settling, mid-animation) aimed every string at
+    // a point ~55vh under the monogram, and they visibly shot past it off the
+    // bottom of the screen. Subtracting GSAP's own y puts the target back on
+    // the hub's resting centre whenever the measurement happens to run.
     const c = core.getBoundingClientRect();
+    const coreY = Number(gsap.getProperty(core, "y")) || 0;
     const cx = c.left + c.width / 2 - w.left;
-    const cy = c.top + c.height / 2 - w.top;
+    const cy = c.top + c.height / 2 - w.top - coreY;
 
     const nodes = nodeRefs.current.filter(Boolean);
     let firstStartY = null;
@@ -127,6 +134,12 @@ const TechStack = () => {
     };
   }, [measure]);
 
+  // Progress survives a timeline rebuild. measure() runs again on resize, on
+  // fonts-ready and on the settle timeout, and each run replaces `paths`,
+  // which rebuilds the timeline below. Without this the sequence would snap
+  // back to the start under someone who was halfway through scrolling it.
+  const progressRef = useRef(0);
+
   useEffect(() => {
     if (!paths.length) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -134,6 +147,9 @@ const TechStack = () => {
     // and a scrubbed timeline fights touch scroll momentum. Mobile gets the
     // finished constellation rather than a half-assembled one.
     if (window.matchMedia("(max-width: 900px)").matches) return;
+
+    let tl;
+    let settled = false;
 
     const ctx = gsap.context(() => {
       const wires = gsap.utils.toArray(".constellation-wire");
@@ -149,36 +165,83 @@ const TechStack = () => {
         const len = wire.getTotalLength();
         gsap.set(wire, { strokeDasharray: len, strokeDashoffset: len });
       });
-      gsap.set(nodes, { opacity: 0, y: -22 });
-      gsap.set(coreRef.current, { opacity: 0, scale: 0.7 });
-      gsap.set(".core-glow", { opacity: 0 });
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          // The section, not the constellation inside it. Jumping here from
-          // the navbar parks the section top just under the navbar - about 8%
-          // of the viewport - so ending at 30% guarantees the timeline has
-          // finished by the time you land, and the monogram is lit. Ending
-          // relative to the inner wrapper left it stranded mid-assembly until
-          // you scrolled further.
-          trigger: sectionRef.current,
-          start: "top 85%",
-          end: "top 30%",
-          scrub: 0.7,
-          invalidateOnRefresh: true,
-        },
-      });
+      // How far below its resting place a piece starts. Keyed to viewport
+      // height rather than a fixed pixel count, so the rise reads the same on
+      // a laptop and a tall monitor. Function-based, so a rebuild after a
+      // resize picks up the new height.
+      const rise = () => window.innerHeight * 0.55;
+
+      // Built paused and driven by hand below, NOT wired to scrub. A scrubbed
+      // timeline plays backwards when you scroll back up; this one has to
+      // stay where it got to.
+      tl = gsap.timeline({ paused: true });
 
       tl
-        // Logos arrive first: the strings have to come FROM something.
-        .to(nodes, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.06 }, 0)
-        // All strings grow together, out from under the captions and down
-        // toward the monogram. Offset runs to 0 from the path's start point,
-        // which is the node end, so the draw travels logo -> hub.
-        .to(wires, { strokeDashoffset: 0, duration: 1.6, ease: "power1.inOut" }, 0.3)
-        // The hub is dark until the strings reach it, then lights up.
-        .to(coreRef.current, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, 1.35)
-        .to(".core-glow", { opacity: 1, duration: 0.7, ease: "power2.out" }, 1.6);
+        // 1. Logos rise from below the fold, one after another.
+        .fromTo(
+          nodes,
+          { opacity: 0, y: rise },
+          { opacity: 1, y: 0, duration: 0.22, ease: "power2.out", stagger: 0.045 },
+          0.2
+        )
+        // 2. Then the monogram, from the same direction. xPercent is restated
+        //    because the hub is centred with translateX(-50%) in CSS, and
+        //    handing GSAP a y without it would drop the centring.
+        .fromTo(
+          coreRef.current,
+          { opacity: 0, y: rise, scale: 0.82, xPercent: -50 },
+          { opacity: 1, y: 0, scale: 1, xPercent: -50, duration: 0.16, ease: "power2.out" },
+          0.58
+        )
+        // 3. Only once there is something at both ends do the strings appear.
+        //    All together, out from under the captions and down into the hub.
+        .to(wires, { strokeDashoffset: 0, duration: 0.2, ease: "power1.inOut" }, 0.72)
+        // 4. The strings land, and the monogram lights.
+        .fromTo(
+          ".core-glow",
+          { opacity: 0 },
+          { opacity: 1, duration: 0.12, ease: "power2.out" },
+          0.88
+        );
+
+      // Total duration is exactly 1, so scroll progress maps straight onto it.
+      tl.progress(progressRef.current);
+
+      // Forward only. ScrollTrigger reports a progress that falls as well as
+      // rises; taking only the rises is what makes this play once per load -
+      // scroll back up and the constellation stays built rather than
+      // dismantling itself, and it never replays.
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        // Ends at 12% of the viewport. A navbar jump parks the section top at
+        // ~8%, past that point, so clicking Skills still lands on a finished,
+        // lit constellation instead of a half-assembled one.
+        start: "top 95%",
+        end: "top 12%",
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          if (self.progress <= progressRef.current) return;
+          progressRef.current = self.progress;
+          settled = true;
+          gsap.to(tl, {
+            progress: progressRef.current,
+            duration: 0.45,
+            ease: "power2.out",
+            overwrite: true,
+          });
+        },
+        onRefresh: (self) => {
+          // Arriving already past the section - a deep link, or a browser
+          // restoring scroll position - should show it finished, not frozen
+          // at frame one.
+          if (self.progress >= 1 && progressRef.current < 1) {
+            progressRef.current = 1;
+            settled = true;
+            tl.progress(1);
+          }
+        },
+      });
     }, wrapRef);
 
     // A ScrollTrigger records its start/end scroll positions when it is
@@ -193,8 +256,24 @@ const TechStack = () => {
     else window.addEventListener("load", refresh, { once: true });
     const settle = setTimeout(refresh, 1200);
 
+    // Failsafe. The timeline's opening state hides the logos, the hub and the
+    // strings, so anything that stops the trigger from driving it would leave
+    // the whole section blank - which is exactly how the contact form ended up
+    // invisible earlier. If the constellation is on screen and nothing has
+    // moved it, assemble it outright.
+    const failsafe = setTimeout(() => {
+      if (settled || !tl || !wrapRef.current) return;
+      const r = wrapRef.current.getBoundingClientRect();
+      const onScreen = r.top < window.innerHeight && r.bottom > 0;
+      if (onScreen) {
+        progressRef.current = 1;
+        tl.progress(1);
+      }
+    }, 2600);
+
     return () => {
       clearTimeout(settle);
+      clearTimeout(failsafe);
       window.removeEventListener("load", refresh);
       ctx.revert();
     };
