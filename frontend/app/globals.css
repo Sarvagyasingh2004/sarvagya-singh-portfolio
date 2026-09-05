@@ -628,7 +628,7 @@ html[data-theme="light"] .resume-btn {
 html[data-theme="light"] .resume-btn:hover { background: rgba(16, 21, 27, 0.05); }
 
 @media (max-width: 900px) {
-  .resume-btn span { display: none; }
+  .resume-btn .resume-label { display: none; }
   .resume-btn { padding: 0.5rem 0.6rem; }
 }
 
@@ -1198,7 +1198,7 @@ html[data-theme="light"] {
   50%      { transform: translateY(3px); }
 }
 @media (max-width: 900px) {
-  .resume-btn span:last-child { display: none; }
+  .resume-btn .resume-label { display: none; }
   .resume-btn { width: 2.85rem; padding: 0; }
 }
 
@@ -2779,4 +2779,231 @@ html[data-theme="light"] .cta-button {
 
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ==========================================================================
+   MOBILE
+   nav.desktop is hidden below 1024px, so the burger and drawer are the only
+   navigation a phone gets. Everything here is additive to the desktop rules.
+   ========================================================================== */
+
+.nav-burger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.85rem;
+  height: 2.85rem;
+  flex: none;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface);
+  cursor: pointer;
+}
+@media (max-width: 1023px) {
+  .nav-burger { display: inline-flex; }
+}
+
+.burger-bars { display: grid; gap: 4px; width: 17px; }
+.burger-bars i {
+  display: block;
+  height: 1.8px;
+  width: 100%;
+  border-radius: 999px;
+  background: var(--text);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+.burger-bars.is-open i:nth-child(1) { transform: translateY(5.8px) rotate(45deg); }
+.burger-bars.is-open i:nth-child(2) { opacity: 0; }
+.burger-bars.is-open i:nth-child(3) { transform: translateY(-5.8px) rotate(-45deg); }
+
+.mobile-nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 190;
+  border: 0;
+  padding: 0;
+  background: rgba(4, 4, 10, 0.62);
+  backdrop-filter: blur(3px);
+  cursor: pointer;
+}
+html[data-theme="light"] .mobile-nav-scrim { background: rgba(15, 23, 42, 0.34); }
+
+.mobile-nav {
+  position: fixed;
+  top: var(--nav-h);
+  right: 0;
+  left: 0;
+  z-index: 200;
+  padding: 1rem 1.25rem 1.6rem;
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--nav-border);
+  backdrop-filter: blur(18px) saturate(150%);
+  animation: drawer-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes drawer-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: none; }
+}
+.mobile-nav ul { display: flex; flex-direction: column; gap: 0.15rem; list-style: none; margin: 0; padding: 0; }
+.mobile-nav a {
+  display: flex;
+  align-items: center;
+  /* 48px: comfortably past the 44px tap-target guideline. */
+  min-height: 48px;
+  padding: 0 0.9rem;
+  border-radius: 0.7rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+}
+.mobile-nav a:active { background: var(--surface-hover); }
+@media (min-width: 1024px) {
+  .mobile-nav, .mobile-nav-scrim { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-nav { animation: none; }
+  .burger-bars i { transition: none; }
+}
+
+/* ---- Tap targets ---- */
+@media (max-width: 1023px) {
+  .brand { min-height: 44px; }
+  .footer a, .socials .icon {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* ---- Constellation on small screens ----
+   The arc wraps into a grid, which pushed the absolutely-positioned hub out
+   of view entirely. Below 900px the hub joins the normal flow underneath the
+   grid instead, and the wires are measured against its real position. */
+@media (max-width: 900px) {
+  .constellation { padding-bottom: 0; }
+  .constellation-arc {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+    gap: 1.5rem 0.75rem;
+    max-width: 26rem;
+    margin-inline: auto;
+  }
+  .constellation-node { transform: none !important; }
+  .constellation-model,
+  .constellation-model .tech-view {
+    width: clamp(4.5rem, 20vw, 6rem);
+    height: clamp(4.5rem, 20vw, 6rem);
+  }
+  .constellation-node p { font-size: 0.7rem; max-width: 6.5rem; }
+  .constellation-core {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    margin: clamp(3rem, 12vw, 5rem) auto 0;
+    width: clamp(7rem, 30vw, 10rem);
+    height: clamp(7rem, 30vw, 10rem);
+  }
+}
+
+/* ---- Project cards ---- */
+@media (max-width: 768px) {
+  .stack-slot { min-height: 0; }
+  .stack-card { max-width: 100%; border-radius: 1rem; }
+  .stack-shot { height: clamp(8rem, 34vw, 12rem); }
+  .stack-body { grid-template-columns: 1fr; gap: 1.25rem; padding: 1.25rem; }
+  .stack-section { padding-inline: 1.1rem; }
+  .stack-head h2 { font-size: clamp(1.4rem, 6.5vw, 1.9rem); }
+}
+
+/* ---- Sections: let them breathe rather than forcing one screen ---- */
+@media (max-width: 900px) {
+  #about, #work, #skills, #contact { min-height: 0; display: block; }
+  #about, #work, #experience, #skills, #contact {
+    padding-block: clamp(2.75rem, 9vw, 4rem);
+  }
+  .about-grid { grid-template-columns: 1fr; gap: 1.75rem; }
+  .about-copy p { font-size: 1rem; }
+  .about-facts > div { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.75rem; }
+}
+
+/* ---- Contact ---- */
+@media (max-width: 900px) {
+  #contact .grid-12-cols { gap: 1.25rem; }
+  #contact .grid-12-cols > div,
+  .contact-canvas-wrap { max-height: none; min-height: 16rem; }
+  #contact form { gap: 1rem; }
+  #contact textarea { min-height: 6rem; }
+}
+
+/* ---- Hero ---- */
+@media (max-width: 768px) {
+  .hero-layout { padding-top: calc(var(--nav-h) + 0.5rem); }
+  .hero-text h1 { font-size: clamp(1.9rem, 8.5vw, 2.6rem); }
+  #hero header p { font-size: 0.95rem; }
+  .cta-wrapper { width: min(100%, 17rem); }
+}
+
+/* ---- Assistant ---- */
+@media (max-width: 480px) {
+  .chat-fab { right: 1rem; bottom: 1rem; width: 2.9rem; height: 2.9rem; }
+  .chat-shell { right: 0.65rem; left: 0.65rem; bottom: 4.7rem; height: min(30rem, calc(100svh - 8rem)); }
+}
+
+/* ---- Marquee ---- */
+@media (max-width: 640px) {
+  .marquee-item { width: 5.5rem; margin-right: 1.6rem; }
+  .marquee-item img { width: 1.7rem; height: 1.7rem; }
+  .marquee-label { font-size: 0.65rem; }
+  .gradient-edge { width: 3.5rem; }
+}
+
+/* ---- Experience ---- */
+@media (max-width: 900px) {
+  .exp-card-wrapper { gap: 1.25rem; }
+  .expText { gap: 1rem !important; }
+  .expText h3 { font-size: clamp(1.15rem, 5vw, 1.5rem); }
+  .expText li { font-size: 0.92rem !important; }
+}
+
+/* The nav link was inline, so the tap target measured only the text box
+   (39x19) even though the <li> around it is padded. Making the anchor fill
+   its parent hands the whole padded area to the pointer. */
+.navbar nav.desktop ul li { display: flex; }
+.navbar nav.desktop ul li a {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 34px;
+}
+
+/* Footer links measured 206x24. Enough vertical room to hit reliably. */
+.footer a { display: inline-flex; align-items: center; min-height: 44px; }
+.socials .icon { min-width: 44px; min-height: 44px; justify-content: center; }
+
+/* Padding lives on the anchor, not the <li>, so the tap target IS the pill.
+   With padding on the parent, `width: 100%` on an inline-level anchor only
+   covers the content box and the padded ring stayed untappable. */
+.navbar nav.desktop ul li { padding: 0; }
+.navbar nav.desktop ul li a {
+  padding: 0.55rem 1rem 0.72rem;
+  min-height: 44px;
+  border-radius: 999px;
+}
+.navbar nav.desktop ul li:hover { background: transparent; }
+.navbar nav.desktop ul li a:hover { background: var(--surface-hover); }
+.navbar nav.desktop ul li .underline { bottom: 0.34rem; left: 1rem; }
+.navbar nav.desktop ul li:hover .underline { width: calc(100% - 2rem); left: 1rem; }
+
+/* Constellation labels were sitting on the models on small screens. */
+@media (max-width: 900px) {
+  .constellation-node { gap: 0.7rem; }
+  .constellation-node p { margin-top: 0.15rem; line-height: 1.35; }
+}
+
+/* The 3D models render slightly beyond their viewport box, so a small gap
+   left the label sitting on the logo. */
+@media (max-width: 900px) {
+  .constellation-node { gap: 1.15rem; }
+  .constellation-arc { gap: 2rem 0.75rem; }
 }

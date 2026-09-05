@@ -71,6 +71,7 @@ const ResumeButton = () => {
         </svg>
       </span>
       <span className="resume-label">Resume</span>
+      <span className="sr-only">Download resume (PDF)</span>
     </a>
   );
 };

@@ -93,6 +93,10 @@ const TechStack = () => {
   useEffect(() => {
     if (!paths.length) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Below 900px the layout reflows to a grid with the hub in normal flow,
+    // and a scrubbed timeline fights touch scroll momentum. Mobile gets the
+    // finished constellation rather than a half-assembled one.
+    if (window.matchMedia("(max-width: 900px)").matches) return;
 
     const ctx = gsap.context(() => {
       const wires = gsap.utils.toArray(".constellation-wire");
