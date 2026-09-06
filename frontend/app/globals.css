@@ -3599,7 +3599,10 @@ html[data-theme="light"] .site-loader::before {
   border-radius: 999px;
   background: var(--grad-accent);
   transform-origin: left center;
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  /* No transition. The value is driven every frame from requestAnimationFrame,
+     and a transition on top of that restarts on each update, so the rendered
+     bar lags permanently behind its target — it sat around 19% while the real
+     value was near 90%. The rAF easing is the animation. */
 }
 
 .site-loader-name {
@@ -3632,10 +3635,11 @@ html[data-theme="light"] .site-loader::before {
   font-weight: 600;
   line-height: 1.35rem;
   text-align: center;
-  background: var(--grad-accent);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  /* Solid colour, not a clipped gradient. background-clip: text paints the
+     container's own background through its text, but these words sit in a
+     child that the carousel translates — the background stays put while the
+     letters move, so nothing showed. */
+  color: var(--accent-1);
 }
 .site-loader-words i {
   display: block;
@@ -3658,4 +3662,25 @@ html[data-theme="light"] .site-loader::before {
   .site-loader-words i { animation: none; }
   .site-loader-rule i { transition: none; }
   .site-loader { transition: none; }
+}
+
+/* Status line. Remounted whenever the label changes, so each new phrase rises
+   in rather than swapping in place. */
+.site-loader-status {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  animation: loader-status 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* Starts part-visible, not at zero. The node is remounted on every label
+   change to replay this, and starting from opacity 0 meant the line was
+   invisible for the first frames after each change — sampling caught it blank
+   more often than not. `both` also pins the end state so it cannot settle
+   anywhere but fully visible. */
+@keyframes loader-status {
+  from { opacity: 0.3; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-loader-status { animation: none; }
 }
