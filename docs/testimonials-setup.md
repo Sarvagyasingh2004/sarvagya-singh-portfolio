@@ -28,17 +28,23 @@ empty section.
 
 ## 1. The Form
 
-Three questions. Word them however you like — the script matches loosely, so
+Two questions are required; role and company are optional and may be one
+question or two. Word them however you like — the script matches loosely, so
 you do not have to rename anything afterwards.
 
 | Question | Type | Required |
 |---|---|---|
-| Your name | Short answer | **yes** |
-| Your role and company | Short answer | no |
-| Your testimonial | Paragraph | **yes** |
+| What is your name? | Short answer | **yes** |
+| Where do you work? | Short answer | no |
+| What is your current role? | Short answer | no |
+| Write your testimonial here | Paragraph | **yes** |
 
-That is the whole form. No photo upload — the card draws a lettered monogram,
-so a missing picture is a design choice rather than a broken image.
+Role and company are joined into the single line the card shows under the
+name — "Engineering Manager, Kraftshala" — so asking for them separately costs
+nothing. Asking as one question works too.
+
+No photo upload: the card draws a lettered monogram, so a missing picture is a
+design choice rather than a broken image.
 
 Then **Responses → Link to Sheets → Create a new spreadsheet**.
 
@@ -50,9 +56,10 @@ column by hand, at the end:
 | Column | Who creates it | What it does |
 |---|---|---|
 | Timestamp | the Form | ignored |
-| Your name | the Form | the person's name |
-| Your role and company | the Form | the line under their name |
-| Your testimonial | the Form | the quote |
+| What is your name? | the Form | the person's name |
+| Where do you work? | the Form | joined into the line under their name |
+| What is your current role? | the Form | joined into the same line |
+| Write your testimonial here | the Form | the quote |
 | **`approved`** | **you** | the gate — type `yes` to publish |
 
 The `approved` gate is not optional. The Form link is public, so anyone can
@@ -70,11 +77,16 @@ const SHEET_NAME = 'Form Responses 1';
 // Matched loosely against the header row so the Form's own wording works
 // as-is. An exact header (`name`, `role`, `review`) always wins if you would
 // rather rename the columns.
+//
+// Resolved in this order, each field skipping columns already claimed, so a
+// loose pattern cannot steal a column a later field needs.
+const ORDER = ['name', 'review', 'approved', 'role', 'company'];
 const FIELDS = {
   name: [/\bname\b/],
-  role: [/\brole\b/, /\bcompany\b/, /\btitle\b/, /\bposition\b/],
   review: [/\btestimonial\b/, /\breview\b/, /\bfeedback\b/, /\bquote\b/],
   approved: [/\bapprove/],
+  role: [/\brole\b/, /\btitle\b/, /\bposition\b/, /\bdesignation\b/],
+  company: [/\bcompany\b/, /\bemployer\b/, /\borgani[sz]ation\b/, /\bwork\b/],
 };
 
 function doGet() {
@@ -84,36 +96,39 @@ function doGet() {
   const [header, ...rows] = sheet.getDataRange().getValues();
   const head = header.map((c) => String(c).trim().toLowerCase());
 
-  const col = (key) => {
-    const exact = head.indexOf(key);
-    if (exact > -1) return exact;
-    for (const re of FIELDS[key]) {
-      const i = head.findIndex((c) => re.test(c));
-      if (i > -1) return i;
+  const at = {};
+  const claimed = {};
+  ORDER.forEach((key) => {
+    let i = head.indexOf(key);
+    if (i < 0 || claimed[i]) {
+      i = -1;
+      for (const re of FIELDS[key]) {
+        const j = head.findIndex((c, n) => !claimed[n] && re.test(c));
+        if (j > -1) { i = j; break; }
+      }
     }
-    return -1;
-  };
-
-  const iName = col('name');
-  const iRole = col('role');
-  const iReview = col('review');
-  const iApproved = col('approved');
+    at[key] = i;
+    if (i > -1) claimed[i] = true;
+  });
 
   // Returning the problem rather than an empty list: the site falls back to its
   // committed testimonials either way, but this way opening the URL tells you
   // which column is missing instead of showing a silent [].
-  const missing = [];
-  if (iName < 0) missing.push('name');
-  if (iReview < 0) missing.push('review');
-  if (iApproved < 0) missing.push('approved');
-  if (missing.length) return out({ error: 'Missing column(s): ' + missing.join(', '), headers: head });
+  const missing = ['name', 'review', 'approved'].filter((k) => at[k] < 0);
+  if (missing.length) {
+    return out({ error: 'Missing column(s): ' + missing.join(', '), headers: head });
+  }
+
+  const cell = (row, key) => (at[key] > -1 ? String(row[at[key]] || '').trim() : '');
 
   const list = rows
-    .filter((r) => String(r[iApproved]).trim().toLowerCase() === 'yes')
+    .filter((r) => String(r[at.approved]).trim().toLowerCase() === 'yes')
     .map((r) => ({
-      name: String(r[iName] || '').trim(),
-      mentions: iRole > -1 ? String(r[iRole] || '').trim() : '',
-      review: String(r[iReview] || '').trim(),
+      name: cell(r, 'name'),
+      // The card shows one line under the name, so a separate role and company
+      // are joined into it rather than one of them being dropped.
+      mentions: [cell(r, 'role'), cell(r, 'company')].filter(Boolean).join(', '),
+      review: cell(r, 'review'),
       imgPath: '',
     }))
     .filter((t) => t.name && t.review);
