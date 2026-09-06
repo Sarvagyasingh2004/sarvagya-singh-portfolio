@@ -2,18 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-/**
- * The line under the brand name, typed out one role at a time.
- *
- * Two things this has to avoid. It must not shift the layout: the roles differ
- * in length, and a navbar whose contents resize every 60ms is worse than a
- * static label. A hidden copy of the longest role holds the width open and the
- * animated text is positioned over it, so the box never changes size.
- *
- * And it must not shout. The text changes constantly, which a screen reader
- * would announce every time, so the animation is hidden from the accessibility
- * tree and a plain static label sits behind it.
- */
 const ROLES = [
   "Full-Stack Developer",
   "Backend Engineer",
@@ -27,15 +15,9 @@ const DELETE_MS = 32;
 const HOLD_MS = 1600;
 const GAP_MS = 340;
 
-// Reserves the width. Measured by rendering, not by character count — these are
-// uppercased and letter-spaced, so the longest string is not simply the one
-// with the most characters.
 const LONGEST = ROLES.reduce((a, b) => (b.length > a.length ? b : a));
 
 const RoleTyper = () => {
-  // Starts on the complete first role so the server-rendered markup matches
-  // what hydration produces, and so a reader who never sees the animation —
-  // reduced motion, or JS that fails — still gets a real label.
   const [text, setText] = useState(ROLES[0]);
   const [running, setRunning] = useState(false);
 

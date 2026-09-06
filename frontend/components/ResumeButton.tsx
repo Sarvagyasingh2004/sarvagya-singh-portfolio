@@ -2,15 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-/**
- * Resume download.
- *
- * The hover fill grows from the edge the pointer actually crossed: enter from
- * below and it rises, enter from the left and it sweeps right. Worked out from
- * the pointer's position relative to the button's box on pointerenter, then
- * expressed as a transform-origin on the fill layer — so it stays one
- * compositor-friendly scale animation rather than four separate ones.
- */
 type Edge = "top" | "right" | "bottom" | "left";
 
 const ResumeButton = () => {
@@ -29,13 +20,6 @@ const ResumeButton = () => {
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    // Offset from the centre, normalised to -1..1 on each axis. The dominant
-    // axis gives the direction and its sign gives the side.
-    //
-    // A previous version compared raw distance-to-each-edge and picked the
-    // minimum, which mis-resolved on a wide short button: the left/right
-    // distances were both ~0.5 of the width and won the comparison before the
-    // much smaller vertical distance was ever reached.
     const nx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
     const ny = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
     const next: Edge =

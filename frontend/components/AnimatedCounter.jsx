@@ -3,18 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { counterItems } from "@/constants";
 
-/**
- * Four outcomes, each as a before and an after.
- *
- * This used to be four counters ticking up to 12, 331, 100 and 3 — numbers that
- * need a paragraph of context before they mean anything. A pair of values with
- * an arrow between them carries its own meaning.
- *
- * Revealed by IntersectionObserver rather than a scroll library: it sits
- * directly under the hero, where the page height is still settling as three
- * WebGL canvases mount, and a ScrollTrigger measured against that has a habit
- * of resolving to the wrong position and leaving everything at opacity 0.
- */
 const AnimatedCounter = () => {
   const ref = useRef(null);
   const [shown, setShown] = useState(false);
@@ -22,8 +10,6 @@ const AnimatedCounter = () => {
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
-    // Fail open: if the observer never fires, show it anyway rather than
-    // leaving the strip invisible.
     const failsafe = window.setTimeout(() => setShown(true), 2600);
     const io = new IntersectionObserver(
       ([entry]) => {

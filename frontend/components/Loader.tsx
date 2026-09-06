@@ -2,30 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/**
- * First-paint loader.
- *
- * The site's signature moment is the tech-stack constellation: strings run into
- * the monogram and it lights. This is that idea compressed — built from the
- * brand rather than a generic spinner.
- *
- * Three things it must never do:
- *
- *  1. Hide the site. It renders server-side so there is no flash of content
- *     first, which also means a JS failure would leave it covering everything.
- *     A pure-CSS animation fades it out at 6s regardless.
- *  2. Lie. The bar is capped at 90% until the page has actually loaded, so it
- *     cannot read "Ready" over a page that is not.
- *  3. Flicker. It holds the same length on every visit; a splash that only
- *     appears once is just a flash on every load after it.
- */
 const MIN_VISIBLE_MS = 3000;
 const HARD_CAP_MS = 6000;
 const FADE_MS = 420;
 
 const NAME = "SARVAGYA SINGH".split("");
-// The hero cycles these four; reusing them keeps one vocabulary across the page
-// instead of writing throwaway loader copy.
 const LOADER_WORDS = ["Ideas", "Concepts", "Designs", "Code"];
 
 const STATUS: { at: number; label: string }[] = [
@@ -53,23 +34,10 @@ const Loader = () => {
     let loaded = document.readyState === "complete";
     let value = 0.05;
 
-    // Timed from NAVIGATION START, not from mount: this element is in the
-    // server-rendered HTML, so it is on screen for roughly a second before
-    // React hydrates and this effect runs. performance.now() is already
-    // relative to navigation start, so the bar spans the whole time the loader
-    // is actually visible instead of leaving that first second frozen.
     const crawl = () => {
       const byTime = Math.min(1, performance.now() / MIN_VISIBLE_MS);
-      // Assigned, not eased toward. Per-frame easing is frame-rate dependent:
-      // on a busy main thread requestAnimationFrame drops well below 60fps and
-      // the bar crawls — it reached 32% where it should have been at 100%.
-      // `byTime` is already a smooth function of elapsed time, so tracking it
-      // directly is both smoother and independent of frame rate.
       value = Math.max(value, loaded ? byTime : Math.min(byTime, 0.9));
 
-      // Written straight to the node. Calling setState here would re-render on
-      // every frame, which React coalesces — the bar visibly lagged its own
-      // value, reaching 28% when it should have been near 100%.
       if (barRef.current) barRef.current.style.transform = `scaleX(${value})`;
       // Cheap: React bails out when the label has not changed.
       setStatus(statusFor(value));
@@ -109,9 +77,6 @@ const Loader = () => {
     <div className="site-loader" data-done={done ? "true" : "false"} aria-hidden="true">
       <div className="site-loader-inner">
         <span className="site-loader-stage">
-          {/* Four strings running into the monogram — the constellation's own
-              gesture, compressed into a loop. Pure CSS: GSAP would be JS the
-              page must fetch and parse before the loader could animate. */}
           <svg className="site-loader-wires" viewBox="0 0 240 240" aria-hidden="true">
             <defs>
               <linearGradient id="loader-wire" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="240">
@@ -124,9 +89,6 @@ const Loader = () => {
             <path d="M14 214 C 64 174, 92 144, 120 120" />
             <path d="M226 214 C 176 174, 148 144, 120 120" />
           </svg>
-          {/* The 256px mark, not the 512px one: a loader whose own artwork is
-              523KB shows an empty screen on the slow connection it exists to
-              cover. Preloaded in <head>. */}
           <img
             src="/brand/mark-256.png"
             alt=""
@@ -141,9 +103,6 @@ const Loader = () => {
           <i ref={barRef} style={{ transform: "scaleX(0.05)" }} />
         </span>
 
-        {/* The name assembles letter by letter; the hero's own carousel runs
-            beneath it, so the loader previews the page rather than inventing
-            copy for it. */}
         <span className="site-loader-name">
           {NAME.map((ch, i) => (
             <span key={i} style={{ "--i": i } as React.CSSProperties}>

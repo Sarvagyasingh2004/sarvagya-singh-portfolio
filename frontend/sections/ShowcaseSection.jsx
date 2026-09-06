@@ -7,20 +7,6 @@ import { projects } from "@/constants";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/**
- * Projects as a real sticky stack.
- *
- * The previous version used CSS `position: sticky` alone. Cards pinned, but
- * nothing happened to the outgoing card, so there was no depth cue and you
- * could not tell how many were behind. A stack needs the card underneath to
- * recede.
- *
- * Each card except the last is pinned with ScrollTrigger, and its scale and
- * opacity are scrubbed by the NEXT card's entry: as card 2 rises, card 1
- * shrinks and dims behind it. Pinning starts at "top top" so a card locks the
- * moment it reaches the top of the viewport, offset by the navbar plus a
- * little breathing room.
- */
 const ARROW = (
   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M4 12h15" />
@@ -29,13 +15,6 @@ const ARROW = (
 );
 
 const ProjectCard = ({ project, index, total }) => {
-  // A project can ship as more than one repository - the chat app is split
-  // frontend/backend - so `repos` takes a labelled list and `repoUrl` stays
-  // as the single-repo shorthand.
-  //
-  // `liveUrl` is still honoured but no project carries one: none of these are
-  // deployed right now. Adding the field back to a project in constants is all
-  // it takes for the button to reappear.
   const links = [
     ...(project.repos ??
       (project.repoUrl ? [{ label: "View code", url: project.repoUrl }] : [])),
@@ -76,9 +55,6 @@ const ProjectCard = ({ project, index, total }) => {
                 ))}
               </div>
             ) : null}
-            {/* Work that shipped inside a company has no repository to link.
-                Saying so is better than a card that looks like its buttons
-                failed to render. */}
             {project.note ? <p className="stack-note">{project.note}</p> : null}
           </div>
 
@@ -108,8 +84,6 @@ const ShowcaseSection = () => {
       const slots = gsap.utils.toArray(".stack-slot");
       if (cards.length < 2) return;
 
-      // Pin offset: navbar plus ~6vh, so a card settles below the bar rather
-      // than flush against it.
       const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--nav-h")) * 16 || 72;
       const offset = Math.round(navH + window.innerHeight * 0.06);
 
@@ -125,8 +99,6 @@ const ShowcaseSection = () => {
           pinSpacing: false,
         });
 
-        // Driven by the NEXT card's arrival, so the outgoing card recedes
-        // exactly as the incoming one covers it. This is the depth cue.
         gsap.to(card, {
           scale: 0.94 - (cards.length - 1 - i) * 0.005,
           opacity: 0.45,

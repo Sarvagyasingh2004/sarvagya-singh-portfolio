@@ -46,10 +46,6 @@ const personSchema = {
   "@type": "Person",
   name: "Sarvagya Singh",
   jobTitle: "Full-Stack Software Engineer",
-  // No `email` here on purpose: this schema is rendered into the page
-  // source, so an address in it is handed to every scraper that loads the
-  // page. Contact goes through the form; sameAs still ties the identity
-  // together for search.
   url: SITE,
   address: {
     "@type": "PostalAddress",
@@ -64,8 +60,6 @@ const personSchema = {
     "Node.js", "TypeScript", "React", "Express", "MySQL", "PostgreSQL",
     "MongoDB", "Redis", "RabbitMQ", "AWS", "Docker", "Next.js",
   ],
-  // sameAs is what links this site to those profiles as one identity in
-  // Google's knowledge graph - worth keeping in step with the footer links.
   sameAs: [
     "https://github.com/Sarvagyasingh2004",
     "https://www.linkedin.com/in/sarvagya-singh-1015722a4",
@@ -79,12 +73,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* The loader's own artwork, fetched at top priority — it is the first
-            and briefly the only thing on screen. */}
         <link rel="preload" as="image" href="/brand/mark-256.png" />
-        {/* Applies the stored / time-of-day theme before first paint. */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        {/* Dev only: see lib/devtoolsShim. Must run before r3f registers. */}
         {process.env.NODE_ENV !== "production" ? (
           <script dangerouslySetInnerHTML={{ __html: devtoolsVersionShim }} />
         ) : null}

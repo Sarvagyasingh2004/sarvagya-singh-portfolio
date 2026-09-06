@@ -2,13 +2,6 @@
 
 import { useEffect, useRef } from "react";
 
-/**
- * Smooth scroll progress bar.
- *
- * Drives `transform: scaleX()` — a compositor-only property — and eases toward
- * the target inside one rAF loop. Animating `width` with a CSS transition
- * fights every scroll event and visibly stutters.
- */
 const ScrollProgress = () => {
   const bar = useRef<HTMLSpanElement>(null);
   const target = useRef(0);
@@ -44,8 +37,6 @@ const ScrollProgress = () => {
 
     value.current = target.current;
     const tick = () => {
-      // Follow 12% of the remaining distance per frame — critically damped,
-      // so it glides rather than snapping between scroll positions.
       value.current += (target.current - value.current) * 0.12;
       if (Math.abs(target.current - value.current) < 0.0001) value.current = target.current;
       el.style.transform = `scaleX(${value.current})`;
@@ -65,8 +56,6 @@ const ScrollProgress = () => {
   return (
     <div className="scroll-progress" aria-hidden="true">
       <span ref={bar} className="scroll-progress-fill">
-        {/* Sits at the leading edge of the fill and travels with it, so the
-            spark is always exactly where the progress ends. */}
         <i className="scroll-progress-spark" />
       </span>
     </div>

@@ -7,19 +7,6 @@ export type Testimonial = {
   imgPath: string;
 };
 
-/**
- * Testimonials come from a Google Sheet fed by a Google Form.
- *
- * Now that the site runs on Vercel rather than as a static export, this uses
- * ISR: the sheet is re-read at most once an hour and the page is regenerated
- * in the background. So ticking `approved` in the sheet publishes the
- * testimonial automatically, within the hour, with NO rebuild and no GitHub
- * dispatch. The markup is still server-rendered, so it stays crawlable.
- *
- * If TESTIMONIALS_URL is unset, or Google is down, or the payload is
- * malformed, it falls back to the committed content/testimonials.json rather
- * than blanking the section.
- */
 const isValid = (row: unknown): row is Testimonial => {
   if (typeof row !== "object" || row === null) return false;
   const r = row as Record<string, unknown>;
@@ -33,8 +20,6 @@ const normalize = (row: Record<string, unknown>): Testimonial => ({
   name: String(row.name).trim(),
   mentions: String(row.mentions ?? "").trim(),
   review: String(row.review).trim(),
-  // Submitters don't upload photos. An empty value makes the card render a
-  // monogram rather than requesting a file that does not exist.
   imgPath: String(row.imgPath ?? ""),
 });
 
@@ -44,8 +29,6 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 
   try {
     const res = await fetch(url, {
-      // Build-time only; never cache a stale sheet into the artifact.
-      // ISR: refreshed at most once an hour without a rebuild.
       next: { revalidate: 3600 },
       signal: AbortSignal.timeout(10_000),
     });

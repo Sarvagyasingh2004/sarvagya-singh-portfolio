@@ -18,8 +18,6 @@ const LogoSection = () => {
   const ref = useRef(null);
   const [focused, setFocused] = useState(false);
 
-  // Lifts and saturates while the strip is centred. The scroll never stops —
-  // it just becomes readable as you reach it.
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
@@ -44,7 +42,6 @@ const LogoSection = () => {
           {logoIconsList.map((icon) => (
             <LogoIcon key={icon.name} icon={icon} />
           ))}
-          {/* Duplicated set so translateX(-50%) loops seamlessly. */}
           {logoIconsList.map((icon) => (
             <LogoIcon key={`dup-${icon.name}`} icon={icon} />
           ))}

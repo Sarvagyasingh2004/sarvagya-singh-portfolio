@@ -5,8 +5,6 @@ import { words } from "@/constants";
 import Button from "../components/Button";
 import dynamic from "next/dynamic";
 
-// WebGL can't be server-rendered, and a static export prerenders everything —
-// so the canvas loads on the client only.
 const HeroExperience = dynamic(() => import("../components/HeroModels/HeroExperience"), { ssr: false });
 import { SplitText } from "gsap/all";
 import gsap from "gsap";
@@ -36,12 +34,9 @@ const Hero = () => {
         <img src="/images/bg.png" alt="background" />
       </div>
       <div className="hero-layout">
-        {/* left - HERO*/}
         <header className="flex flex-col justify-center md:w-full w-screen md:px-20 px-5">
           <div className="flex flex-col gap-7">
             <div className="hero-text">
-              {/* ONE h1 for the whole headline. The three lines were three separate
-                  h1 elements, which reads as three competing page titles. */}
               <h1>
                 <span className="hero-line">
                 Shaping
@@ -78,7 +73,6 @@ const Hero = () => {
             />
           </div>
         </header>
-        {/* right - 3D Model */}
         <figure>
           <div className="hero-3d-layout">
             <HeroExperience />

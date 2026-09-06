@@ -24,9 +24,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Escape closes the drawer and returns focus to the burger, so a keyboard
-  // user is never stranded inside a dismissed panel. Body scroll is locked
-  // while it is open, otherwise the page scrolls behind the overlay.
   useEffect(() => {
     if (!menuOpen) return;
 
@@ -103,8 +100,6 @@ const Navbar = () => {
 
       <ScrollProgress />
 
-      {/* Mobile navigation. nav.desktop is hidden below 1024px, so without
-          this there is no way to reach any section on a phone. */}
       <div
         id="mobile-nav"
         ref={panelRef}

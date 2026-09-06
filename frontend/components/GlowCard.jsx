@@ -11,13 +11,6 @@ const Star = () => (
   </svg>
 );
 
-/**
- * Pointer-tracking glow wrapper.
- *
- * Stars are opt-in. They belong on a testimonial, where someone else is
- * rating you; on your own experience card they read as self-rating. The
- * original hardcoded five star.png images on every use.
- */
 const GlowCard = ({ card, children, index, stars = false }) => {
   const cardRef = useRef(null);
 

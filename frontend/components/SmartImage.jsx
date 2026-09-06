@@ -2,15 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-/**
- * Renders `fallback` until the image is confirmed loadable, then swaps it in.
- *
- * The naive approach — render <img> and handle onError — still paints the
- * browser's broken-image glyph for a moment (and permanently, if the error
- * fires before hydration). Preloading with `new Image()` means a missing file
- * is simply never rendered, so a not-yet-saved asset looks designed rather
- * than broken.
- */
 const SmartImage = ({ src, alt = "", className = "", width, height, fallback }) => {
   const [ok, setOk] = useState(false);
 

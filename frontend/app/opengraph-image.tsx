@@ -2,20 +2,12 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-/**
- * The card people see when this site is shared — LinkedIn, X, WhatsApp, Slack.
- *
- * Generated rather than a committed PNG so it cannot drift from the site: the
- * name, role and mark come from the same place everything else does.
- */
 export const runtime = "nodejs";
 export const alt = "Sarvagya Singh — Full-Stack & Backend Engineer";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OpengraphImage() {
-  // Inlined as a data URI: ImageResponse renders outside a request context, so
-  // a relative path has no origin to resolve against.
   const mark = await readFile(join(process.cwd(), "public", "brand", "mark-256.png"));
   const markSrc = `data:image/png;base64,${mark.toString("base64")}`;
 
@@ -34,7 +26,6 @@ export default async function OpengraphImage() {
           fontFamily: "Helvetica, Arial, sans-serif",
         }}
       >
-        {/* The accent wash the site uses behind its own hub. */}
         <div
           style={{
             position: "absolute",

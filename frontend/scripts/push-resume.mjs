@@ -1,14 +1,3 @@
-/**
- * Uploads private/resume.pdf into MongoDB so production can serve it.
- *
- * The PDF is deliberately not in the repository — it carries a phone number
- * and the repository is public — so it has to reach production some other
- * way. Vercel environment variables cap at 64KB combined, and base64 of this
- * file is ~290KB, so the file goes into Mongo, where the site's other state
- * already lives.
- *
- * Run once after any resume change:  npm run resume:push
- */
 import { readFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";

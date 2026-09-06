@@ -15,16 +15,12 @@ const HeroExperience = () => {
     <Canvas camera={{ position: [0, 0, 15], fov: 45 }}>
       <HeroLights />
       <Particles count={100} />
-      {/* Zoom stays off: OrbitControls captures the wheel, which hijacks page
-          scroll whenever the cursor is over the canvas. Drag to rotate only. */}
       <OrbitControls
         enablePan={false}
         enableZoom={false}
         minPolarAngle={Math.PI / 5}
         maxPolarAngle={Math.PI / 2}
       />
-      {/* useGLTF/useTexture suspend while the model and matcap load. Without
-          a boundary here the scene never resolves and the canvas stays empty. */}
       <Suspense fallback={null}>
         <group
           scale={isMobile ? 0.7 : 1}

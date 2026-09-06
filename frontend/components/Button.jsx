@@ -1,7 +1,5 @@
 "use client";
 
-// Renders a real <button> so it is focusable and operable from the keyboard —
-// the original was an <a> with no href, which is invisible to tab navigation.
 const Button = ({ className, id, text }) => {
   const handleClick = () => {
     const target = document.getElementById(id || "counter");
@@ -25,9 +23,6 @@ const Button = ({ className, id, text }) => {
       <div className="cta-button group">
         <div className="bg-circle" />
         <p className="text">{text}</p>
-        {/* The scroll affordance lives inside the CTA rather than as a separate
-            cue below the hero — one signal, in the place you already want to
-            click, instead of two competing ones. */}
         <div className="arrow-wrapper">
           <svg
             className="cta-arrow"

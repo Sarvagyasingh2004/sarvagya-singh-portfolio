@@ -13,21 +13,12 @@ export function Room(props) {
   const screensRef = useRef();
   const matcapTexture = useTexture("/images/textures/mat1.png");
 
-  // All seven materials in ONE memo.
-  //
-  // Constructing these in the render body builds
-  // seven brand-new material objects that three.js swapped onto every mesh in
-  // the room. That swap is the flicker — much bigger than the single light
-  // that was fixed earlier, and the reason it persisted after that fix.
   const materials2 = useMemo(
     () => ({
       curtain: new THREE.MeshPhongMaterial({ color: "#d90429" }),
       body: new THREE.MeshPhongMaterial({ map: matcapTexture }),
       table: new THREE.MeshPhongMaterial({ color: "#582f0e" }),
       radiator: new THREE.MeshPhongMaterial({ color: "#fff" }),
-      // The monitors read as self-lit. At night that glow is the point; in
-      // daylight the same white surface takes the full ambient on top of it
-      // and blows out to a flat white slab. Dimmer and slightly warm by day.
       comp: new THREE.MeshStandardMaterial({
         color: isDay ? "#9fb2c9" : "#fff",
         roughness: isDay ? 0.55 : 0.3,
@@ -48,17 +39,9 @@ export function Room(props) {
 
   return (
     <group {...props} dispose={null}>
-      {/* <ambientLight intensity={0.2} /> */}
       <directionalLight position={[5, 5, 5]} intensity={0.2} />
       <EffectComposer>
         <SelectiveBloom
-          // NOTE: no `lights` prop, matching the original template. This logs
-          // "SelectiveBloom requires lights to work" and applies no bloom.
-          // Passing lights={[ref]} is NOT the fix — SelectiveBloom reads
-          // .layers off the light during the first render, when the ref is
-          // still null, which throws and takes the whole scene down. Making
-          // bloom actually work needs the composer gated behind a mounted
-          // check, and would change how the scene looks.
           selection={screensRef}
           intensity={1.5} // Strength of the bloom
           luminanceThreshold={0.2} // Minimum luminance needed

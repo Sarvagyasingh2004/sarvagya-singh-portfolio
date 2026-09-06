@@ -1,17 +1,3 @@
-/**
- * Extrude one of the site's tech SVGs into a GLB for the skills constellation.
- *
- *   node scripts/build-logo-model.mjs typescript
- *   node scripts/build-logo-model.mjs rabbitmq rabbitmq-extruded.glb
- *
- * The constellation renders GLTF models, and the site only ever had five —
- * which is how a Python logo ended up representing a stack with no Python in
- * it. Building them from the same simple-icons SVGs the marquee already uses
- * makes a new logo a build step rather than a hunt for a matching 3D asset.
- *
- * Needs @xmldom/xmldom (a devDependency): three's SVGLoader wants a DOMParser,
- * and Node has none.
- */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,9 +9,6 @@ import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 globalThis.DOMParser = DOMParser;
 
-// GLTFExporter reads its assembled Blob through a FileReader, which Node has no
-// equivalent of. Node does have Blob, and the exporter only calls
-// readAsArrayBuffer + onloadend, so that pair is all this has to provide.
 globalThis.FileReader = class {
   readAsArrayBuffer(blob) {
     blob.arrayBuffer().then((buf) => {
@@ -39,15 +22,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(root, "public/images/tech");
 const OUT = join(root, "public/models");
 
-// Sized so the constellation's per-model `scale` stays a round number instead
-// of the magic constants the hand-authored models need.
 const TARGET = 1.6;
 
-// Extrusion depth as a fraction of the logo's width, applied after normalising
-// rather than set on ExtrudeGeometry. The authored models sit between 0.034
-// (React) and 0.075 (Git); a fixed depth in SVG units gave 0.403 — a slab,
-// five to twelve times thicker than everything beside it. Expressed as a ratio
-// it stays correct whatever the source artwork measures.
 const DEPTH_RATIO = 0.05;
 
 // Relative luminance (WCAG), the same test scripts/generate-icons.mjs applies.
@@ -56,10 +32,6 @@ const luminance = ({ r, g, b }) => {
   return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
 };
 
-// A few brands are officially near-black — GitHub is #181717, Express #0A0A0A.
-// The marquee flips those per theme with a CSS filter, which a model sharing
-// one 3D scene cannot do, so they take a mid-tone slate instead. It is the same
-// substitution the three.js logo already carried, and it reads on both grounds.
 const DARK_LIMIT = 0.06;
 const NEUTRAL = "#aab6c8";
 
@@ -70,9 +42,6 @@ if (!slug) {
 }
 const outName = (process.argv[3] || "").startsWith("--") ? `${slug}-extruded.glb` : process.argv[3] || `${slug}-extruded.glb`;
 
-// Curve resolution. Six suits most marks; an intricate outline like the
-// PostgreSQL elephant produces several times the triangles at the same setting,
-// so it is worth turning down where the silhouette can spare it.
 const segArg = process.argv.find((a) => a.startsWith("--segments="));
 const CURVE_SEGMENTS = segArg ? Number(segArg.split("=")[1]) : 6;
 
@@ -80,10 +49,6 @@ const data = new SVGLoader().parse(readFileSync(join(SRC, `${slug}.svg`), "utf8"
 const staged = new THREE.Group();
 
 for (const path of data.paths) {
-  // No convertSRGBToLinear here. three manages colour space by default since
-  // r152, so SVGLoader has already converted the SVG's fill into the linear
-  // working space — converting again halved TypeScript's blue and took the
-  // green out of RabbitMQ's orange, which rendered red instead.
   let colour = path.color ? path.color.clone() : new THREE.Color(NEUTRAL);
   if (luminance(colour.clone().convertLinearToSRGB()) < DARK_LIMIT) {
     colour = new THREE.Color(NEUTRAL);
@@ -119,14 +84,9 @@ staged.updateMatrixWorld(true);
 const box = new THREE.Box3().setFromObject(staged);
 const size = box.getSize(new THREE.Vector3());
 const centre = box.getCenter(new THREE.Vector3());
-// The face is scaled to TARGET; the depth is set independently, so the plate is
-// as thin as the ratio asks regardless of what the extrusion produced.
 const k = TARGET / Math.max(size.x, size.y);
 const kz = (TARGET * DEPTH_RATIO) / size.z;
 
-// Bake the flip, centring and scale into the geometry. The loader clones the
-// scene and drives rotation from the group it mounts, so a transform left on a
-// parent node would fight it.
 const out = new THREE.Group();
 staged.traverse((o) => {
   if (!o.isMesh) return;
@@ -134,9 +94,6 @@ staged.traverse((o) => {
   g.applyMatrix4(o.matrixWorld);
   g.translate(-centre.x, -centre.y, -centre.z);
   g.scale(k, k, kz);
-  // ExtrudeGeometry emits every triangle with its own three vertices, plus a UV
-  // set nothing samples. Welding and dropping those is where nearly all of the
-  // file size goes — 670KB became 139KB on the TypeScript mark.
   g.deleteAttribute("uv");
   const welded = mergeVertices(g, 1e-4);
   welded.computeVertexNormals();

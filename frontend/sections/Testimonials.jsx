@@ -1,13 +1,8 @@
 import TitleHeader from "../components/TitleHeader";
 import GlowCard from "../components/GlowCard.jsx";
 import CompanyLogo from "../components/CompanyLogo.jsx";
-// Original markup and classes, unchanged. The only difference is that the
-// entries arrive as a prop, read from the Google Sheet at build time, instead
-// of being hardcoded. Renders nothing at all when none are approved yet — an
-// empty heading looks worse than no section.
-/**
- * @param {{ testimonials?: import("@/lib/testimonials").Testimonial[] }} props
- */
+
+/** @param {{ testimonials?: import("@/lib/testimonials").Testimonial[] }} props */
 const Testimonials = ({ testimonials = [] }) => {
   if (!testimonials.length) return null;
 

@@ -13,9 +13,6 @@ import { getTestimonials } from "@/lib/testimonials";
 import Chatbot from "@/components/Chatbot";
 import CursorFX from "@/components/CursorFX";
 
-// Section order matches the original App.jsx.
-// Server component: the sheet is read here at build time and the rows are
-// baked into the HTML, so they are crawlable rather than client-fetched.
 export default async function Home() {
   const testimonials = await getTestimonials();
 

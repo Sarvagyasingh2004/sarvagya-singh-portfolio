@@ -2,8 +2,6 @@
 
 import SmartImage from "./SmartImage";
 
-// Lettered monogram until a real logo file is saved — see
-// public/images/companies/README.md.
 const CompanyLogo = ({ src, name }) => {
   const initials = name
     .split(/\s+/)

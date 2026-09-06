@@ -2,25 +2,6 @@
 
 import { useEffect } from "react";
 
-/**
- * Custom pointer: a dot, a hollow ring that trails it, and a soft lamp behind
- * the content.
- *
- * Three layers, one rAF loop, one pointermove listener:
- *
- *  1. `.cursor-dot`  — tracks the pointer exactly.
- *  2. `.cursor-ring` — lags behind with eased follow, expands over anything
- *                      interactive. Transparent centre so nothing is hidden.
- *  3. `.cursor-ripple` — a ring that expands out of a click and fades. Spawned
- *     per press and self-removing, not a persistent element.
- *  4. `.cursor-bulb` — a lamp at z-index 0, BEHIND the content rather than
- *                      over it, and dimmed over canvases so it never washes
- *                      out the 3D scenes.
- *
- * The ink-trail variant was tried and reverted — the lamp reads better.
- *
- * Skipped entirely for coarse pointers (touch) and reduced-motion.
- */
 const INTERACTIVE = 'a, button, input, textarea, select, [role="button"], .tech-item, .card';
 
 /** Ring follow speed, 0-1. Higher = tighter. 1 locks it to the dot. */
@@ -73,35 +54,18 @@ const CursorFX = () => {
       const t = e.target as Element | null;
       if (t?.closest?.(INTERACTIVE)) root.classList.remove("cursor-active");
     };
-    // Dim the lamp over a canvas so it never washes out the 3D scenes. The
-    // dot and ring stay visible — the native grab cursor is not used.
     const onCanvas = (e: Event) => {
       const t = e.target as Element | null;
       root.classList.toggle("cursor-over-canvas", Boolean(t?.closest?.("canvas")));
     };
-    // A ring that expands and fades from wherever the pointer was pressed.
-    //
-    // Deliberately on click rather than continuously while moving. The cursor
-    // already carries three ambient layers (dot, trailing ring, lamp); a fourth
-    // that fires on its own would just be noise. Firing on press makes it
-    // answer something the visitor did - it confirms the click landed, and it
-    // is the reason the effect reads as intentional rather than decorative.
-    //
-    // Each ripple is one element animating transform and opacity only, so it
-    // composites on the GPU, and it removes itself when the animation ends.
     const onDown = (e: PointerEvent) => {
       if (e.button !== 0) return;
       const el = document.createElement("span");
       el.className = "cursor-ripple";
-      // Position through custom properties, not transform: the keyframes need
-      // transform for the scale, and an inline transform would be overwritten by
-      // it the moment the animation started.
       el.style.setProperty("--rx", e.clientX + "px");
       el.style.setProperty("--ry", e.clientY + "px");
       el.addEventListener("animationend", () => el.remove(), { once: true });
       document.body.appendChild(el);
-      // Belt and braces: if the animation never fires (a background tab, say)
-      // the node still goes, rather than accumulating one per click forever.
       window.setTimeout(() => el.remove(), 1200);
     };
 

@@ -8,10 +8,6 @@
 html,
 body {
   width: 100dvw;
-  /* `clip`, not `hidden`. hidden makes <body> a scroll container, which
-     silently breaks position: sticky for every descendant — that is what
-     stopped the project card stack from pinning. clip prevents horizontal
-     scroll without establishing a scrollport. */
   overflow-x: clip;
   background-color: black;
   color: white;
@@ -246,10 +242,6 @@ section {
     @apply absolute top-0 xl:left-[35.5vw] md:left-10 left-5 h-full flex justify-center;
   }
 
-  /* A black bar GSAP scales down (scaleY) to progressively reveal the
-     gradient line beneath it. It only ever needs to be as wide as that line —
-     at w-28 it was 28x wider and painted over the company logo and the
-     bullet copy sitting beside it. Also sits BELOW the logo now. */
   .timeline {
     @apply absolute z-10 h-[110%] -top-10 w-1 bg-black;
   }
@@ -479,13 +471,6 @@ section {
   opacity: 1;
 }
 
-/* ==========================================================================
-   LIGHT THEME OVERRIDE
-   Dark is the default and everything above is untouched, so the dark
-   appearance is exactly the original. Light is a pure override layer keyed on
-   [data-theme="light"], remapping the Tailwind theme tokens the design
-   already uses plus the handful of literal colours.
-   ========================================================================== */
 :root {
   color-scheme: dark;
 }
@@ -556,10 +541,6 @@ html[data-theme="light"] textarea {
 }
 
 html[data-theme="light"] .cta-button .text { color: #ffffff; }
-/* Deliberately no background-color override for the light theme here: it would
-   need !important to beat the gradient, and that !important then blocks every
-   state-driven background on the button - the submit button could not turn
-   green on success. */
 
 /* Theme transition, skipped for anyone who asked for reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
@@ -567,8 +548,6 @@ html[data-theme="light"] .cta-button .text { color: #ffffff; }
     transition: background-color 0.4s ease, color 0.4s ease;
   }
 }
-
-
 
 /* ===================== Theme toggle ===================== */
 .theme-toggle {
@@ -689,15 +668,6 @@ html[data-theme="light"] .scroll-cue-mouse { border-color: rgba(16, 21, 27, 0.28
   .scroll-cue-mouse i, .scroll-cue-chevrons svg, .theme-icon { animation: none; }
 }
 
-/* ==========================================================================
-   CUSTOM POINTER — single source of truth
-   Rewritten as ONE block: repeated appends had left three overlapping
-   .cursor-dot / .cursor-ring definitions and the cascade decided which
-   margins won, which is why the dot drifted off the ring's centre.
-
-   Both layers are translated to the SAME point every move, and each is offset
-   by exactly half its own size, so they are concentric by construction.
-   ========================================================================== */
 :root                    { --cursor-rgb: 167, 139, 250; }
 html[data-theme="light"] { --cursor-rgb: 109, 40, 217; }
 
@@ -739,8 +709,6 @@ html[data-theme="light"] { --cursor-rgb: 109, 40, 217; }
     margin 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease;
 }
 
-/* The lamp sits BEHIND content and lags, which is what reads as a light
-   being carried around. */
 .cursor-bulb {
   z-index: 0;
   width: 32rem;
@@ -748,8 +716,6 @@ html[data-theme="light"] { --cursor-rgb: 109, 40, 217; }
   margin: -16rem 0 0 -16rem;
   border-radius: 999px;
   transition: opacity 0.6s ease;
-  /* Many closely-spaced stops running all the way to 100%: a ramp that ends
-     early (transparent 70%) leaves a visible circular edge. */
   background: radial-gradient(
     circle closest-side,
     rgba(167, 139, 250, 0.30) 0%,
@@ -784,8 +750,6 @@ html[data-theme="light"] .cursor-bulb {
 .has-cursor-fx.cursor-hidden .cursor-ring,
 .has-cursor-fx.cursor-hidden .cursor-bulb { opacity: 0; }
 
-/* Dim the lamp over a canvas so it never washes out the 3D scenes. The dot
-   and ring stay fully visible there. */
 .has-cursor-fx.cursor-over-canvas .cursor-bulb { opacity: 0.22; }
 
 .has-cursor-fx.cursor-active .cursor-ring {
@@ -800,9 +764,6 @@ html[data-theme="light"] .cursor-bulb {
   margin: -2.5px 0 0 -2.5px;      /* half of 5px */
 }
 
-/* Native cursor off across the ENTIRE page. The descendant selector is
-   deliberate: without it, elements that set their own cursor (buttons, links,
-   canvases, inputs) each reassert a native one. */
 .has-cursor-fx,
 .has-cursor-fx * { cursor: none !important; }
 
@@ -899,9 +860,6 @@ html[data-theme="light"] .chat-shell {
 
 .chat-titlebar {
   display: grid;
-  /* Two columns since the close button went. The FAB toggles to an X in place,
-     so a second dismiss control in the titlebar was one too many - and the
-     third column left a dangling gap once it was gone. */
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 0.6rem;
@@ -1043,11 +1001,6 @@ html[data-theme="light"] .chat-composer { background: #f6f8fa; border-color: rgb
   .resume-icon, .scroll-cue, .chat-fab-pulse, .chat-typing i { animation: none; }
 }
 
-/* ===================== Tech marquee =====================
-   Seamless infinite loop in real brand colours. Spacing is per-item margin,
-   NOT flex `gap`: with gap, 2N items span 2N + (2N-1) gaps while one set spans
-   N + (N-1), so translateX(-50%) lands half a gap short of the seam and the
-   loop visibly jumps. Per-item margin makes -50% exactly one set. */
 .marquee-box {
   display: flex;
   width: max-content;
@@ -1066,8 +1019,6 @@ html[data-theme="light"] .chat-composer { background: #f6f8fa; border-color: rgb
   gap: 0.7rem;
   width: 7.25rem;
   margin-right: 2.5rem;
-  /* Desaturated at rest so the strip reads as one texture, full colour as you
-     reach it — the colour arriving is the reward for scrolling. */
   filter: grayscale(0.55) opacity(0.55);
   transform: translateY(0);
   transition: filter 0.5s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
@@ -1094,9 +1045,6 @@ html[data-theme="light"] .chat-composer { background: #f6f8fa; border-color: rgb
 .marquee-item:hover { filter: grayscale(0) opacity(1) !important; }
 .marquee-item:hover img { transform: scale(1.18); }
 
-/* A few brands' official colours are near-black (Express, Next.js, Socket.IO,
-   Three.js). Flagged by the generator via WCAG luminance and flipped for
-   whichever ground they'd disappear against. */
 html:not([data-theme="light"]) .marquee-item.invert-on-dark img { filter: invert(1); }
 html[data-theme="light"] .marquee-item.invert-on-light img { filter: invert(1); }
 
@@ -1115,13 +1063,6 @@ html[data-theme="light"] .marquee-item.invert-on-light img { filter: invert(1); 
   opacity: 0 !important;
 }
 
-/* ==========================================================================
-   DESIGN TOKENS
-   One place for the palette. The accent is a violet -> cyan ramp: it reads as
-   "engineering" rather than "agency", and it already exists in the hero scene
-   (the purple lamp and cyan monitors), so the UI and the 3D agree instead of
-   competing.
-   ========================================================================== */
 :root {
   --nav-h: 4.5rem;
   --theme-t: 320ms;
@@ -1157,9 +1098,6 @@ html[data-theme="light"] {
 /* Push content clear of the now-fixed navbar. */
 .hero-layout { padding-top: var(--nav-h); }
 
-/* ===================== Shared button surface =====================
-   Resume, theme toggle and the assistant FAB all derive from this, so the
-   header controls read as one family instead of three separate widgets. */
 .btn-surface {
   display: inline-flex;
   align-items: center;
@@ -1222,8 +1160,6 @@ html[data-theme="light"] {
   inset: 0;
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
 }
-/* Sun keeps its warm colour, moon its cool one, and they swap by rotating
-   through each other rather than cross-fading. */
 .theme-toggle .icon-sun  { color: var(--accent-warm); }
 .theme-toggle .icon-moon { color: var(--accent-3); }
 
@@ -1280,10 +1216,6 @@ html[data-theme="light"] .icon-moon { transform: rotate(0deg) scale(1); opacity:
   .brand-name i { display: none; }
 }
 
-/* ===================== Hero CTA arrow =====================
-   Bounces continuously so the button itself carries the "there is more below"
-   signal. Replaces the separate scroll cue that sat between the hero and the
-   next section and duplicated the same message. */
 .cta-arrow {
   color: currentColor;
   animation: cta-arrow-bob 1.7s cubic-bezier(0.45, 0, 0.35, 1) infinite;
@@ -1296,11 +1228,7 @@ html[data-theme="light"] .icon-moon { transform: rotate(0deg) scale(1); opacity:
 
 /* ===================== Hero polish ===================== */
 .hero-text h1 { letter-spacing: -0.022em; }
-/* Each line is now a span inside the single h1, so it needs to be a block
-   to keep the original stacked layout. */
 .hero-text .hero-line { display: block; }
-/* Third line picks up the accent ramp, so the eye lands on "Deliver Results"
-   rather than treating all three lines as equal weight. */
 .hero-text .hero-line:last-child {
   background: var(--grad-accent);
   -webkit-background-clip: text;
@@ -1309,16 +1237,12 @@ html[data-theme="light"] .icon-moon { transform: rotate(0deg) scale(1); opacity:
   color: transparent;
 }
 
-/* Ambient wash behind the hero copy — gives the text a ground to sit on so it
-   doesn't float directly against the 3D scene. */
 #hero::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 1;
-  /* Carried all the way to 100%. Stopping at 62% left a visible elliptical
-     edge behind the room, which read as a light sphere sitting in the scene. */
   background:
     radial-gradient(
       68rem 42rem at 10% 40%,
@@ -1382,8 +1306,6 @@ html[data-theme="light"] #hero::before {
 
 .footer, .footer-container { border-color: var(--hairline); }
 
-/* The original marquee fades hardcode black, which renders as a solid black
-   block on the light theme. Drive both edges from a token instead. */
 :root { --page-bg: #000000; }
 html[data-theme="light"] { --page-bg: #f4f6f8; }
 
@@ -1394,12 +1316,6 @@ html[data-theme="light"] { --page-bg: #f4f6f8; }
   background: linear-gradient(-90deg, var(--page-bg) 0%, transparent 100%) !important;
 }
 
-/* ===================== Project screenshot placeholders =====================
-   The tutorial's screenshots were still in place — a car-rental app captioned
-   "Six Independent Microservices", and one frame containing the tutorial
-   author's email address. Showing someone else's product as your own is exactly
-   the problem this whole project set out to remove, so they are deleted rather
-   than left in until real captures exist. */
 .shot-placeholder {
   display: flex;
   flex-direction: column;
@@ -1443,8 +1359,6 @@ html[data-theme="light"] { --page-bg: #f4f6f8; }
   color: #94a3b8;
 }
 
-/* Initials sit behind the photo, so a missing or slow image shows the mark
-   rather than an empty ring. */
 .avatar { display: inline-grid; }
 .avatar > * { grid-area: 1 / 1; }
 .avatar::after {
@@ -1461,20 +1375,8 @@ html[data-theme="light"] { --page-bg: #f4f6f8; }
 }
 .avatar img { position: relative; z-index: 1; }
 
-/* ==========================================================================
-   POINTER — dot, hollow ring, ink trail
-   The ring must stay HOLLOW. The previous version used
-   `linear-gradient(...) padding-box, var(--grad-accent) border-box` without a
-   matching `background-clip`, so the gradient painted the whole element and
-   the ring became an opaque disc that hid whatever was under it.
-   Using a border-image keeps the fill genuinely transparent.
-   ========================================================================== */
 :root       { --cursor-trail: 167, 139, 250; }  /* violet-400 on dark  */
 html[data-theme="light"] { --cursor-trail: 109, 40, 217; } /* violet-700 on light */
-
-
-
-
 
 /* ===================== About + Now ===================== */
 .about-grid {
@@ -1619,20 +1521,12 @@ html[data-theme="light"] { --cursor-trail: 109, 40, 217; } /* violet-700 on ligh
   letter-spacing: 0.02em;
 }
 
-/* ===================== CTA on the accent ramp =====================
-   Was a pale blue that matched nothing else on the page. */
 .cta-button {
   background: var(--grad-accent);
   border: 0;
 }
 .cta-wrapper .cta-button .text,
 .cta-button .cta-arrow { color: #fff; }
-/* Pill radius, matching the Resume button's 999px. Three elements, not one:
-   `.cta-button` is the visible surface, and `.cta-wrapper` /
-   `.contact-submit` are the real <button> elements wrapping it - left square
-   they would have kept drawing a rectangular focus ring around a pill.
-   Nothing else changes: the converging disc is clipped by the button's own
-   overflow: hidden, so it simply follows the new radius. */
 .cta-wrapper,
 .cta-button,
 .contact-submit {
@@ -1643,29 +1537,15 @@ html[data-theme="light"] { --cursor-trail: 109, 40, 217; } /* violet-700 on ligh
 .cta-wrapper:hover .cta-button,
 button:hover > .cta-button { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.35); }
 
-/* ==========================================================================
-   UI CONSISTENCY PASS
-   ========================================================================== */
-
-/* Anchor targets were landing under the fixed navbar, clipping each section's
-   heading. Every scroll target needs to stop clear of it. */
 section[id],
 #hero, #about, #work, #experience, #skills, #contact, #testimonials {
-  /* Just clears the fixed navbar. The previous +1.25rem pushed the heading
-     down far enough that the section's own bottom went past the fold. */
   scroll-margin-top: var(--nav-h);
 }
 
-/* Section rhythm: the original mixed md:mt-40, my-20 and section-padding, so
-   gaps between sections were uneven. One vertical step everywhere. */
 #about, #work, #experience, #skills, #contact, #testimonials {
-  /* Roughly halved. The previous 7.5rem top and bottom meant a section that
-     was already a full screen tall overflowed as soon as you jumped to it. */
   padding-block: clamp(2.25rem, 4.5vw, 3.75rem);
 }
 
-/* Each anchor target should sit inside one screen once scrolled to, rather
-   than starting at the top and running past the fold. */
 #about, #skills, #contact {
   min-height: calc(100svh - var(--nav-h));
   display: flex;
@@ -1684,8 +1564,6 @@ h2, h3 { text-wrap: balance; }
 /* Long section headings were running the full page width. */
 .flex-center > div > .flex.flex-col.items-center > h2 { max-width: 22ch; }
 
-/* Cards: one radius and one border across abilities, tech, experience and
-   about, instead of three different values. */
 .card-border, .about-facts, .now-card, .tech-card { border-radius: 0.9rem; }
 
 /* The chat FAB overlapped the footer's right column on narrow screens. */
@@ -1700,10 +1578,6 @@ input:focus-visible,
 textarea:focus-visible {
   outline: 2px solid var(--accent-1);
   outline-offset: 3px;
-  /* Deliberately NO border-radius here. A fixed 4px squared off the circular
-     theme toggle on focus, and `inherit` was no better - it takes the
-     PARENT's radius, which resolved to 0. Omitting the property entirely
-     lets each element keep its own radius and the outline follows it. */
 }
 
 /* Inline star row — replaces five star.png requests per card. */
@@ -1727,9 +1601,6 @@ textarea:focus-visible {
 .testimonial-avatar .company-monogram { width: 100%; height: 100%; }
 .testimonial-avatar img { object-fit: cover; }
 
-
-/* Fills the circular well edge to edge. `contain` left each mark floating at
-   its own aspect ratio inside the circle. */
 .timeline-logo img {
   width: 100%;
   height: 100%;
@@ -1740,14 +1611,6 @@ textarea:focus-visible {
 
 /* Each <View> is its own sized box; the shared canvas scissors to it. */
 .tech-view { width: 100%; height: 100%; min-height: 9rem; }
-
-/* ==========================================================================
-   BUTTON HIERARCHY
-   Everything was wearing the same gradient, which flattened the hierarchy and
-   read as decoration rather than emphasis. One primary action carries the
-   accent; secondary controls are quiet glass and only pick up the accent on
-   hover.
-   ========================================================================== */
 
 /* --- Secondary: Resume, theme toggle --- */
 .btn-surface {
@@ -1787,8 +1650,6 @@ button:hover > .cta-button {
 }
 .cta-button .text { color: #fff; }
 
-/* The arrow well was solid white — too heavy, and it fought the button.
-   Translucent white keeps it legible while reading as part of the surface. */
 .cta-button .arrow-wrapper {
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.28);
@@ -1803,12 +1664,6 @@ button:hover > .cta-button .arrow-wrapper {
 }
 .cta-button .cta-arrow { color: #fff; }
 .cta-button .bg-circle { background: rgba(255, 255, 255, 0.12); }
-
-/* ==========================================================================
-   LIGHT THEME PASS
-   The original stylesheet hardcodes dark values in a number of places that the
-   token layer alone doesn't reach.
-   ========================================================================== */
 
 /* Form fields were dark-on-light. */
 html[data-theme="light"] input,
@@ -1863,15 +1718,6 @@ html[data-theme="light"] .footer p { color: #475569; }
 /* Social icons are white PNGs. */
 html[data-theme="light"] .socials .icon img { filter: invert(1) brightness(0.45); }
 
-
-
-
-/* ==========================================================================
-   TWEAKS
-   ========================================================================== */
-
-/* Avatar: the photo was overflowing its ring because the gradient border is
-   padding on the wrapper and the image had no clip of its own. */
 .avatar {
   overflow: hidden;
   isolation: isolate;
@@ -1897,10 +1743,6 @@ button:hover .send-plane { animation-duration: 0.9s; }
   50%      { transform: translate(3px, -2px) rotate(4deg); }
 }
 
-/* Marquee fades were reading as dark blocks on the light theme because the
-   token they read resolved to the dark page ground. Tie them to the actual
-   body colour per theme, and soften the ramp so the ends dissolve instead of
-   ending in a hard edge. */
 .gradient-edge { width: 8rem; }
 .gradient-edge:nth-of-type(1) {
   background: linear-gradient(
@@ -1926,8 +1768,6 @@ button:hover .send-plane { animation-duration: 0.9s; }
   margin: -16rem 0 0 -16rem;
 }
 
-/* Light theme: the rotating hero words carried dark pills from the dark
-   theme, which read as holes punched in a light page. */
 html[data-theme="light"] .hero-text .slide img {
   background: rgba(139, 92, 246, 0.12) !important;
   border: 1px solid rgba(139, 92, 246, 0.22);
@@ -1948,13 +1788,6 @@ html[data-theme="light"] .hero-text .hero-line:last-child {
   touch-action: pan-y;   /* horizontal drag spins; vertical still scrolls */
 }
 
-/* ==========================================================================
-   SCROLL PROGRESS
-   Thicker, brighter, with a travelling spark at the leading edge. The bar is
-   driven by scaleX (compositor-only) and eased in rAF — no CSS transition on
-   the transform, since a transition layered on a per-frame write is what made
-   the first version stutter.
-   ========================================================================== */
 .scroll-progress {
   position: absolute;
   left: 0;
@@ -1985,8 +1818,6 @@ html[data-theme="light"] .scroll-progress { background: rgba(15, 23, 42, 0.07); 
   box-shadow: 0 0 12px rgba(139, 92, 246, 0.55);
 }
 
-/* The spark. Counter-scaled in JS so it stays round however far the bar has
-   travelled. */
 .scroll-progress-spark {
   position: absolute;
   right: 0;
@@ -2031,8 +1862,6 @@ html[data-theme="light"] .scroll-progress { background: rgba(15, 23, 42, 0.07); 
 /* ===================== Navbar refinement ===================== */
 .navbar .inner { max-width: 84rem; }
 
-/* Nav links: quieter at rest, with the underline growing from the centre
-   instead of sliding in from the left. */
 .navbar nav.desktop ul { gap: 0.35rem; }
 .navbar nav.desktop ul li {
   padding: 0.45rem 0.85rem;
@@ -2068,19 +1897,12 @@ html[data-theme="light"] .scroll-progress { background: rgba(15, 23, 42, 0.07); 
 }
 .avatar { width: 2.4rem; height: 2.4rem; }
 
-/* A hairline that only appears once scrolled, so the bar reads as flat at the
-   top of the page and lifted afterwards. */
 .navbar.scrolled { box-shadow: 0 1px 0 var(--nav-border), 0 8px 30px rgba(0, 0, 0, 0.28); }
 html[data-theme="light"] .navbar.scrolled {
   box-shadow: 0 1px 0 var(--nav-border), 0 8px 30px rgba(15, 23, 42, 0.07);
 }
 .navbar.not-scrolled { box-shadow: none; }
 
-/* ==========================================================================
-   HERO — decorative background plate
-   bg.png is a fixed-width image pinned top-left, so it ends in a hard
-   vertical seam partway across the hero. Masked so it dissolves instead.
-   ========================================================================== */
 #hero > div:first-child {
   -webkit-mask-image: linear-gradient(
     100deg,
@@ -2102,12 +1924,6 @@ html[data-theme="light"] .navbar.scrolled {
 }
 html[data-theme="light"] #hero > div:first-child { opacity: 0.35; }
 
-/* ==========================================================================
-   HERO — intro line legibility over the canvas
-   The sentence runs under the 3D room, so its tail ("...and code.") sat on
-   top of the model. A shadow matched to the page ground lifts it off the
-   scene without putting a visible plate behind the text.
-   ========================================================================== */
 .hero-text + p,
 #hero header p {
   position: relative;
@@ -2127,14 +1943,6 @@ html[data-theme="light"] #hero header p {
     0 0 24px #f4f6f8;
 }
 
-/* ==========================================================================
-   HERO CANVAS EDGE
-   The WebGL canvas is 70% wide, pinned right, so its left boundary lands
-   around x=512 on a 1440px viewport. A transparent WebGL surface still
-   composites slightly differently from the page behind it, which showed as a
-   faint vertical seam running the full height of the hero. Feathering the
-   canvas edges dissolves that boundary.
-   ========================================================================== */
 .hero-3d-layout {
   -webkit-mask-image: linear-gradient(
     90deg,
@@ -2154,12 +1962,6 @@ html[data-theme="light"] #hero header p {
   );
 }
 
-/* ==========================================================================
-   CONTACT SCENE PANEL
-   This panel is the room's back WALL, so it takes a wall colour rather than
-   the site's accent gradient. Painted plaster by day; the same wall in
-   lamplight at night, warm near the desk and falling off into the corners.
-   ========================================================================== */
 .contact-canvas-wrap {
   background:
     radial-gradient(120% 90% at 62% 74%, rgba(255, 186, 120, 0.22), transparent 66%),
@@ -2175,20 +1977,10 @@ html[data-theme="light"] .contact-canvas-wrap {
   border-color: rgba(15, 23, 42, 0.08);
 }
 
-/* ==========================================================================
-   TECH CONSTELLATION
-   Count-agnostic: nothing here assumes how many logos there are. The arc lift
-   is a per-node custom property written by JS from each node's distance to the
-   centre, and the grid wraps. Adding entries to techStackIcons is the only
-   change needed.
-   ========================================================================== */
 .constellation {
   position: relative;
   width: 100%;
   margin-top: clamp(1.5rem, 3vh, 2.75rem);
-  /* This is the run the strings travel. Keyed to viewport HEIGHT, not width,
-     because it has to grow on a tall screen and shrink on a short one for the
-     section to keep landing inside a single screen. */
   padding-bottom: clamp(14rem, 40vh, 28rem);
   display: flex;
   flex-direction: column;
@@ -2205,8 +1997,6 @@ html[data-theme="light"] .contact-canvas-wrap {
   overflow: visible;
 }
 
-/* Two strokes per wire: a wide blurred pass for presence, a crisp one on top.
-   The single 1.15px stroke this replaces was far too faint to read. */
 .constellation-wire { stroke: url(#wire); fill: none; }
 .wire-glow {
   stroke-width: 5;
@@ -2227,17 +2017,10 @@ html[data-theme="light"] .wire-core { opacity: 0.72; }
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-end;
-  /* Tuned so eight nodes hold one row down to 1024px: at 4vw with a 7.5rem
-     model the row needed 1363px against 1280 available, and wrapped a single
-     logo onto a second line by itself, which reads as a mistake. */
   gap: clamp(0.7rem, 2vw, 2.6rem);
   width: 100%;
 }
 
-/* Two elements because two things want to own `transform`: the node keeps
-   the hover lift in CSS, the inner wrapper is what the entrance timeline
-   animates. Sharing one element meant GSAP's inline transform beat the
-   stylesheet and the hover lift silently never ran. */
 .constellation-node {
   display: flex;
   flex-direction: column;
@@ -2282,9 +2065,6 @@ html[data-theme="light"] .wire-core { opacity: 0.72; }
 /* ---- The hub ---- */
 .constellation-core {
   position: absolute;
-  /* Low in the padding, and ~40px lower again since the rise animation went
-     in. The hub is absolutely positioned, so dropping it lengthens the run
-     from the logos without making the section any taller. */
   bottom: clamp(-1.5rem, -2.45vh, -1rem);
   left: 50%;
   transform: translateX(-50%);
@@ -2348,8 +2128,6 @@ html[data-theme="light"] .core-ring-2 { border-color: rgba(124, 58, 237, 0.15); 
 }
 
 .core-logo { display: grid; place-items: center; }
-/* Halved from where this started. The artwork already carries its own bloom;
-   stacking a strong CSS glow on top of it was most of what read as glitter. */
 .logo-mark.is-glowing {
   filter: drop-shadow(0 0 12px rgba(167, 139, 250, 0.45))
     drop-shadow(0 0 30px rgba(139, 92, 246, 0.22));
@@ -2381,18 +2159,9 @@ html[data-theme="light"] .core-ring-2 { border-color: rgba(124, 58, 237, 0.15); 
 }
 .brand:hover .brand-mark { border-color: var(--accent-edge); }
 
-/* ==========================================================================
-   THEME SWITCH
-   Transitions are suppressed for one frame while data-theme flips. Elements
-   carried different durations, so on switch the backgrounds, borders and text
-   each settled at their own pace — the button labels arrived visibly late.
-   ========================================================================== */
 html.theme-switching *,
 html.theme-switching *::before,
 html.theme-switching *::after {
-  /* Every theme-affected property moves on ONE clock. The stagger, not the
-     animation, was the problem: mismatched durations meant a label's colour
-     landed after its background had already changed. */
   transition:
     background-color var(--theme-t) var(--theme-e),
     background-image var(--theme-t) var(--theme-e),
@@ -2405,23 +2174,12 @@ html.theme-switching *::after {
   transition-delay: 0s !important;
 }
 
-/* ...but the toggle's own icon rotation must survive the switch. The rule
-   above lists only colour-ish properties, so it silently dropped `transform`
-   and the sun/moon snapped between states instead of sweeping through. */
 html.theme-switching .theme-toggle-track svg {
   transition:
     transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.4s ease !important;
 }
 
-/* ==========================================================================
-   BUTTON HIERARCHY — final pass
-   Primary (CTA) and secondary (Resume) now share one hover language: a filled
-   circle grows out from behind the icon and the label shifts to meet it.
-   ========================================================================== */
-
-/* The violet glow read as a stray highlight sitting under the button on a
-   light ground. Tightened and tinted to the surface it sits on. */
 .cta-button {
   box-shadow: 0 2px 10px rgba(109, 92, 246, 0.22);
 }
@@ -2433,10 +2191,6 @@ html[data-theme="light"] .cta-button { box-shadow: none; }
 html[data-theme="light"] .cta-wrapper:hover .cta-button,
 html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
 
-/* ---- Resume: fill enters from whichever edge the pointer crossed ----
-   The fill is a single scaled layer whose transform-origin is set from the
-   edge measured in JS. One compositor-friendly scale animation covers all
-   four directions instead of four separate keyframes. */
 .resume-btn {
   position: relative;
   overflow: hidden;
@@ -2474,29 +2228,14 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
   .resume-btn:hover .resume-fill { transform: scale(7); }
 }
 
-/* ==========================================================================
-   CONTACT — form and canvas share one height
-   The two columns sized themselves independently, so the panel and the form
-   card ended on different baselines. A single grid row makes both stretch to
-   the taller of the two, and the canvas fills whatever that resolves to.
-   ========================================================================== */
 #contact .grid-12-cols {
   align-items: stretch;
 }
 #contact .grid-12-cols > div { display: flex; }
 #contact .grid-12-cols > div > * { width: 100%; }
 
-/* The card sizes to the form, and the canvas column stretches to match it.
-   Forcing height:100% here made the card resolve against the grid row instead,
-   which capped it below the form's natural height and pushed the last field
-   and the button past its bottom edge. */
 #contact .xl\:col-span-5 > div { height: auto; }
 
-/* No max-height here any more. The column was capped at 30rem while the form
-   inside it was not and had overflow: visible, so the submit button hung 49px
-   below the card's rounded bottom edge. The form now sizes to its content and
-   the content itself is tight enough that the section still lands inside one
-   screen; the canvas stretches to match whatever the form resolves to. */
 #contact .grid-12-cols > div,
 .contact-canvas-wrap {
   min-height: 22rem;
@@ -2504,11 +2243,6 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
 #contact form { gap: 0.9rem; }
 #contact textarea { min-height: 4.75rem; }
 
-/* ==========================================================================
-   FOOTER RULE
-   Was fading almost immediately from both ends, so the middle never reached
-   full strength. Solid across the centre ~55vw, then falls away.
-   ========================================================================== */
 .section-rule {
   height: 1px;
   background: linear-gradient(
@@ -2523,21 +2257,11 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
   );
 }
 
-
-/* ==========================================================================
-   WORK — sticky card stack
-   Each card pins slightly lower than the last, so the next rises over the
-   previous while a sliver of every earlier card stays visible. Pinning is
-   position: sticky, so the browser owns it: smooth, and it degrades to a
-   plain list where sticky isn't available.
-   ========================================================================== */
 .stack-section {
   padding-block: clamp(3rem, 6vw, 5rem);
   padding-inline: clamp(1.25rem, 5vw, 5rem);
 }
 
-/* Centred, like every other section heading on the page. It was the only one
-   left-aligned, which read as a mistake rather than a choice. */
 .stack-head {
   max-width: 46rem;
   margin: 0 auto clamp(2rem, 4vw, 3.5rem);
@@ -2564,8 +2288,6 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
   flex-direction: column;
   gap: clamp(1.5rem, 3vw, 2.5rem);
 }
-/* Each slot is a full screen of scroll, which is the travel GSAP scrubs the
-   outgoing card's scale and opacity across. */
 @media (min-width: 769px) and (prefers-reduced-motion: no-preference) {
   .stack-slot { min-height: 78svh; }
 }
@@ -2577,9 +2299,6 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
 
 .stack-card {
   width: 100%;
-  /* Industry standard reading width. The previous 70-80vw cards were far too
-     wide: line lengths ran past 120 characters and the layout read as a page
-     section rather than a card. */
   max-width: 56rem;
   margin-inline: auto;
   transform-origin: center top;
@@ -2599,7 +2318,6 @@ html[data-theme="light"] .stack-card {
     0 -1px 0 var(--hairline) inset,
     0 -18px 40px -24px rgba(15, 23, 42, 0.22);
 }
-
 
 :root { --card-bg: #12101c; }
 html[data-theme="light"] { --card-bg: #ffffff; }
@@ -2744,10 +2462,6 @@ html[data-theme="light"] .stack-shot-empty span { color: rgba(15, 23, 42, 0.55);
 
 /* Reduced motion: no pinning, just a list. */
 
-
-/* ==========================================================================
-   (1) NAVBAR — one height, always
-   ========================================================================== */
 .navbar,
 .navbar.scrolled,
 .navbar.not-scrolled {
@@ -2764,11 +2478,6 @@ html[data-theme="light"] .stack-shot-empty span { color: rgba(15, 23, 42, 0.55);
 .brand-name b { font-size: 0.97rem; letter-spacing: -0.01em; line-height: 1.15; }
 .brand-name i { font-size: 0.6rem; letter-spacing: 0.15em; line-height: 1.2; }
 
-/* (3) Nav items.
-   Radius stays the pill it always was - only the SPACING changed. The
-   underline keeps its original position just under the label; the pill simply
-   gets more bottom padding so there is clear air between the underline and
-   the pill's own bottom edge instead of the two touching. */
 .navbar nav.desktop ul { gap: 0.15rem; }
 .navbar nav.desktop ul li {
   border-radius: 999px;
@@ -2784,18 +2493,7 @@ html[data-theme="light"] .stack-shot-empty span { color: rgba(15, 23, 42, 0.55);
   left: 1rem;
 }
 
-/* ==========================================================================
-   (6) PRIMARY CTA — the disc converges into the arrow
-   `.bg-circle` starts at 120% of the button and, on hover, shrinks to the
-   arrow well's exact size and position (both size-10 at right-10), so the
-   surface colour gathers into the arrow. Kept faint at rest so it reads as a
-   sheen on the gradient rather than a plate over it, and the label holds still
-   throughout - a label that slides on hover just looks like a twitch.
-   ========================================================================== */
 .cta-button .bg-circle {
-  /* Faint enough at rest to read as a sheen on the gradient rather than a
-     plate over it. Gathering into the arrow then brightens the well and lets
-     the gradient come back to full saturation. */
   background: rgba(255, 255, 255, 0.1);
   transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1),
     height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
@@ -2813,24 +2511,8 @@ html[data-theme="light"] .cta-button .text {
   /* No transition at all: there is nothing left to transition to. */
   transition: none !important;
   text-shadow: none;
-  /* The label held a `group-hover:-translate-x-5` from the template, which
-     slid it 20px left on hover and opened up the gap to the arrow. The colour
-     swap it was paired with is gone, so the shift has nothing left to make
-     room for - it just made the button look like it twitched.
-     It has to be `translate`, not `transform`: Tailwind v4 compiles
-     translate-x-* to the standalone `translate` property, so a
-     `transform: none` here is a no-op and the label kept moving
-     (measured translate 0px -> -20px on hover with transform reading none).
-     Both are pinned so nothing can shift it. */
 }
 
-/* Kept in a rule of its own, deliberately. Written alongside a `transform`
-   declaration, Lightning CSS folds the two together - it rewrote
-   `transform: none` to translate3d(0,0,0) and dropped `translate: none`
-   as redundant, which it is not: `translate` is a separate property and
-   Tailwind's hover rule sets it. Overriding Tailwind's own custom property is
-   also sturdier than fighting the compiled declaration, since that is what
-   `translate: var(--tw-translate-x) var(--tw-translate-y)` reads from. */
 .cta-button .text {
   --tw-translate-x: 0px !important;
   --tw-translate-y: 0px !important;
@@ -2841,12 +2523,6 @@ html[data-theme="light"] .cta-button {
   background-color: transparent;
 }
 
-/* ==========================================================================
-   (5) SCROLL REVEAL
-   Sections that had no motion now sequence their reading order on entry.
-   Transform and opacity only, so it composites; the class is toggled by an
-   IntersectionObserver rather than a scroll listener.
-   ========================================================================== */
 .reveal {
   opacity: 0;
   transform: translateY(18px);
@@ -2858,12 +2534,6 @@ html[data-theme="light"] .cta-button {
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
 }
-
-/* ==========================================================================
-   MOBILE
-   nav.desktop is hidden below 1024px, so the burger and drawer are the only
-   navigation a phone gets. Everything here is additive to the desktop rules.
-   ========================================================================== */
 
 .nav-burger {
   display: none;
@@ -2953,10 +2623,6 @@ html[data-theme="light"] .mobile-nav-scrim { background: rgba(15, 23, 42, 0.34);
   }
 }
 
-/* ---- Constellation on small screens ----
-   The arc wraps into a grid, which pushed the absolutely-positioned hub out
-   of view entirely. Below 900px the hub joins the normal flow underneath the
-   grid instead, and the wires are measured against its real position. */
 @media (max-width: 900px) {
   .constellation { padding-bottom: 0; }
   .constellation-arc {
@@ -3044,9 +2710,6 @@ html[data-theme="light"] .mobile-nav-scrim { background: rgba(15, 23, 42, 0.34);
   .expText li { font-size: 0.92rem !important; }
 }
 
-/* The nav link was inline, so the tap target measured only the text box
-   (39x19) even though the <li> around it is padded. Making the anchor fill
-   its parent hands the whole padded area to the pointer. */
 .navbar nav.desktop ul li { display: flex; }
 .navbar nav.desktop ul li a {
   display: flex;
@@ -3059,9 +2722,6 @@ html[data-theme="light"] .mobile-nav-scrim { background: rgba(15, 23, 42, 0.34);
 .footer a { display: inline-flex; align-items: center; min-height: 44px; }
 .socials .icon { min-width: 44px; min-height: 44px; justify-content: center; }
 
-/* Padding lives on the anchor, not the <li>, so the tap target IS the pill.
-   With padding on the parent, `width: 100%` on an inline-level anchor only
-   covers the content box and the padded ring stayed untappable. */
 .navbar nav.desktop ul li { padding: 0; }
 .navbar nav.desktop ul li a {
   padding: 0.55rem 1rem 0.72rem;
@@ -3079,20 +2739,11 @@ html[data-theme="light"] .mobile-nav-scrim { background: rgba(15, 23, 42, 0.34);
   .constellation-node p { margin-top: 0.15rem; line-height: 1.35; }
 }
 
-/* The 3D models render slightly beyond their viewport box, so a small gap
-   left the label sitting on the logo. */
 @media (max-width: 900px) {
   .constellation-node-inner { gap: 1.15rem; }
   .constellation-arc { gap: 2rem 0.75rem; }
 }
 
-
-/* ==========================================================================
-   CONTACT FORM — fit and feel
-   Sizing above; everything below is the interaction layer. Focus is signalled
-   three ways at once (label colour, border, and a rule that wipes in under the
-   field) because one 1px border change is easy to miss on a dense form.
-   ========================================================================== */
 #contact .card-border { padding: clamp(1.35rem, 2.2vw, 1.9rem); }
 
 #contact form label {
@@ -3119,8 +2770,6 @@ html[data-theme="light"] .mobile-nav-scrim { background: rgba(15, 23, 42, 0.34);
   border-color: rgba(139, 92, 246, 0.65);
   box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
 }
-/* The default ring is suppressed only because it is replaced by something
-   stronger: an accent border plus a 4px halo plus the rule below. */
 #contact form input:focus-visible,
 #contact form textarea:focus-visible { outline: none; }
 
@@ -3141,11 +2790,12 @@ html[data-theme="light"] .mobile-nav-scrim { background: rgba(15, 23, 42, 0.34);
 }
 .contact-field:focus-within .field-line { opacity: 1; transform: scaleX(1); }
 
-/* :user-invalid, not :invalid - a required field is invalid the moment it
-   renders, and flagging an empty form nobody has touched yet is hostile. */
 #contact form input:user-invalid,
 #contact form textarea:user-invalid { border-color: rgba(248, 113, 113, 0.55); }
 .contact-field:has(:user-invalid) label { color: #f87171; }
+
+.contact-form.is-sent :user-invalid { border-color: var(--hairline) !important; }
+.contact-form.is-sent .contact-field label { color: var(--muted) !important; }
 
 /* ---- Submit ---- */
 .contact-submit {
@@ -3241,9 +2891,6 @@ html[data-theme="light"] .mobile-nav-scrim { background: rgba(15, 23, 42, 0.34);
   box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.16);
 }
 
-/* :not(:focus) matters. Without it this rule - same specificity family,
-   but later in the file - beat the focus rule above and the border never went
-   accent in light theme. It sets the RESTING border only; focus owns its own. */
 html[data-theme="light"] #contact form input:not(:focus),
 html[data-theme="light"] #contact form textarea:not(:focus) {
   border-color: rgba(15, 23, 42, 0.14);
@@ -3261,9 +2908,6 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
   .field-line { transition: opacity 0.2s ease; transform: scaleX(1); }
 }
 
-/* Staggered reveal. `is-armed` is only ever applied to a form confirmed to be
-   off screen, so the default render is visible - decoration can never be the
-   reason the contact form isn't there. */
 .contact-form.is-armed .contact-field,
 .contact-form.is-armed .contact-submit {
   opacity: 0;
@@ -3286,9 +2930,6 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
   }
 }
 
-/* One size for all three footer marks. The SVGs carry no width or height
-   attribute, so without this they stretch to fill the well while the LinkedIn
-   PNG holds its intrinsic 20px, and the row comes out uneven. */
 .socials .icon img {
   width: 20px;
   height: 20px;
@@ -3301,15 +2942,6 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
   }
 }
 
-/* ==========================================================================
-   CURSOR RIPPLE
-   A ring that expands out of a click and fades. Fires on press rather than
-   continuously: the cursor already carries three ambient layers, and a fourth
-   running on its own would be noise — on press it confirms the click landed.
-   Position comes through --rx/--ry because the keyframes own `transform` for
-   the scale; an inline transform would be overwritten the moment the
-   animation started.
-   ========================================================================== */
 .cursor-ripple {
   position: fixed;
   top: 0;
@@ -3327,8 +2959,6 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
   animation: cursor-ripple 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 @keyframes cursor-ripple {
-  /* Fades in over the first tenth rather than popping in at full strength,
-     which is the difference between a ripple and a flash. */
   0% {
     transform: translate3d(var(--rx, 0), var(--ry, 0), 0) scale(0.4);
     opacity: 0;
@@ -3342,18 +2972,10 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
   }
 }
 
-/* No pointer, no ripple — and CursorFX bails on reduced motion before any of
-   this runs, so this is belt and braces for anything that injects the node. */
 @media (prefers-reduced-motion: reduce), (pointer: coarse) {
   .cursor-ripple { display: none !important; }
 }
 
-/* ==========================================================================
-   CHAT FAB ICON SWAP
-   Both icons are mounted at once and rotate through each other, matching the
-   theme toggle's sun/moon. Conditional rendering swapped one for the other,
-   which gives the browser nothing to interpolate — the icon just changed.
-   ========================================================================== */
 .chat-fab-track {
   position: relative;
   display: block;
@@ -3387,11 +3009,6 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
   max-width: 34ch;
 }
 
-/* Tap targets.
-   These links are 25px tall because the underline has to sit tight against
-   the text, so padding cannot be used to grow them - it would push the border
-   away from the words. An overlaid pseudo-element gives the 44px target the
-   WCAG guidance asks for while the visible link stays exactly where it is. */
 .stack-links a { position: relative; }
 .stack-links a::after {
   content: "";
@@ -3406,40 +3023,17 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
 /* The brand lock-up sits just under the same threshold without this. */
 .navbar .brand { min-height: 44px; }
 
-/* ==========================================================================
-   MOBILE CORRECTIONS
-   ========================================================================== */
-
-/* `.tech-view` carries min-height: 9rem for its standalone use. Inside the
-   constellation the box is sized by its parent — on a phone that is 78px, and
-   the 9rem floor made the view 144px, so each model rendered 66px past its own
-   box and sat on top of its caption. drei's <View> scissors to the tracked
-   element's rect, so the element's height IS the render height. */
 .constellation-model .tech-view { min-height: 0; }
 
-/* The CTA label is centred while the arrow is absolutely positioned over the
-   right edge, so on a narrow button the two meet and the label is clipped —
-   "SEND MESSAGE" becomes "SEND MESSAG". The template avoided this
-   by translating the label left, but that also made it jump on hover. Padding
-   reserves the arrow's space instead, so the label centres in what is left and
-   never moves. */
 @media (max-width: 900px) {
   .cta-button { padding-right: 4.5rem; }
 }
 
-/* Project screenshots are wide captures. `cover` fills the card but on a phone
-   it crops so hard that the Convex module tiles became half-words. `contain`
-   shows the whole frame instead, letterboxed against the card surface. */
 @media (max-width: 768px) {
   .stack-shot { background: var(--surface); }
   .stack-shot img { object-fit: contain; }
 }
 
-/* ==========================================================================
-   FOOTER LINKS — tile plus label
-   The address itself is gone from the markup: "Email" points at the contact
-   form, so nothing here is scrapeable.
-   ========================================================================== */
 .socials { flex-wrap: wrap; gap: 0.55rem 1.1rem; }
 
 .social-link {
@@ -3474,18 +3068,10 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
   .socials .social-link .icon { width: 2.2rem; height: 2.2rem; }
 }
 
-/* Four labelled links need more room than a rigid one-third column, and the
-   last one wrapped onto its own row. The middle column now sizes to its
-   content and the outer two share what is left. */
 @media (min-width: 768px) {
   .footer-container { grid-template-columns: 1fr auto 1fr; }
 }
 
-/* ==========================================================================
-   FIRST-PAINT LOADER
-   Theme-aware from the first frame: the inline theme script sets data-theme
-   before anything paints, so this never flashes the wrong ground.
-   ========================================================================== */
 .site-loader {
   position: fixed;
   inset: 0;
@@ -3494,9 +3080,6 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
   place-items: center;
   background: var(--page-bg);
   transition: opacity 0.5s ease, visibility 0.5s ease;
-  /* Pure-CSS failsafe. If the component never runs — a JS error, a bundle that
-     fails to load — this still clears at 6s rather than hiding the site
-     forever. */
   animation: loader-failsafe 0s linear 6s forwards;
 }
 @keyframes loader-failsafe {
@@ -3610,10 +3193,6 @@ html[data-theme="light"] .site-loader::before {
   border-radius: 999px;
   background: var(--grad-accent);
   transform-origin: left center;
-  /* No transition. The value is driven every frame from requestAnimationFrame,
-     and a transition on top of that restarts on each update, so the rendered
-     bar lags permanently behind its target — it sat around 19% while the real
-     value was near 90%. The rAF easing is the animation. */
 }
 
 .site-loader-name {
@@ -3635,9 +3214,6 @@ html[data-theme="light"] .site-loader::before {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* The hero's carousel, running while the page arrives. One window, the words
-   stacked inside it, translated a word at a time; the first is repeated at the
-   end so the loop closes without a jump back. */
 .site-loader-words {
   display: block;
   height: 1.35rem;
@@ -3646,10 +3222,6 @@ html[data-theme="light"] .site-loader::before {
   font-weight: 600;
   line-height: 1.35rem;
   text-align: center;
-  /* Solid colour, not a clipped gradient. background-clip: text paints the
-     container's own background through its text, but these words sit in a
-     child that the carousel translates — the background stays put while the
-     letters move, so nothing showed. */
   color: var(--accent-1);
 }
 .site-loader-words i {
@@ -3675,19 +3247,12 @@ html[data-theme="light"] .site-loader::before {
   .site-loader { transition: none; }
 }
 
-/* Status line. Remounted whenever the label changes, so each new phrase rises
-   in rather than swapping in place. */
 .site-loader-status {
   font-size: 0.78rem;
   font-weight: 500;
   color: var(--muted);
   animation: loader-status 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-/* Starts part-visible, not at zero. The node is remounted on every label
-   change to replay this, and starting from opacity 0 meant the line was
-   invisible for the first frames after each change — sampling caught it blank
-   more often than not. `both` also pins the end state so it cannot settle
-   anywhere but fully visible. */
 @keyframes loader-status {
   from { opacity: 0.3; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -3696,51 +3261,23 @@ html[data-theme="light"] .site-loader::before {
   .site-loader-status { animation: none; }
 }
 
-/* ==========================================================================
-   HOVER HIT-AREA STABILISER
-   These buttons lift a pixel or two on hover. A transform moves the element's
-   hit box along with its pixels, so a pointer resting on the edge lifts the
-   button out from under itself, which un-hovers it, which drops it back —
-   measured at nine hover flips per second against a perfectly still pointer.
-
-   The fix is the pattern `.contact-submit` already uses: keep the hit area
-   still and move only what you can see. Here that layer is a pseudo-element
-   counter-translated by the same distance, so button ∪ layer always covers the
-   resting box and the hover boundary never moves. The lift is unchanged.
-   ========================================================================== */
 .btn-surface { position: relative; }
 .btn-surface::after,
 .chat-fab::after {
   content: "";
   position: absolute;
-  /* -1px, not 0: `inset` resolves against the padding box, so at 0 this layer
-     stops one border-width short of the button's real edge and the counter-
-     translate lands a pixel high — still oscillating, just more finely. At
-     -1px it matches the border box exactly. */
   inset: -1px;
   border-radius: inherit;
-  /* Matches each button's own transform timing so the two stay in step for
-     every frame of the transition, not just at the ends. */
   transition: transform 0.3s ease;
 }
 .btn-surface:hover::after { transform: translateY(1px); }
 
-/* Resume is the exception. It clips itself to keep the edge-wipe fill inside
-   the pill, and that clip crops the stabiliser's one overhanging pixel — an
-   attempt to let the fill round itself instead left a grey ring where it no
-   longer reached the button's edge. So this button gives up the 1px lift
-   rather than its fill: with no transform there is no moving hit box and no
-   flicker to correct. The gradient wipe already carries the hover; the shadow
-   below stands in for the pixel of rise. */
 .resume-btn:hover { transform: none; }
 .resume-btn:hover::after { transform: none; }
 .resume-btn:hover { box-shadow: 0 5px 20px rgba(109, 92, 246, 0.26); }
 .chat-fab::after { transition-duration: 0.25s; }
 .chat-fab:hover::after { transform: translateY(2px); }
 
-/* The clip was defensive — the icons are 18px inside a 45.6px button and
-   cannot reach the edge even scaled — but it cropped the one pixel of
-   stabiliser that has to sit outside the padding box. */
 .theme-toggle { overflow: visible; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3748,15 +3285,6 @@ html[data-theme="light"] .site-loader::before {
   .chat-fab::after { transition: none; }
 }
 
-/* ==========================================================================
-   LIGHT THEME — the neon mark
-   One treatment everywhere. The mark is a triangulated neon "S" whose glow
-   lives in the artwork's alpha, so on a light ground it needs contrast rather
-   than a different colour or a plate behind it — saturate and contrast sharpen
-   the strokes while leaving the halo soft, and the drop-shadow supplies the
-   glow the light background swallows. The navbar, the constellation hub and
-   the loader all use it, so the mark reads as one thing in both themes.
-   ========================================================================== */
 html[data-theme="light"] .logo-mark,
 html[data-theme="light"] .site-loader-mark {
   filter: saturate(2) contrast(1.75) brightness(0.76)
@@ -3768,8 +3296,6 @@ html[data-theme="light"] .logo-mark.is-glowing {
     drop-shadow(0 0 38px rgba(109, 40, 217, 0.15));
 }
 
-/* The loader's monogram animates its own filter, so light mode needs matching
-   keyframes rather than a static filter the animation would overwrite. */
 html[data-theme="light"] .site-loader-mark { animation-name: loader-mark-light; }
 @keyframes loader-mark-light {
   0%, 100% {
@@ -3784,8 +3310,6 @@ html[data-theme="light"] .site-loader-mark { animation-name: loader-mark-light; 
       drop-shadow(0 0 42px rgba(109, 40, 217, 0.17));
   }
 }
-/* The reduced-motion rule further up is less specific than the one naming the
-   light keyframes, so it has to be restated or the animation survives. */
 @media (prefers-reduced-motion: reduce) {
   html[data-theme="light"] .site-loader-mark {
     animation: none;
@@ -3793,23 +3317,11 @@ html[data-theme="light"] .site-loader-mark { animation-name: loader-mark-light; 
   }
 }
 
-/* The strings ramp from 15%-opacity lavender, which is nothing at all against
-   #f4f6f8. Light mode runs the same ramp toward a saturated indigo instead. */
 html[data-theme="light"] #loader-wire stop:first-child { stop-color: rgba(109, 40, 217, 0.12); }
 html[data-theme="light"] #loader-wire stop:last-child  { stop-color: rgba(67, 56, 202, 0.9); }
 
-/* The submit shared the 1.75rem rhythm of the gaps between fields, so it read
-   as a fourth field rather than the end of the form. */
 .contact-form .contact-submit { margin-top: 0.55rem; }
 
-/* ==========================================================================
-   BRAND ROLE TYPEWRITER
-   The roles differ in length, so a naive implementation resizes the navbar on
-   every keystroke. A hidden copy of the longest role holds the box open and the
-   animated text is absolutely positioned over it — the width is measured from
-   real rendered type rather than guessed in `ch`, which would be wrong here
-   anyway with the uppercasing and letter-spacing applied.
-   ========================================================================== */
 .brand-role {
   position: relative;
   display: inline-block;
@@ -3843,13 +3355,6 @@ html[data-theme="light"] #loader-wire stop:last-child  { stop-color: rgba(67, 56
   .brand-role-caret { display: none; }
 }
 
-/* ==========================================================================
-   OUTCOME STRIP
-   Replaces the four counters under the hero. Each card is a before, an arrow
-   and an after, so the number carries its own meaning without a paragraph
-   underneath it. Revealed on entry with a stagger, in the same idiom as the
-   contact form's fields.
-   ========================================================================== */
 .outcome-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3913,8 +3418,6 @@ html[data-theme="light"] #loader-wire stop:last-child  { stop-color: rgba(67, 56
   text-decoration: line-through;
   text-decoration-color: rgba(248, 113, 113, 0.55);
 }
-/* Drawn rather than typed: an arrow glyph sits on the text baseline and drifts
-   between fonts, where this stays put and can animate its own length. */
 .outcome-arrow {
   position: relative;
   align-self: center;

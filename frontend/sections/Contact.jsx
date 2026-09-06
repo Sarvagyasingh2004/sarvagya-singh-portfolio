@@ -5,8 +5,6 @@ import TitleHeader from "../components/TitleHeader";
 import Reveal from "../components/Reveal";
 import dynamic from "next/dynamic";
 
-// WebGL can't be server-rendered, and a static export prerenders everything —
-// so the canvas loads on the client only.
 const ContactExperience = dynamic(() => import("../components/ContactModels/ContactExperience"), { ssr: false });
 
 const Contact = () => {
@@ -37,6 +35,7 @@ const Contact = () => {
         throw new Error(body.error || "Couldn't send that message.");
       }
       setForm({ name: "", email: "", message: "" });
+      formRef.current?.reset();
       setStatus({ state: "success", message: "Message sent. I'll try to reply within a day." });
     } catch (error) {
       setStatus({
@@ -46,30 +45,22 @@ const Contact = () => {
     }
   };
 
-  // The button holds its "sent" face for a beat, then returns to idle so the
-  // form is obviously usable again.
   useEffect(() => {
     if (status.state !== "success") return;
-    const t = setTimeout(
+    const idle = setTimeout(
       () => setStatus((s) => (s.state === "success" ? { ...s, state: "idle" } : s)),
       4200
     );
-    return () => clearTimeout(t);
+    const clear = setTimeout(
+      () => setStatus((s) => (s.state === "error" ? s : { state: "idle", message: "" })),
+      10000
+    );
+    return () => {
+      clearTimeout(idle);
+      clearTimeout(clear);
+    };
   }, [status.state]);
 
-  // Fields arrive one after another as the section comes up, so the form reads
-  // as being assembled rather than pasted in.
-  //
-  // Deliberately an IntersectionObserver and CSS rather than a scrubbed GSAP
-  // tween. A gsap.from() applies its start state the moment it is created, and
-  // its ScrollTrigger start position is measured on mount - before the WebGL
-  // canvases on this page finish changing the document height. When that
-  // measurement went stale the trigger never fired and the from-state stuck,
-  // leaving every field and the submit button at opacity 0. A contact form
-  // that can be hidden by its own decoration is a bug, so:
-  //   - the markup renders visible; `armed` is what opts into hiding, and it is
-  //     only ever set for an element confirmed to be OFF screen
-  //   - a timeout guarantees the form reveals itself even if nothing else fires
   const [armed, setArmed] = useState(false);
   const [shown, setShown] = useState(false);
 
@@ -117,7 +108,7 @@ const Contact = () => {
               <form
                 ref={formRef}
                 onSubmit={handleSubmit}
-                className={`w-full flex flex-col gap-7 contact-form${armed ? " is-armed" : ""}${shown ? " is-in" : ""}`}
+                className={`w-full flex flex-col gap-7 contact-form${armed ? " is-armed" : ""}${shown ? " is-in" : ""}${status.state === "success" ? " is-sent" : ""}`}
               >
                 <div className="contact-field" style={{ "--i": 0 }}>
                   <label htmlFor="name">Your name</label>
@@ -176,7 +167,6 @@ const Contact = () => {
                   </p>
                 ) : null}
 
-                {/* Honeypot — hidden from people, filled by bots. */}
                 <input
                   type="text"
                   name="company_url"

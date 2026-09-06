@@ -5,15 +5,6 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useThemeName } from "@/lib/useTheme";
 
-/**
- * A round sprite for the flakes.
- *
- * `pointsMaterial` rasterises each point as a square quad, so without a
- * texture the snow falls as little boxes. This paints one soft disc to a
- * canvas and hands it over as the material's map: solid through the middle so
- * the flake still reads at 2-3px, then a short falloff so the rim is smooth
- * rather than aliased.
- */
 const makeFlake = () => {
   const c = document.createElement("canvas");
   c.width = c.height = 64;
@@ -36,8 +27,6 @@ const Particles = ({ count = 200 }) => {
   const mesh = useRef();
   const isDay = useThemeName() === "light";
 
-  // Guarded: this is a client component, but Next still renders it on the
-  // server, where there is no canvas to draw into.
   const flake = useMemo(
     () => (typeof document === "undefined" ? null : makeFlake()),
     []
@@ -88,11 +77,6 @@ const Particles = ({ count = 200 }) => {
         />
       </bufferGeometry>
       <pointsMaterial
-        // White flakes are invisible against a light page, so day mode swaps
-        // them for drifting motes lit from the window rather than snow against
-        // a night sky. The first pass at that was too polite to notice: a pale
-        // slate at 55% read as dust on the screen. Deeper, larger and more
-        // opaque, tinted toward the page's own violet so they belong to it.
         color={isDay ? "#4a4a8f" : "#ffffff"}
         size={isDay ? 0.115 : 0.06}
         map={flake}

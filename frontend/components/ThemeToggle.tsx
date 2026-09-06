@@ -7,32 +7,20 @@ const ThemeToggle = () => {
   const [theme, setTheme] = useState<Theme>("dark");
   const [tip, setTip] = useState("");
 
-  // The head script already applied the theme — read it back so there's no
-  // flicker from re-deciding on mount.
   useEffect(() => {
     setTheme((document.documentElement.dataset.theme as Theme) || "dark");
-    setTip(`${isDaytime() ? "daytime" : "night"} in ${localZone()} — follows the clock again tomorrow`);
+    setTip(`${isDaytime() ? "daytime" : "night"} in ${localZone()}`);
   }, []);
 
   const apply = (next: Theme) => {
     setTheme(next);
-    // Kill every transition for one frame while the theme flips.
-    // Different elements carried different transition durations, so on switch
-    // backgrounds, borders and text each settled at their own pace and the
-    // button labels visibly arrived late. Suppressing transitions makes the
-    // swap atomic, then they're restored for normal interaction.
     const root = document.documentElement;
     root.classList.add("theme-switching");
     root.dataset.theme = next;
     window.setTimeout(() => root.classList.remove("theme-switching"), 60);
     try {
-      // Stored with the period it was chosen in, so the choice lasts this
-      // morning or this evening and then hands back to the clock. See
-      // lib/theme.ts.
       localStorage.setItem(THEME_KEY, writeStored(next));
-    } catch {
-      /* private browsing — still applies for this session */
-    }
+    } catch {}
   };
 
   const isDark = theme === "dark";
@@ -45,8 +33,6 @@ const ThemeToggle = () => {
       aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
       title={tip ? `${isDark ? "Dark" : "Light"} — ${tip}` : undefined}
     >
-      {/* Both icons are always mounted; CSS rotates one out and the other in,
-          each keeping its own colour. */}
       <span className="theme-toggle-track" aria-hidden="true">
         <svg className="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <circle cx="12" cy="12" r="4.2" />

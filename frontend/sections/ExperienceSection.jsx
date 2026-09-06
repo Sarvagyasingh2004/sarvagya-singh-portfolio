@@ -26,14 +26,6 @@ const ExperienceSection = () => {
       });
     });
 
-    // The mask retracts as you scroll, uncovering the gradient line beneath.
-    //
-    // Scrubbed to the scroll position. The previous version called
-    // `gsap.to(".timeline", ...)` inside its trigger's onUpdate, which built a
-    // fresh half-second tween on every scroll event, each fighting the one
-    // before it — that is the line dropping out halfway down and coming back.
-    // Its trigger also resolved to a single element while the tween targeted
-    // every match, so nothing was scoped to what it animated.
     gsap.utils.toArray(".timeline").forEach((line) => {
       gsap.fromTo(
         line,
@@ -75,12 +67,6 @@ const ExperienceSection = () => {
           sub="💼 My Career Overview"
         />
         <div className="mt-32 relative">
-          {/* One line for the whole run, rendered once.
-              It used to be emitted inside the card loop, but `.timeline-wrapper`
-              is absolute and the nearest positioned ancestor is this shared
-              container — so all three copies resolved to the same box and
-              stacked, spanning the section three times over rather than
-              once each. */}
           <div className="timeline-wrapper">
             <div className="timeline" />
             <div className="gradient-line w-1 h-full" />
