@@ -4,5 +4,8 @@
       "path": "/api/cron/digest",
       "schedule": "30 3 * * *"
     }
+  ],
+  "regions": [
+    "bom1"
   ]
 }

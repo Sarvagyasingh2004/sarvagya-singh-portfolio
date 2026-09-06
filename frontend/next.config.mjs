@@ -8,6 +8,44 @@ const nextConfig = {
   //   3. next/image optimization.
   // Vercel serverless functions do not sleep, so there is no keep-alive cron.
   reactStrictMode: true,
+
+  // Sent on every response. Without these the site scores poorly on any
+  // security scan and, more practically, can be framed by anyone.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          // Stops the site being embedded in someone else's page.
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          // Stops a browser second-guessing a declared content type.
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          // Send the origin to other sites, the full URL only to ourselves.
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          // Nothing here needs a camera, a microphone or a location.
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+          },
+          // Two years, subdomains included. Vercel serves HTTPS only.
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+        ],
+      },
+      {
+        // The API answers the site, not other origins, and must never be
+        // cached by a proxy in between.
+        source: "/api/:path*",
+        headers: [
+          { key: "Cache-Control", value: "no-store, max-age=0" },
+          { key: "X-Robots-Tag", value: "noindex" },
+        ],
+      },
+    ];
+  },
+
   transpilePackages: [
     "three",
     "@react-three/fiber",

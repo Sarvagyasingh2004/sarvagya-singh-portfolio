@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { connectDb, dbReady } from "@/lib/server/db";
 import { ResumeFile } from "@/lib/server/models";
-import { json } from "@/lib/server/util";
+import { clientIp, json, rateLimit } from "@/lib/server/util";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,7 +12,13 @@ export const dynamic = "force-dynamic";
 // the PDF is kept out of the repo so it has no crawlable URL. So this reported
 // unavailable and disabled the button while the download itself was working
 // perfectly from MongoDB.
-export async function GET() {
+export async function GET(req: Request) {
+  // This reaches the database now, so it needs the same protection the other
+  // database-backed routes have.
+  if (!rateLimit(`rstatus:${clientIp(req)}`, 60, 60 * 60 * 1000).ok) {
+    return json({ error: "Too many requests." }, 429);
+  }
+
   if (existsSync(join(process.cwd(), "private", "resume.pdf"))) {
     return json({ available: true });
   }
