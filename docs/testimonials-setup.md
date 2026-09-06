@@ -1,167 +1,127 @@
 # Testimonials via Google Form — setup
 
-## Why it works this way
-
-The site is a **static export**. There is no server at request time and no ISR,
-so the Google Sheet is read **once, during `next build`**, and the approved rows
-are baked into the HTML.
-
-Two consequences, both deliberate:
-
-1. Testimonials ship as real crawlable markup, not a client-side fetch that
-   Google may never execute.
-2. Approving a testimonial does **not** appear instantly. It needs a rebuild —
-   which the Apps Script trigger fires automatically. Lag is one deploy,
-   roughly 2–3 minutes.
+Approved rows in a Google Sheet become testimonials on the site. No rebuild and
+no deploy: the page re-reads the sheet at most once an hour and regenerates
+itself in the background (Next.js ISR).
 
 ```
-Google Form  (public link you send to people)
-     │  submission
-     ▼
-Google Sheet ── you tick `approved` = TRUE   ◄── manual gate, always required
-     │
-     ├─ onFormSubmit  → emails you "new testimonial pending"
-     └─ onEdit        → POST repository_dispatch to GitHub
-                             │
-                             ▼
-                   GitHub Actions rebuild
-                             │
-                   next build reads /exec → JSON
-                             │
-                   s3 sync + CloudFront invalidation
-                             ▼
-                        live, ~2-3 min
+Google Form   (public link you send to people)
+      │  submission
+      ▼
+Google Sheet  ── you set `approved` to yes      ◄── manual gate, always
+      │
+      ▼
+Apps Script web app  →  JSON array at /exec
+      │
+      ▼
+TESTIMONIALS_URL  →  read hourly, server-rendered, crawlable
 ```
 
 The `approved` gate is not optional. The Form link is public, so anyone can
-submit anything; nothing renders until you tick the box yourself.
+submit anything; nothing renders until you set that cell yourself.
 
-## 1. Create the Form
+If the sheet is unreachable, malformed, or `TESTIMONIALS_URL` is unset, the
+site falls back to `frontend/content/testimonials.json` rather than showing an
+empty section.
 
-Fields, in this order:
+---
 
-| Field | Type | Required |
+## 1. The Form
+
+Create a Google Form with these questions, in any order:
+
+| Question | Type | Required |
 |---|---|---|
 | Your name | Short answer | yes |
-| Role and company | Short answer | yes |
-| How did we work together? | Short answer | yes |
+| Your role and company | Short answer | no |
 | Your testimonial | Paragraph | yes |
-| LinkedIn profile URL | Short answer | yes — this is your verification |
-| I'm happy for this to appear publicly | Checkbox | yes |
 
-Link it to a Sheet: **Responses → Link to Sheets**.
+Responses → **Link to Sheets** → create a new spreadsheet.
 
-## 2. Add the moderation columns
+## 2. The Sheet
 
-In the response sheet, add two columns to the right of the generated ones:
+In the responses sheet, rename the header cells so the script can find them.
+The script matches on these names, lower-cased, so the exact wording of your
+Form question does not matter:
 
-- `approved` — leave blank; type `TRUE` to publish
-- `order` — optional number for display ordering
+| Column header | Becomes |
+|---|---|
+| `name` | the person's name |
+| `role` | the line under their name (optional) |
+| `review` | the testimonial body |
+| `approved` | the gate — type `yes` to publish |
 
-## 3. Apps Script
+Add the `approved` column yourself; the Form will not create it.
 
-**Extensions → Apps Script**, paste this, and set `GITHUB_TOKEN` /
-`GITHUB_REPO` under Project Settings → Script Properties.
+## 3. The Apps Script
 
-```javascript
-// Serves only approved rows, and strips the submitter's email and LinkedIn URL
-// so no PII reaches the public site.
+In the sheet: **Extensions → Apps Script**, replace everything with:
+
+```js
+const SHEET_NAME = 'Form Responses 1';
+
 function doGet() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
-  const rows = sheet.getDataRange().getValues();
-  const header = rows.shift().map(h => String(h).trim().toLowerCase());
+  const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
+  const [header, ...rows] = sheet.getDataRange().getValues();
 
-  const col = name => header.findIndex(h => h.includes(name));
+  const col = (want) =>
+    header.findIndex((h) => String(h).trim().toLowerCase() === want);
+
   const iName = col('name');
   const iRole = col('role');
-  const iReview = col('testimonial');
+  const iReview = col('review');
   const iApproved = col('approved');
-  const iOrder = col('order');
 
   const out = rows
-    .filter(r => String(r[iApproved]).toUpperCase() === 'TRUE')
-    .map(r => ({
+    .filter((r) => String(r[iApproved]).trim().toLowerCase() === 'yes')
+    .map((r) => ({
       name: String(r[iName] || '').trim(),
-      mentions: String(r[iRole] || '').trim(),
+      mentions: iRole > -1 ? String(r[iRole] || '').trim() : '',
       review: String(r[iReview] || '').trim(),
-      order: Number(r[iOrder]) || 999,
+      imgPath: '',
     }))
-    .filter(t => t.name && t.review)
-    .sort((a, b) => a.order - b.order);
+    .filter((t) => t.name && t.review);
 
-  return ContentService
-    .createTextOutput(JSON.stringify(out))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-// Notify yourself when something needs moderating.
-function onFormSubmit(e) {
-  MailApp.sendEmail(
-    'sarvagya3555cc@gmail.com',
-    'New testimonial pending approval',
-    'Someone submitted a testimonial. Tick `approved` in the sheet to publish it:\n\n'
-      + SpreadsheetApp.getActiveSpreadsheet().getUrl()
+  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(
+    ContentService.MimeType.JSON
   );
-}
-
-// Ticking `approved` triggers a site rebuild.
-function onEdit(e) {
-  const header = e.source.getActiveSheet()
-    .getRange(1, 1, 1, e.source.getActiveSheet().getLastColumn())
-    .getValues()[0].map(h => String(h).trim().toLowerCase());
-
-  const approvedCol = header.findIndex(h => h.includes('approved')) + 1;
-  if (e.range.getColumn() !== approvedCol) return;
-
-  const props = PropertiesService.getScriptProperties();
-  const token = props.getProperty('GITHUB_TOKEN');
-  const repo  = props.getProperty('GITHUB_REPO'); // e.g. "sarvagya/portfolio"
-  if (!token || !repo) return;
-
-  UrlFetchApp.fetch(`https://api.github.com/repos/${repo}/dispatches`, {
-    method: 'post',
-    contentType: 'application/json',
-    headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' },
-    payload: JSON.stringify({ event_type: 'cms-update' }),
-    muteHttpExceptions: true,
-  });
 }
 ```
 
-**Deploy → New deployment → Web app**
+Then **Deploy → New deployment → Web app**:
+
 - Execute as: **Me**
 - Who has access: **Anyone**
 
-That gives you a `/exec` URL that returns JSON with no API key in your app.
+Copy the `/exec` URL it gives you.
 
-Then add the two triggers under the clock icon: `onFormSubmit` (event: On form
-submit) and `onEdit` (event: On edit).
+> Access must be **Anyone**, not "Anyone with a Google account" — the site
+> fetches this without signing in. The sheet itself stays private; only this
+> JSON is exposed, and it only ever contains approved rows.
 
 ## 4. Wire it up
 
-`frontend/.env.local`, and as a GitHub Actions secret:
+Add the URL to `frontend/.env.local` for local work, and to the Vercel project's
+environment variables for production:
 
 ```
-TESTIMONIALS_URL=https://script.google.com/macros/s/AKfy.../exec
+TESTIMONIALS_URL=https://script.google.com/macros/s/…/exec
 ```
 
-GitHub PAT for the dispatch: fine-grained, single repo, **Contents: write**.
+Check it first — this should print a JSON array:
 
-## 5. Behaviour without any of this
+```bash
+curl -sL "$TESTIMONIALS_URL"
+```
 
-- `TESTIMONIALS_URL` unset → falls back to `frontend/content/testimonials.json`
-- Sheet down, times out, or returns malformed JSON → same fallback, build still
-  succeeds with a warning
-- Zero approved rows → **the section does not render at all.** An empty
-  "What People Say About Me?" heading looks worse than no section.
+`[]` is a correct answer when nothing is approved yet. The site then keeps its
+committed fallback, and the section hides itself entirely rather than showing
+an empty heading.
 
-## 6. Who to actually ask
+## What the site does with each field
 
-Realistic, and all real:
-
-- Your Kraftshala manager and teammates (lokesh, rishik, mohit)
-- The BWS point of contact
-- Coding Blocks students you mentored — you taught 100+ people Java and DSA,
-  which is a testimonial source most early-career candidates simply don't have
-
-Three real ones beat six invented ones, which is what was there before.
+- **name** — required. A row without one is dropped.
+- **review** — required. Same.
+- **mentions** — optional, shown under the name.
+- **imgPath** — left empty. Submitters do not upload photos, so the card draws
+  a lettered monogram instead of requesting a file that does not exist.
