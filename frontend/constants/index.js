@@ -197,10 +197,10 @@ const projects = [
     accent: "violet",
   },
   {
-    slug: "realtime-chat",
-    title: "Real-Time Chat",
+    slug: "skein",
+    title: "Skein — Real-Time Chat",
     tagline:
-      "A messaging platform where a message survives the recipient being offline.",
+      "A messaging platform where a message survives the recipient being offline — passwordless sign-in, delivery state you can trust.",
     stack: ["Next.js", "TypeScript", "Node.js", "MongoDB", "Redis", "RabbitMQ"],
     highlights: [
       "RabbitMQ sits behind the WebSocket layer rather than the socket writing straight to the database — which is what makes acknowledgements and offline delivery work.",
@@ -214,7 +214,7 @@ const projects = [
       { label: "Backend code", url: "https://github.com/Sarvagyasingh2004/Microservices_chat_backend" },
     ],
     liveUrl: "REPLACE_ME",
-    shot: "",
+    shot: "/images/projects/skein.jpg",
     accent: "indigo",
   },
   {
