@@ -28,51 +28,87 @@ empty section.
 
 ## 1. The Form
 
-Create a Google Form with these questions, in any order:
+Three questions. Word them however you like — the script matches loosely, so
+you do not have to rename anything afterwards.
 
 | Question | Type | Required |
 |---|---|---|
-| Your name | Short answer | yes |
+| Your name | Short answer | **yes** |
 | Your role and company | Short answer | no |
-| Your testimonial | Paragraph | yes |
+| Your testimonial | Paragraph | **yes** |
 
-Responses → **Link to Sheets** → create a new spreadsheet.
+That is the whole form. No photo upload — the card draws a lettered monogram,
+so a missing picture is a design choice rather than a broken image.
+
+Then **Responses → Link to Sheets → Create a new spreadsheet**.
 
 ## 2. The Sheet
 
-In the responses sheet, rename the header cells so the script can find them.
-The script matches on these names, lower-cased, so the exact wording of your
-Form question does not matter:
+The Form creates a `Timestamp` column plus one per question. You add **one**
+column by hand, at the end:
 
-| Column header | Becomes |
-|---|---|
-| `name` | the person's name |
-| `role` | the line under their name (optional) |
-| `review` | the testimonial body |
-| `approved` | the gate — type `yes` to publish |
+| Column | Who creates it | What it does |
+|---|---|---|
+| Timestamp | the Form | ignored |
+| Your name | the Form | the person's name |
+| Your role and company | the Form | the line under their name |
+| Your testimonial | the Form | the quote |
+| **`approved`** | **you** | the gate — type `yes` to publish |
 
-Add the `approved` column yourself; the Form will not create it.
+The `approved` gate is not optional. The Form link is public, so anyone can
+submit anything; nothing reaches the site until you type `yes` in that cell
+yourself.
 
 ## 3. The Apps Script
 
-In the sheet: **Extensions → Apps Script**, replace everything with:
+In the sheet: **Extensions → Apps Script**, replace everything with this, then
+save.
 
 ```js
 const SHEET_NAME = 'Form Responses 1';
 
+// Matched loosely against the header row so the Form's own wording works
+// as-is. An exact header (`name`, `role`, `review`) always wins if you would
+// rather rename the columns.
+const FIELDS = {
+  name: [/\bname\b/],
+  role: [/\brole\b/, /\bcompany\b/, /\btitle\b/, /\bposition\b/],
+  review: [/\btestimonial\b/, /\breview\b/, /\bfeedback\b/, /\bquote\b/],
+  approved: [/\bapprove/],
+};
+
 function doGet() {
   const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
-  const [header, ...rows] = sheet.getDataRange().getValues();
+  if (!sheet) return out({ error: 'No sheet named ' + SHEET_NAME });
 
-  const col = (want) =>
-    header.findIndex((h) => String(h).trim().toLowerCase() === want);
+  const [header, ...rows] = sheet.getDataRange().getValues();
+  const head = header.map((c) => String(c).trim().toLowerCase());
+
+  const col = (key) => {
+    const exact = head.indexOf(key);
+    if (exact > -1) return exact;
+    for (const re of FIELDS[key]) {
+      const i = head.findIndex((c) => re.test(c));
+      if (i > -1) return i;
+    }
+    return -1;
+  };
 
   const iName = col('name');
   const iRole = col('role');
   const iReview = col('review');
   const iApproved = col('approved');
 
-  const out = rows
+  // Returning the problem rather than an empty list: the site falls back to its
+  // committed testimonials either way, but this way opening the URL tells you
+  // which column is missing instead of showing a silent [].
+  const missing = [];
+  if (iName < 0) missing.push('name');
+  if (iReview < 0) missing.push('review');
+  if (iApproved < 0) missing.push('approved');
+  if (missing.length) return out({ error: 'Missing column(s): ' + missing.join(', '), headers: head });
+
+  const list = rows
     .filter((r) => String(r[iApproved]).trim().toLowerCase() === 'yes')
     .map((r) => ({
       name: String(r[iName] || '').trim(),
@@ -82,7 +118,11 @@ function doGet() {
     }))
     .filter((t) => t.name && t.review);
 
-  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(
+  return out(list);
+}
+
+function out(data) {
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(
     ContentService.MimeType.JSON
   );
 }
@@ -97,7 +137,7 @@ Copy the `/exec` URL it gives you.
 
 > Access must be **Anyone**, not "Anyone with a Google account" — the site
 > fetches this without signing in. The sheet itself stays private; only this
-> JSON is exposed, and it only ever contains approved rows.
+> JSON is exposed, and it only ever contains rows you approved.
 
 ## 4. Wire it up
 
@@ -117,6 +157,12 @@ curl -sL "$TESTIMONIALS_URL"
 `[]` is a correct answer when nothing is approved yet. The site then keeps its
 committed fallback, and the section hides itself entirely rather than showing
 an empty heading.
+
+If instead you get `{"error": "Missing column(s): approved", "headers": [...]}`,
+the script found the sheet but not that column — the response lists the headers
+it did see, so you can spot the mismatch. The site treats anything that is not
+an array as a failure and falls back, so a half-configured sheet can never blank
+the section.
 
 ## What the site does with each field
 
