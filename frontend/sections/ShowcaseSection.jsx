@@ -29,8 +29,12 @@ const ARROW = (
 );
 
 const ProjectCard = ({ project, index, total }) => {
+  // A project can ship as more than one repository - the chat app is split
+  // frontend/backend - so `repos` takes a labelled list and `repoUrl` stays
+  // as the single-repo shorthand.
   const links = [
-    { label: "View code", url: project.repoUrl },
+    ...(project.repos ??
+      (project.repoUrl ? [{ label: "View code", url: project.repoUrl }] : [])),
     { label: "Live demo", url: project.liveUrl },
   ].filter((l) => l.url && l.url !== "REPLACE_ME");
 

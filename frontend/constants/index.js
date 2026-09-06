@@ -173,7 +173,7 @@ const projects = [
       "Redis caching cut database reads by roughly 60% and latency by roughly 35%.",
       "Retries, a dead-letter queue and health checks so a downed service degrades instead of losing orders.",
     ],
-    repoUrl: "REPLACE_ME",
+    repoUrl: "https://github.com/Sarvagyasingh2004/eatlify-food-ordering-microservices",
     liveUrl: "REPLACE_ME",
     shot: "/images/projects/eatlify.png",
     accent: "violet",
@@ -189,7 +189,12 @@ const projects = [
       "Redis caching and query optimization cut response times by roughly 35%.",
       "JWT authentication with per-message delivery state, so the UI can show sent, delivered and read honestly.",
     ],
-    repoUrl: "REPLACE_ME",
+    // Two repositories: the split is the point of the project, so both are
+    // linked rather than hiding half the system behind one button.
+    repos: [
+      { label: "Frontend code", url: "https://github.com/Sarvagyasingh2004/Microservices_chat_frontend" },
+      { label: "Backend code", url: "https://github.com/Sarvagyasingh2004/Microservices_chat_backend" },
+    ],
     liveUrl: "REPLACE_ME",
     shot: "",
     accent: "indigo",
@@ -205,7 +210,7 @@ const projects = [
       "Token-based authentication and REST APIs, shipped with CI/CD.",
       "Released open-source with documentation — counting this site's Gemini integration, that is three providers on the same abstraction.",
     ],
-    repoUrl: "REPLACE_ME",
+    repoUrl: "https://github.com/Sarvagyasingh2004/SaaSify-AI",
     liveUrl: "REPLACE_ME",
     shot: "/images/projects/saasify-ai.jpg",
     accent: "cyan",
