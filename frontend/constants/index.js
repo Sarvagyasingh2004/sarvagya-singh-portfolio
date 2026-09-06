@@ -289,6 +289,14 @@ const socialImgs = [
     url: "https://leetcode.com/u/Sarvagyasingh_2004/",
     imgPath: "/images/logos/leetcode.svg",
   },
+  {
+    name: "Email",
+    // Points at the contact form, NOT a mailto:. A mailto puts the address in
+    // the page source for any scraper that asks; the form reaches the same
+    // inbox without publishing it.
+    url: "#contact",
+    imgPath: "/images/logos/email.svg",
+  },
 ];
 
 const techStackImgs = [

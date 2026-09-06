@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { contactEmail } from "@/constants";
 
 // API routes are same-origin now — no cross-origin base URL, no CORS.
 const API_URL = "";
@@ -217,7 +216,7 @@ const Chatbot = () => {
           {error ? (
             <div className="chat-fallback">
               <p>{error}</p>
-              <a href={`mailto:${contactEmail}`}>Email me instead</a>
+              <a href="#contact">Use the contact form instead</a>
             </div>
           ) : null}
         </div>

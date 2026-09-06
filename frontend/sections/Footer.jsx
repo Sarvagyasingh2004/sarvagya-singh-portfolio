@@ -1,28 +1,36 @@
-import { socialImgs, contactEmail } from "@/constants";
+import { socialImgs } from "@/constants";
 
 const Footer = () => {
   return (
     <footer className="footer">
       <div className="footer-container">
-        <div className="flex flex-col md:items-start justify-center items-center">
-          <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+        <div className="footer-line">
+          <p>Open to full-time backend and full-stack roles.</p>
         </div>
+
         <div className="socials">
           {socialImgs
             .filter((img) => img.url && img.url !== "REPLACE_ME")
-            .map((img) => (
-            <a
-              key={img.name}
-              className="icon"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={img.name}
-              href={img.url}
-            >
-              <img src={img.imgPath} alt="" />
-            </a>
-          ))}
+            .map((img) => {
+              const internal = img.url.startsWith("#");
+              return (
+                <a
+                  key={img.name}
+                  className="social-link"
+                  href={img.url}
+                  {...(internal
+                    ? {}
+                    : { target: "_blank", rel: "noopener noreferrer" })}
+                >
+                  <span className="icon">
+                    <img src={img.imgPath} alt="" />
+                  </span>
+                  <span className="social-label">{img.name}</span>
+                </a>
+              );
+            })}
         </div>
+
         <div className="flex flex-col justify-center">
           <p className="text-center md:text-end">
             © {new Date().getFullYear()} Sarvagya Singh. All rights reserved.

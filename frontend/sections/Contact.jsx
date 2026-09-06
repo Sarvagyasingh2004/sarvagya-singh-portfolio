@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import TitleHeader from "../components/TitleHeader";
 import Reveal from "../components/Reveal";
-import { contactEmail } from "@/constants";
 import dynamic from "next/dynamic";
 
 // WebGL can't be server-rendered, and a static export prerenders everything —
@@ -42,7 +41,7 @@ const Contact = () => {
     } catch (error) {
       setStatus({
         state: "error",
-        message: `${error.message} You can email me directly at ${contactEmail}.`,
+        message: `${error.message} You can also reach me on LinkedIn — the link is in the footer.`,
       });
     }
   };
