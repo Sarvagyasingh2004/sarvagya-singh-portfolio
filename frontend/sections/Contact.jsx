@@ -37,7 +37,7 @@ const Contact = () => {
         throw new Error(body.error || "Couldn't send that message.");
       }
       setForm({ name: "", email: "", message: "" });
-      setStatus({ state: "success", message: "Message sent. I'll reply within a day." });
+      setStatus({ state: "success", message: "Message sent. I'll try to reply within a day." });
     } catch (error) {
       setStatus({
         state: "error",

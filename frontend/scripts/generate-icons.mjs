@@ -11,6 +11,7 @@ const WANT = [
   ["siRedis", "Redis"], ["siRabbitmq", "RabbitMQ"], ["siDocker", "Docker"],
   ["siSocketdotio", "Socket.IO"], ["siNginx", "Nginx"], ["siGit", "Git"],
   ["siGithubactions", "GitHub Actions"], ["siLinux", "Linux"],
+  ["siGithub", "GitHub"], ["siPostman", "Postman"],
   ["siThreedotjs", "Three.js"], ["siTailwindcss", "Tailwind CSS"],
 ];
 

@@ -136,6 +136,20 @@ const techIcons = [
     "invertOnLight": false
   },
   {
+    "name": "GitHub",
+    "imgPath": "/images/tech/github.svg",
+    "hex": "#181717",
+    "invertOnDark": true,
+    "invertOnLight": false
+  },
+  {
+    "name": "Postman",
+    "imgPath": "/images/tech/postman.svg",
+    "hex": "#FF6C37",
+    "invertOnDark": false,
+    "invertOnLight": false
+  },
+  {
     "name": "Three.js",
     "imgPath": "/images/tech/three-js.svg",
     "hex": "#000000",

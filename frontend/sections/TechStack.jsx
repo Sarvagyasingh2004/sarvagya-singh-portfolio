@@ -188,6 +188,15 @@ const TechStack = () => {
       const STAGES = nodes.length + 3;
       const unit = 1 / STAGES;
 
+      // Half a screen per stage reads well at five or six logos, but the set
+      // has grown to twelve and a fixed half-screen each would pin the section
+      // for seven and a half screens of scrolling — long past the point where
+      // it stops being a reveal and starts being a hostage situation. Below the
+      // cap nothing changes; above it the stages compress so the whole run
+      // stays around five and a half screens however many logos there are.
+      const MAX_SCREENS = 5.5;
+      const perStage = Math.min(0.5, MAX_SCREENS / STAGES);
+
       // Where a piece sits once it has landed, in viewport coordinates. The
       // section is pinned at the navbar, so that is a layout sum rather than a
       // rect - and layout is the only thing here a transform cannot corrupt.
@@ -209,7 +218,7 @@ const TechStack = () => {
           // the strings drew - the payoff would happen below the fold. Pinning
           // holds it under the navbar so the whole thing plays in view.
           start: () => "top " + navH() + "px",
-          end: () => "+=" + window.innerHeight * 0.5 * STAGES,
+          end: () => "+=" + window.innerHeight * perStage * STAGES,
           pin: true,
           pinSpacing: true,
           anticipatePin: 1,

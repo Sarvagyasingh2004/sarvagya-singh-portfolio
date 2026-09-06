@@ -50,12 +50,31 @@ const TARGET = 1.6;
 // it stays correct whatever the source artwork measures.
 const DEPTH_RATIO = 0.05;
 
+// Relative luminance (WCAG), the same test scripts/generate-icons.mjs applies.
+const luminance = ({ r, g, b }) => {
+  const f = (c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+};
+
+// A few brands are officially near-black — GitHub is #181717, Express #0A0A0A.
+// The marquee flips those per theme with a CSS filter, which a model sharing
+// one 3D scene cannot do, so they take a mid-tone slate instead. It is the same
+// substitution the three.js logo already carried, and it reads on both grounds.
+const DARK_LIMIT = 0.06;
+const NEUTRAL = "#aab6c8";
+
 const slug = process.argv[2];
 if (!slug) {
   console.error("usage: node scripts/build-logo-model.mjs <slug> [outfile.glb]");
   process.exit(1);
 }
-const outName = process.argv[3] || `${slug}-extruded.glb`;
+const outName = (process.argv[3] || "").startsWith("--") ? `${slug}-extruded.glb` : process.argv[3] || `${slug}-extruded.glb`;
+
+// Curve resolution. Six suits most marks; an intricate outline like the
+// PostgreSQL elephant produces several times the triangles at the same setting,
+// so it is worth turning down where the silhouette can spare it.
+const segArg = process.argv.find((a) => a.startsWith("--segments="));
+const CURVE_SEGMENTS = segArg ? Number(segArg.split("=")[1]) : 6;
 
 const data = new SVGLoader().parse(readFileSync(join(SRC, `${slug}.svg`), "utf8"));
 const staged = new THREE.Group();
@@ -65,7 +84,11 @@ for (const path of data.paths) {
   // r152, so SVGLoader has already converted the SVG's fill into the linear
   // working space — converting again halved TypeScript's blue and took the
   // green out of RabbitMQ's orange, which rendered red instead.
-  const colour = path.color ? path.color.clone() : new THREE.Color("#8f9bb0");
+  let colour = path.color ? path.color.clone() : new THREE.Color(NEUTRAL);
+  if (luminance(colour.clone().convertLinearToSRGB()) < DARK_LIMIT) {
+    colour = new THREE.Color(NEUTRAL);
+    console.log(`  (${slug}: brand colour is near-black — using ${NEUTRAL})`);
+  }
   const material = new THREE.MeshStandardMaterial({
     color: colour,
     metalness: 0.05,
@@ -81,7 +104,7 @@ for (const path of data.paths) {
           bevelThickness: 0.5,
           bevelSize: 0.4,
           bevelSegments: 1,
-          curveSegments: 6,
+          curveSegments: CURVE_SEGMENTS,
         }),
         material
       )

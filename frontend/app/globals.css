@@ -2227,7 +2227,10 @@ html[data-theme="light"] .wire-core { opacity: 0.72; }
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-end;
-  gap: clamp(1.5rem, 4vw, 4rem);
+  /* Tuned so eight nodes hold one row down to 1024px: at 4vw with a 7.5rem
+     model the row needed 1363px against 1280 available, and wrapped a single
+     logo onto a second line by itself, which reads as a mistake. */
+  gap: clamp(0.7rem, 2vw, 2.6rem);
   width: 100%;
 }
 
@@ -2253,8 +2256,8 @@ html[data-theme="light"] .wire-core { opacity: 0.72; }
 
 .constellation-model,
 .constellation-model .tech-view {
-  width: clamp(5.5rem, 8.5vw, 7.5rem);
-  height: clamp(5.5rem, 8.5vw, 7.5rem);
+  width: clamp(5rem, 8.5vw, 6.5rem);
+  height: clamp(5rem, 8.5vw, 6.5rem);
 }
 .constellation-model .tech-view {
   pointer-events: auto;
@@ -2533,7 +2536,13 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
   padding-inline: clamp(1.25rem, 5vw, 5rem);
 }
 
-.stack-head { max-width: 46rem; margin-bottom: clamp(2rem, 4vw, 3.5rem); }
+/* Centred, like every other section heading on the page. It was the only one
+   left-aligned, which read as a mistake rather than a choice. */
+.stack-head {
+  max-width: 46rem;
+  margin: 0 auto clamp(2rem, 4vw, 3.5rem);
+  text-align: center;
+}
 .stack-eyebrow {
   font-size: 0.7rem;
   letter-spacing: 0.16em;
@@ -3792,3 +3801,167 @@ html[data-theme="light"] #loader-wire stop:last-child  { stop-color: rgba(67, 56
 /* The submit shared the 1.75rem rhythm of the gaps between fields, so it read
    as a fourth field rather than the end of the form. */
 .contact-form .contact-submit { margin-top: 0.55rem; }
+
+/* ==========================================================================
+   BRAND ROLE TYPEWRITER
+   The roles differ in length, so a naive implementation resizes the navbar on
+   every keystroke. A hidden copy of the longest role holds the box open and the
+   animated text is absolutely positioned over it — the width is measured from
+   real rendered type rather than guessed in `ch`, which would be wrong here
+   anyway with the uppercasing and letter-spacing applied.
+   ========================================================================== */
+.brand-role {
+  position: relative;
+  display: inline-block;
+  font-style: normal;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.brand-role-sizer { visibility: hidden; }
+.brand-role-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+}
+.brand-role-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1px;
+  margin-left: 0.14em;
+  background: var(--accent-3);
+  animation: role-caret 1s steps(1, end) infinite;
+}
+@keyframes role-caret {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-role-caret { display: none; }
+}
+
+/* ==========================================================================
+   OUTCOME STRIP
+   Replaces the four counters under the hero. Each card is a before, an arrow
+   and an after, so the number carries its own meaning without a paragraph
+   underneath it. Revealed on entry with a stagger, in the same idiom as the
+   contact form's fields.
+   ========================================================================== */
+.outcome-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.4vw, 1.15rem);
+  padding: 0 clamp(1.25rem, 5vw, 5rem);
+  margin-top: clamp(2.5rem, 6vw, 5rem);
+}
+.outcome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: clamp(1rem, 1.6vw, 1.35rem);
+  border: 1px solid var(--hairline);
+  border-radius: 1rem;
+  background: var(--surface);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease;
+  transition-delay: calc(var(--i) * 90ms);
+}
+.outcome-strip.is-in .outcome { opacity: 1; transform: none; }
+.outcome:hover { border-color: var(--accent-edge); }
+
+.outcome-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.outcome-icon {
+  display: grid;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: none;
+  border-radius: 0.5rem;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+}
+.outcome-icon img { width: 16px; height: 16px; object-fit: contain; }
+.outcome-where {
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.outcome-metric {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0;
+  font-weight: 650;
+  line-height: 1.1;
+}
+.outcome-before {
+  font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: rgba(248, 113, 113, 0.55);
+}
+/* Drawn rather than typed: an arrow glyph sits on the text baseline and drifts
+   between fonts, where this stays put and can animate its own length. */
+.outcome-arrow {
+  position: relative;
+  align-self: center;
+  width: 1.1rem;
+  height: 1px;
+  flex: none;
+  background: var(--accent-1);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i) * 90ms + 220ms);
+}
+.outcome-arrow::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 0.32rem;
+  height: 0.32rem;
+  border-top: 1px solid var(--accent-1);
+  border-right: 1px solid var(--accent-1);
+  transform: translateY(-50%) rotate(45deg);
+}
+.outcome-strip.is-in .outcome-arrow { transform: scaleX(1); }
+.outcome-after {
+  font-size: clamp(1.15rem, 1.9vw, 1.6rem);
+  letter-spacing: -0.02em;
+  background: var(--grad-accent);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.outcome-label {
+  margin: 0;
+  font-size: clamp(0.78rem, 0.95vw, 0.86rem);
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .outcome-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .outcome-strip { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .outcome, .outcome-arrow { transition: none; }
+  .outcome { opacity: 1; transform: none; }
+  .outcome-arrow { transform: scaleX(1); }
+}

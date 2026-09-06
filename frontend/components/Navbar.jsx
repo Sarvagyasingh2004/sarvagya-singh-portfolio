@@ -6,6 +6,7 @@ import ScrollProgress from "./ScrollProgress";
 import ThemeToggle from "./ThemeToggle";
 import ResumeButton from "./ResumeButton";
 import Logo from "./Logo";
+import RoleTyper from "@/components/RoleTyper";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -64,7 +65,7 @@ const Navbar = () => {
           <span className="brand-mark"><Logo size={30} /></span>
           <span className="brand-name">
             <b>Sarvagya Singh</b>
-            <i>Full-Stack Developer</i>
+            <RoleTyper />
           </span>
         </a>
         <nav className="desktop">
