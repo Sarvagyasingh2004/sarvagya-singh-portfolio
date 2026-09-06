@@ -164,7 +164,7 @@ const expCards = [
 const projects = [
   {
     slug: "food-delivery-microservices",
-    title: "Food Delivery Microservices",
+    title: "Eatlify — Food Delivery Microservices",
     tagline:
       "Six independent services coordinating one order, built so any of them can fail without taking the order with it.",
     stack: ["Node.js", "TypeScript", "RabbitMQ", "Socket.IO", "Redis", "Docker", "AWS"],
@@ -175,7 +175,7 @@ const projects = [
     ],
     repoUrl: "REPLACE_ME",
     liveUrl: "REPLACE_ME",
-    shot: "",
+    shot: "/images/projects/eatlify.png",
     accent: "violet",
   },
   {
@@ -207,7 +207,7 @@ const projects = [
     ],
     repoUrl: "REPLACE_ME",
     liveUrl: "REPLACE_ME",
-    shot: "",
+    shot: "/images/projects/saasify-ai.jpg",
     accent: "cyan",
   },
 ];
