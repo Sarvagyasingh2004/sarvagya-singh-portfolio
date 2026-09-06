@@ -32,6 +32,10 @@ const ProjectCard = ({ project, index, total }) => {
   // A project can ship as more than one repository - the chat app is split
   // frontend/backend - so `repos` takes a labelled list and `repoUrl` stays
   // as the single-repo shorthand.
+  //
+  // `liveUrl` is still honoured but no project carries one: none of these are
+  // deployed right now. Adding the field back to a project in constants is all
+  // it takes for the button to reappear.
   const links = [
     ...(project.repos ??
       (project.repoUrl ? [{ label: "View code", url: project.repoUrl }] : [])),
