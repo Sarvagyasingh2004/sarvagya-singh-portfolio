@@ -29,7 +29,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 
   try {
     const res = await fetch(url, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 600 },
       signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) throw new Error(`sheet responded ${res.status}`);

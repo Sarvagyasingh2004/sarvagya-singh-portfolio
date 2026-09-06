@@ -1,7 +1,7 @@
 # Testimonials via Google Form — setup
 
 Approved rows in a Google Sheet become testimonials on the site. No rebuild and
-no deploy: the page re-reads the sheet at most once an hour and regenerates
+no deploy: the page re-reads the sheet at most once every ten minutes and regenerates
 itself in the background (Next.js ISR).
 
 ```
@@ -129,8 +129,13 @@ function doGet() {
 
   const cell = (row, key) => (at[key] > -1 ? String(row[at[key]] || '').trim() : '');
 
+  // Accepts a ticked checkbox as well as typed text, so the column can be
+  // Insert > Tick box rather than something you have to spell right.
+  const isApproved = (v) =>
+    ['yes', 'y', 'true', '1', 'approved'].indexOf(String(v).trim().toLowerCase()) > -1;
+
   const list = rows
-    .filter((r) => String(r[at.approved]).trim().toLowerCase() === 'yes')
+    .filter((r) => isApproved(r[at.approved]))
     .map((r) => ({
       name: cell(r, 'name'),
       // The card shows one line under the name, so a separate role and company
