@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { THEME_KEY, isDaytime, localZone, type Theme } from "@/lib/theme";
+import { THEME_KEY, isDaytime, localZone, writeStored, type Theme } from "@/lib/theme";
 
 const ThemeToggle = () => {
   const [theme, setTheme] = useState<Theme>("dark");
@@ -11,7 +11,7 @@ const ThemeToggle = () => {
   // flicker from re-deciding on mount.
   useEffect(() => {
     setTheme((document.documentElement.dataset.theme as Theme) || "dark");
-    setTip(`it's ${isDaytime() ? "daytime" : "night"} in ${localZone()}`);
+    setTip(`${isDaytime() ? "daytime" : "night"} in ${localZone()} — follows the clock again tomorrow`);
   }, []);
 
   const apply = (next: Theme) => {
@@ -26,7 +26,10 @@ const ThemeToggle = () => {
     root.dataset.theme = next;
     window.setTimeout(() => root.classList.remove("theme-switching"), 60);
     try {
-      localStorage.setItem(THEME_KEY, next);
+      // Stored with the period it was chosen in, so the choice lasts this
+      // morning or this evening and then hands back to the clock. See
+      // lib/theme.ts.
+      localStorage.setItem(THEME_KEY, writeStored(next));
     } catch {
       /* private browsing — still applies for this session */
     }

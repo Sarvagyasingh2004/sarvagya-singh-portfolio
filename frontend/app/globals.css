@@ -2434,13 +2434,18 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
    four directions instead of four separate keyframes. */
 .resume-btn {
   position: relative;
-  overflow: hidden;
+  /* Deliberately not `overflow: hidden`. Clipping the button also clipped the
+     hover stabiliser below, which has to sit one pixel outside the padding box
+     to hold the hover boundary still. The fill carries its own rounding
+     instead, so nothing needs clipping: at rest it is scaled to zero, and at
+     full scale it is exactly the padding box. */
   isolation: isolate;
 }
 .resume-btn .resume-fill {
   position: absolute;
   inset: 0;
   z-index: -1;
+  border-radius: inherit;
   background: var(--grad-accent);
   transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -2465,8 +2470,10 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
 .resume-btn:hover { border-color: transparent; }
 
 @media (prefers-reduced-motion: reduce) {
-  .resume-btn .resume-fill { transition: opacity 0.2s ease; }
-  .resume-btn:hover .resume-fill { transform: scale(7); }
+  /* Was scale(7), which relied on the button clipping it. A fade reads the
+     same here and stays inside its own box. */
+  .resume-btn .resume-fill { transform: none; opacity: 0; transition: opacity 0.2s ease; }
+  .resume-btn:hover .resume-fill { opacity: 1; }
 }
 
 /* ==========================================================================
@@ -3684,3 +3691,107 @@ html[data-theme="light"] .site-loader::before {
 @media (prefers-reduced-motion: reduce) {
   .site-loader-status { animation: none; }
 }
+
+/* ==========================================================================
+   HOVER HIT-AREA STABILISER
+   These buttons lift a pixel or two on hover. A transform moves the element's
+   hit box along with its pixels, so a pointer resting on the edge lifts the
+   button out from under itself, which un-hovers it, which drops it back —
+   measured at nine hover flips per second against a perfectly still pointer.
+
+   The fix is the pattern `.contact-submit` already uses: keep the hit area
+   still and move only what you can see. Here that layer is a pseudo-element
+   counter-translated by the same distance, so button ∪ layer always covers the
+   resting box and the hover boundary never moves. The lift is unchanged.
+   ========================================================================== */
+.btn-surface { position: relative; }
+.btn-surface::after,
+.chat-fab::after {
+  content: "";
+  position: absolute;
+  /* -1px, not 0: `inset` resolves against the padding box, so at 0 this layer
+     stops one border-width short of the button's real edge and the counter-
+     translate lands a pixel high — still oscillating, just more finely. At
+     -1px it matches the border box exactly. */
+  inset: -1px;
+  border-radius: inherit;
+  /* Matches each button's own transform timing so the two stay in step for
+     every frame of the transition, not just at the ends. */
+  transition: transform 0.3s ease;
+}
+.btn-surface:hover::after { transform: translateY(1px); }
+.chat-fab::after { transition-duration: 0.25s; }
+.chat-fab:hover::after { transform: translateY(2px); }
+
+/* The clip was defensive — the icons are 18px inside a 45.6px button and
+   cannot reach the edge even scaled — but it cropped the one pixel of
+   stabiliser that has to sit outside the padding box. */
+.theme-toggle { overflow: visible; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-surface::after,
+  .chat-fab::after { transition: none; }
+}
+
+/* ==========================================================================
+   LIGHT THEME — the neon mark
+   The brand mark is a triangulated neon "S" drawn for a dark ground: pale
+   strokes with the glow baked into the artwork's alpha. Filtering it for light
+   mode was tried and rejected — darkening the strokes darkens the halo with
+   them, and the mark turns into a violet smudge. What the artwork actually
+   needs is the ground it was drawn for, so on light it gets a dark plate. The
+   theme already does exactly this with the assistant button, so it reads as
+   part of the design rather than an exception.
+   ========================================================================== */
+html[data-theme="light"] .brand-mark {
+  background: #10151b;
+  border-color: rgba(16, 21, 27, 0.35);
+}
+
+html[data-theme="light"] .site-loader-mark {
+  /* content-box so the padding grows the plate around the art instead of
+     shrinking the art inside it. */
+  box-sizing: content-box;
+  padding: 0.85rem;
+  border-radius: 1.4rem;
+  background: #10151b;
+  animation-name: loader-mark-light;
+}
+/* No brightness or saturation here: on its own plate the artwork is already
+   correct. Only the halo changes — a violet glow that reads on white, pulsing
+   on the same beat the dark theme uses. */
+@keyframes loader-mark-light {
+  0%, 100% {
+    transform: scale(0.97);
+    filter: drop-shadow(0 6px 16px rgba(16, 21, 27, 0.16))
+      drop-shadow(0 0 12px rgba(124, 58, 237, 0.18));
+  }
+  62% {
+    transform: scale(1.03);
+    filter: drop-shadow(0 10px 26px rgba(16, 21, 27, 0.22))
+      drop-shadow(0 0 26px rgba(124, 58, 237, 0.42));
+  }
+}
+/* The reduced-motion rule further up is less specific than the one naming the
+   light keyframes, so it has to be restated or the animation survives. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="light"] .site-loader-mark { animation: none; }
+}
+
+/* The constellation's hub is freestanding — the strings run into the monogram
+   itself, so a plate there would break the gesture. Contrast and saturation
+   without darkening sharpen the strokes and leave the halo soft. */
+html[data-theme="light"] .logo-mark.is-glowing {
+  filter: saturate(1.9) contrast(1.9)
+    drop-shadow(0 0 18px rgba(124, 58, 237, 0.4))
+    drop-shadow(0 0 44px rgba(109, 40, 217, 0.2));
+}
+
+/* The strings ramp from 15%-opacity lavender, which is nothing at all against
+   #f4f6f8. Light mode runs the same ramp toward a saturated indigo instead. */
+html[data-theme="light"] #loader-wire stop:first-child { stop-color: rgba(109, 40, 217, 0.12); }
+html[data-theme="light"] #loader-wire stop:last-child  { stop-color: rgba(67, 56, 202, 0.9); }
+
+/* The submit shared the 1.75rem rhythm of the gaps between fields, so it read
+   as a fourth field rather than the end of the form. */
+.contact-form .contact-submit { margin-top: 0.55rem; }
