@@ -72,6 +72,10 @@ const ProjectCard = ({ project, index, total }) => {
                 ))}
               </div>
             ) : null}
+            {/* Work that shipped inside a company has no repository to link.
+                Saying so is better than a card that looks like its buttons
+                failed to render. */}
+            {project.note ? <p className="stack-note">{project.note}</p> : null}
           </div>
 
           <ul className="stack-points">
@@ -141,7 +145,8 @@ const ShowcaseSection = () => {
       <div className="stack-head">
         <h2>Systems I designed and built end to end</h2>
         <p className="stack-sub">
-          Every one is a public repository. Clone it and read the code.
+          Three are public repositories you can clone. One shipped inside a
+          company, to a team that used it daily.
         </p>
       </div>
 

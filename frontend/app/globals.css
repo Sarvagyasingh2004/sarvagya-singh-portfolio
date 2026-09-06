@@ -3366,3 +3366,20 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
   .chat-fab .icon-bubble,
   .chat-fab.is-open .icon-x { transform: none; }
 }
+
+/* Sits where the repo buttons would be, on work that has no public code. */
+.stack-note {
+  margin: 0.55rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 34ch;
+}
+
+/* A four-point card carries more text than the three-point ones, so it trades
+   image height for it. Without this the extra point pushes the card past the
+   viewport, and since the stack PINS each card, anything below the fold can
+   never be scrolled to. */
+.stack-card:has(.stack-points li:nth-child(4)) .stack-shot {
+  height: clamp(11rem, 17vh, 15rem);
+}
