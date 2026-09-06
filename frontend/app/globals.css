@@ -1564,6 +1564,14 @@ h2, h3 { text-wrap: balance; }
 /* Long section headings were running the full page width. */
 .flex-center > div > .flex.flex-col.items-center > h2 { max-width: 22ch; }
 
+#about .section-title {
+  max-width: min(100%, 44ch);
+  /* Fluid rather than the shared 48px step, so this one holds a single line
+     down to tablet width and only breaks to two on a phone, where there is
+     nowhere near the room for it. */
+  font-size: clamp(1.65rem, 3.6vw, 3rem);
+}
+
 .card-border, .about-facts, .now-card, .tech-card { border-radius: 0.9rem; }
 
 /* The chat FAB overlapped the footer's right column on narrow screens. */

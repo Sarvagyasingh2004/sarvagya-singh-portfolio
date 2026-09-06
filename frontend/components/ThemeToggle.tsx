@@ -17,6 +17,7 @@ const ThemeToggle = () => {
     const root = document.documentElement;
     root.classList.add("theme-switching");
     root.dataset.theme = next;
+    (window as unknown as { __setFavicon?: (t: string) => void }).__setFavicon?.(next);
     window.setTimeout(() => root.classList.remove("theme-switching"), 60);
     try {
       localStorage.setItem(THEME_KEY, writeStored(next));

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { themeInitScript } from "@/lib/theme";
+import { faviconScript, themeInitScript } from "@/lib/theme";
 import { devtoolsVersionShim } from "@/lib/devtoolsShim";
 import Loader from "@/components/Loader";
 import "./globals.css";
@@ -74,6 +74,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preload" as="image" href="/brand/mark-256.webp" type="image/webp" />
+        <link rel="icon" type="image/png" sizes="64x64" href="/brand/favicon-dark.png" media="(prefers-color-scheme: dark)" />
+        <link rel="icon" type="image/png" sizes="64x64" href="/brand/favicon-light.png" media="(prefers-color-scheme: light)" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/brand/favicon-dark-180.png" />
+        <script dangerouslySetInnerHTML={{ __html: faviconScript }} />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {process.env.NODE_ENV !== "production" ? (
           <script dangerouslySetInnerHTML={{ __html: devtoolsVersionShim }} />

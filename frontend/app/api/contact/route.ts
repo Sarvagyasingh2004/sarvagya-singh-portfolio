@@ -34,6 +34,50 @@ const TYPOS: Record<string, string> = {
 
 type MailCheck = { ok: true } | { ok: false; error: string };
 
+/**
+ * Mailbox-level check, when a key is configured.
+ *
+ * An MX lookup only proves the domain accepts mail. Proving a specific mailbox
+ * exists means an SMTP RCPT TO probe, and that cannot be done from here:
+ * Vercel's functions have no outbound port 25, most large providers answer 250
+ * for every address anyway, and probing gets the source IP blacklisted. A
+ * verification service does it from infrastructure built for it.
+ *
+ * Only a definite UNDELIVERABLE is rejected. Catch-all domains, rate limits and
+ * outages all come back UNKNOWN, and turning a real visitor away on an unknown
+ * is worse than accepting a bad address.
+ */
+async function verifyMailbox(email: string): Promise<MailCheck> {
+  const key = process.env.EMAIL_VERIFY_API_KEY;
+  if (!key) return { ok: true };
+
+  try {
+    const url =
+      "https://emailvalidation.abstractapi.com/v1/?api_key=" +
+      encodeURIComponent(key) +
+      "&email=" +
+      encodeURIComponent(email);
+    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    if (!res.ok) return { ok: true };
+
+    const data = (await res.json()) as {
+      deliverability?: string;
+      is_smtp_valid?: { value?: boolean };
+    };
+    const undeliverable = data.deliverability === "UNDELIVERABLE";
+    const noMailbox = data.is_smtp_valid?.value === false;
+    if (undeliverable || noMailbox) {
+      return {
+        ok: false,
+        error: "That mailbox does not exist. Please check the address.",
+      };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: true };
+  }
+}
+
 async function checkMailDomain(email: string): Promise<MailCheck> {
   const domain = email.split("@")[1]?.toLowerCase() ?? "";
   if (!domain) return { ok: false, error: "Please enter a valid email address." };
@@ -76,6 +120,9 @@ export async function POST(req: Request) {
 
   const mail = await checkMailDomain(email);
   if (!mail.ok) return json({ error: mail.error }, 400);
+
+  const mailbox = await verifyMailbox(email);
+  if (!mailbox.ok) return json({ error: mailbox.error }, 400);
 
   if ((await connectDb()) && dbReady()) {
     await Contact.create({ name, email, message, ipHash: hashIp(ip) }).catch(() => {});

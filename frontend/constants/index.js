@@ -214,7 +214,7 @@ const projects = [
 
 const about = {
   eyebrow: "About",
-  heading: "I own the whole path.",
+  heading: "I own the whole path — API to screen.",
   paragraphs: [
     "I'm a software engineer in Delhi NCR working across backend and full-stack — Node.js, TypeScript, Express, React/Redux and SQL, with Redis and RabbitMQ where the work needs them. I graduate from MAIT (GGSIPU) in May 2026 with a 9.2 CGPA, though most of what I know came from shipping: 331 commits across two live codebases.",
     "At Kraftshala I owned features end to end on the platform a team used daily — dashboard queries from ~40s to ~400ms, a self-service alerting platform where teams write their own SQL rules, bulk Excel ingestion at 1,000+ records an upload, Google OAuth SSO, and calendar invites re-architected through AWS SES from around 2,000 a day to 400,000. The alerting platform is the one I would walk you through: months later another engineer shipped two of their own features on top of it, without needing me.",
@@ -243,7 +243,7 @@ const socialImgs = [
   {
     name: "GitHub",
     url: "https://github.com/Sarvagyasingh2004",
-    // The GitHub mark, not git.svg - that was Git's logo, a different thing.
+
     imgPath: "/images/logos/github.svg",
   },
   {

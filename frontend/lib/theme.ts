@@ -22,6 +22,29 @@ export const localZone = () => {
   }
 };
 
+// Swaps the tab icon with the theme. The <link media> attributes alone follow
+// the OS setting, not the toggle on the page, so the choice has to be applied
+// here too — and it has to run in <head>, before the first icon is fetched.
+export const faviconScript = `
+(function(){
+  window.__setFavicon=function(theme){
+    try{
+      var href="/brand/favicon-"+(theme==="light"?"light":"dark")+".png";
+      var l=document.querySelector('link[rel="icon"][data-themed]');
+      if(!l){
+        document.querySelectorAll('link[rel="icon"]').forEach(function(x){x.remove()});
+        l=document.createElement("link");
+        l.rel="icon"; l.type="image/png"; l.setAttribute("sizes","64x64");
+        l.setAttribute("data-themed","");
+        document.head.appendChild(l);
+      }
+      if(l.getAttribute("href")!==href) l.setAttribute("href",href);
+      var a=document.querySelector('link[rel="apple-touch-icon"]');
+      if(a) a.setAttribute("href","/brand/favicon-"+(theme==="light"?"light":"dark")+"-180.png");
+    }catch(e){}
+  };
+})();`.trim();
+
 export const themeInitScript = `
 (function(){
   try{
@@ -38,4 +61,5 @@ export const themeInitScript = `
     if((p[0]==="dark"||p[0]==="light")&&p[1]===now){theme=p[0];}
   }catch(e){}
   document.documentElement.dataset.theme=theme;
+  if(window.__setFavicon) window.__setFavicon(theme);
 })();`.trim();
