@@ -73,7 +73,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preload" as="image" href="/brand/mark-256.png" />
+        <link rel="preload" as="image" href="/brand/mark-256.webp" type="image/webp" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {process.env.NODE_ENV !== "production" ? (
           <script dangerouslySetInnerHTML={{ __html: devtoolsVersionShim }} />

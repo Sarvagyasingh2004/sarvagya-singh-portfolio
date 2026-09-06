@@ -1,6 +1,6 @@
 "use client";
 
-import { Environment, Float, PerspectiveCamera, View, useGLTF } from "@react-three/drei";
+import { Float, PerspectiveCamera, View, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Suspense, useMemo, useRef } from "react";
 
@@ -67,10 +67,15 @@ const TechIcon = ({ model }) => {
       onLostPointerCapture={endDrag}
     >
       <PerspectiveCamera makeDefault position={[0, 0, 9.5]} fov={45} />
-      <ambientLight intensity={0.45} />
-      <directionalLight position={[5, 5, 5]} intensity={1.15} />
+      {/* Lit directly rather than with drei's <Environment>. That fetches an
+          HDR from a third-party CDN and suspends on it, inside the same
+          boundary as the model — so when the request did not resolve, all eight
+          logos rendered nothing at all. These are flat extruded marks; they do
+          not need image-based lighting. */}
+      <ambientLight intensity={0.85} />
+      <directionalLight position={[5, 5, 5]} intensity={1.25} />
+      <directionalLight position={[-4, 2, 3]} intensity={0.45} />
       <Suspense fallback={null}>
-        <Environment preset="city" />
         <Model model={model} spin={spin} />
       </Suspense>
     </View>

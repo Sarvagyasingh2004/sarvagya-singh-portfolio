@@ -1,5 +1,10 @@
 "use client";
 
+const srcFor = (size: number, large: boolean) => {
+  if (large) return "/brand/mark.png";
+  return size * 2 > 128 ? "/brand/mark-256.webp" : "/brand/mark-128.webp";
+};
+
 const Logo = ({
   size = 34,
   glow = false,
@@ -10,7 +15,7 @@ const Logo = ({
   large?: boolean;
 }) => (
   <img
-    src={large ? "/brand/mark.png" : "/brand/mark-128.png"}
+    src={srcFor(size, large)}
     alt="Sarvagya Singh"
     width={size}
     height={size}

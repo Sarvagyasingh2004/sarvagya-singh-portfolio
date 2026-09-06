@@ -92,7 +92,7 @@ const abilities = [
 const techStackIcons = [
   { name: "TypeScript", modelPath: "/models/typescript-extruded.glb", scale: 3, rotation: [0, 0, 0] },
   { name: "React & Redux", modelPath: "/models/react_logo-transformed.glb", scale: 1, rotation: [0, 0, 0] },
-  { name: "Node.js", modelPath: "/models/node-transformed.glb", scale: 5, rotation: [0, -Math.PI / 2, 0] },
+  { name: "Node.js", modelPath: "/models/nodejs-extruded.glb", scale: 3, rotation: [0, 0, 0] },
   { name: "Express", modelPath: "/models/express-extruded.glb", scale: 3, rotation: [0, 0, 0] },
   { name: "MongoDB", modelPath: "/models/mongodb-extruded.glb", scale: 3, rotation: [0, 0, 0] },
   { name: "PostgreSQL", modelPath: "/models/postgresql-extruded.glb", scale: 3, rotation: [0, 0, 0] },

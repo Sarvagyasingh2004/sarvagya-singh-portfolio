@@ -90,7 +90,7 @@ const Loader = () => {
             <path d="M226 214 C 176 174, 148 144, 120 120" />
           </svg>
           <img
-            src="/brand/mark-256.png"
+            src="/brand/mark-256.webp"
             alt=""
             width={78}
             height={78}

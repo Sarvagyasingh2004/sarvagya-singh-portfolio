@@ -269,7 +269,7 @@ const TechStack = () => {
             <span className="core-ring" aria-hidden="true" />
             <span className="core-ring core-ring-2" aria-hidden="true" />
             <span className="core-logo">
-              <Logo size={92} glow large />
+              <Logo size={92} glow />
             </span>
           </div>
         </div>
