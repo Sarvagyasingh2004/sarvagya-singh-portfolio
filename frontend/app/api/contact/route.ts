@@ -1,3 +1,4 @@
+import net from "node:net";
 import { promises as dns } from "node:dns";
 import { z } from "zod";
 import { Resend } from "resend";
@@ -47,9 +48,97 @@ type MailCheck = { ok: true } | { ok: false; error: string };
  * outages all come back UNKNOWN, and turning a real visitor away on an unknown
  * is worse than accepting a bad address.
  */
+/**
+ * Asks the recipient's own mail server whether the mailbox exists, by getting
+ * as far as RCPT TO and stopping before anything is sent.
+ *
+ * Measured against the real world rather than assumed: Gmail, iCloud, Zoho and
+ * ordinary custom domains all answer 550 for an address that does not exist,
+ * which is a definite answer worth acting on. Outlook, Hotmail and Yahoo close
+ * the connection on anyone without mail-server reputation, and Proton does not
+ * answer at all — those are not refusals, they are silence, and silence is
+ * treated as acceptance.
+ *
+ * Fails open on everything except an explicit rejection. A blocked port, a
+ * greylist, a catch-all domain and a timeout all let the message through: a
+ * real person turned away is a worse outcome than an undeliverable address.
+ *
+ * Note for deployment: this needs outbound port 25, which most serverless
+ * platforms (Vercel included, via Lambda) do not allow. There it will time out
+ * and fail open, and EMAIL_VERIFY_API_KEY below is what does the work instead.
+ */
+const REJECTED = new Set(["550", "551", "553"]);
+
+function smtpProbe(email: string, host: string, ms = 4000): Promise<string> {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (code: string) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      try { socket.destroy(); } catch { /* already gone */ }
+      resolve(code);
+    };
+    const timer = setTimeout(() => finish("timeout"), ms);
+
+    const steps = [
+      "EHLO mail.sarvagyasingh.space",
+      "MAIL FROM:<postmaster@sarvagyasingh.space>",
+      `RCPT TO:<${email}>`,
+      "QUIT",
+    ];
+    let stage = 0;
+    let awaitingRcpt = false;
+    let buffer = "";
+
+    const socket = net.createConnection({ host, port: 25 });
+    socket.setTimeout(ms);
+    socket.on("timeout", () => finish("timeout"));
+    socket.on("error", () => finish("unreachable"));
+    socket.on("close", () => finish("closed"));
+    socket.on("data", (chunk) => {
+      buffer += chunk.toString();
+      const lines = buffer.split(/\r?\n/).filter(Boolean);
+      const last = lines[lines.length - 1] ?? "";
+      // A hyphen after the code means more lines are coming.
+      if (/^\d{3}-/.test(last)) return;
+      buffer = "";
+      if (awaitingRcpt) return finish(last.slice(0, 3));
+      if (stage < steps.length) {
+        if (stage === 2) awaitingRcpt = true;
+        socket.write(steps[stage] + "\r\n");
+        stage += 1;
+      }
+    });
+  });
+}
+
+async function mailboxExists(email: string): Promise<MailCheck> {
+  const domain = email.split("@")[1]?.toLowerCase() ?? "";
+  let host = "";
+  try {
+    const mx = (await dns.resolveMx(domain)).sort((a, b) => a.priority - b.priority);
+    host = mx[0]?.exchange ?? "";
+  } catch {
+    return { ok: true };
+  }
+  if (!host) return { ok: true };
+
+  const code = await smtpProbe(email, host);
+  if (REJECTED.has(code)) {
+    return {
+      ok: false,
+      error: "That mailbox does not exist at that domain. Please check the address.",
+    };
+  }
+  return { ok: true };
+}
+
 async function verifyMailbox(email: string): Promise<MailCheck> {
   const key = process.env.EMAIL_VERIFY_API_KEY;
-  if (!key) return { ok: true };
+  // Without a key, ask the mail server directly. It answers definitively for a
+  // good share of real addresses and costs nothing.
+  if (!key) return mailboxExists(email);
 
   try {
     const url =
