@@ -2,8 +2,7 @@
 
 import { Environment, Float, PerspectiveCamera, View, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { Suspense, useEffect, useMemo, useRef } from "react";
-import * as THREE from "three";
+import { Suspense, useMemo, useRef } from "react";
 
 /**
  * A tech logo rendered through the page's single shared WebGL context.
@@ -26,21 +25,6 @@ const Model = ({ model, spin }) => {
   // model from the first and one card rendered empty. Cloning makes the list
   // safe to extend with repeated paths.
   const scene = useMemo(() => cached.clone(true), [cached]);
-
-  useEffect(() => {
-    // The three.js logo's own material is near-black and vanishes on the dark
-    // card; a mid-tone slate reads against both grounds.
-    if (!model.modelPath.includes("three.js")) return;
-    scene.traverse((child) => {
-      if (child.isMesh && child.name === "Object_5") {
-        child.material = new THREE.MeshStandardMaterial({
-          color: "#8f9bb0",
-          roughness: 0.35,
-          metalness: 0.1,
-        });
-      }
-    });
-  }, [scene, model.modelPath]);
 
   useFrame(() => {
     if (!group.current) return;

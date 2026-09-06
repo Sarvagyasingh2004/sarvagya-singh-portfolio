@@ -89,15 +89,18 @@ const techStackIcons = [
     rotation: [0, -Math.PI / 2, 0],
   },
   {
-    name: "Python",
-    modelPath: "/models/python-transformed.glb",
-    scale: 0.8,
+    // Extruded from the same simple-icons SVG the marquee uses — see
+    // scripts/build-logo-model.mjs. Python was here because a model existed for
+    // it, not because it appears in any of the work.
+    name: "TypeScript",
+    modelPath: "/models/typescript-extruded.glb",
+    scale: 3,
     rotation: [0, 0, 0],
   },
   {
-    name: "Three.js & WebGL",
-    modelPath: "/models/three.js-transformed.glb",
-    scale: 0.05,
+    name: "RabbitMQ",
+    modelPath: "/models/rabbitmq-extruded.glb",
+    scale: 3,
     rotation: [0, 0, 0],
   },
   {
@@ -295,14 +298,6 @@ const socialImgs = [
   },
 ];
 
-const techStackImgs = [
-  { name: "React Developer", imgPath: "/images/logos/react.png" },
-  { name: "Python Developer", imgPath: "/images/logos/python.svg" },
-  { name: "Backend Developer", imgPath: "/images/logos/node.png" },
-  { name: "Interactive Developer", imgPath: "/images/logos/three.png" },
-  { name: "Project Manager", imgPath: "/images/logos/git.svg" },
-];
-
 const contactEmail = "sarvagya3555cc@gmail.com";
 
 
@@ -313,7 +308,6 @@ export {
   counterItems,
   expCards,
   projects,
-  techStackImgs,
   socialImgs,
   about,
   now,
