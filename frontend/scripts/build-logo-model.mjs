@@ -43,6 +43,13 @@ const OUT = join(root, "public/models");
 // of the magic constants the hand-authored models need.
 const TARGET = 1.6;
 
+// Extrusion depth as a fraction of the logo's width, applied after normalising
+// rather than set on ExtrudeGeometry. The authored models sit between 0.034
+// (React) and 0.075 (Git); a fixed depth in SVG units gave 0.403 — a slab,
+// five to twelve times thicker than everything beside it. Expressed as a ratio
+// it stays correct whatever the source artwork measures.
+const DEPTH_RATIO = 0.05;
+
 const slug = process.argv[2];
 if (!slug) {
   console.error("usage: node scripts/build-logo-model.mjs <slug> [outfile.glb]");
@@ -89,7 +96,10 @@ staged.updateMatrixWorld(true);
 const box = new THREE.Box3().setFromObject(staged);
 const size = box.getSize(new THREE.Vector3());
 const centre = box.getCenter(new THREE.Vector3());
-const k = TARGET / Math.max(size.x, size.y, size.z);
+// The face is scaled to TARGET; the depth is set independently, so the plate is
+// as thin as the ratio asks regardless of what the extrusion produced.
+const k = TARGET / Math.max(size.x, size.y);
+const kz = (TARGET * DEPTH_RATIO) / size.z;
 
 // Bake the flip, centring and scale into the geometry. The loader clones the
 // scene and drives rotation from the group it mounts, so a transform left on a
@@ -100,7 +110,7 @@ staged.traverse((o) => {
   const g = o.geometry.clone();
   g.applyMatrix4(o.matrixWorld);
   g.translate(-centre.x, -centre.y, -centre.z);
-  g.scale(k, k, k);
+  g.scale(k, k, kz);
   // ExtrudeGeometry emits every triangle with its own three vertices, plus a UV
   // set nothing samples. Welding and dropping those is where nearly all of the
   // file size goes — 670KB became 139KB on the TypeScript mark.

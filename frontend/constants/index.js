@@ -98,6 +98,12 @@ const techStackIcons = [
     rotation: [0, 0, 0],
   },
   {
+    name: "Redis",
+    modelPath: "/models/redis-extruded.glb",
+    scale: 3,
+    rotation: [0, 0, 0],
+  },
+  {
     name: "RabbitMQ",
     modelPath: "/models/rabbitmq-extruded.glb",
     scale: 3,
@@ -239,17 +245,19 @@ const projects = [
 // story is included deliberately: engineers who hide rollbacks read junior.
 const about = {
   eyebrow: "About",
-  heading: "I build the boring infrastructure that other people build on.",
+  heading: "I build the API, the query underneath it, and the screen on top.",
   paragraphs: [
-    "I'm a full-stack engineer in Delhi NCR, graduating from MAIT (GGSIPU) in May 2026 with a 9.2 CGPA. Over the last year I shipped 331 commits across two production codebases — a Node/TypeScript/MySQL backend and a React/Redux operations platform used daily by a real team.",
-    "The work I'd most want to walk you through is a self-service alerting platform. Teams define a SQL rule and a threshold through an API; a per-minute cron evaluates them and posts to Google Chat. Because the SQL is user-supplied, it needed a validation layer that permits only SELECT and WITH and blocks DDL and DML. A few months later another engineer shipped two of their own alert features on top of it, without needing me. That's the part I'm proud of — not the feature, the fact that it became something someone else could build on.",
-    "I also broke production once. An SSO restriction I added locked some admins out of password sign-in. I caught it and rolled it back inside 48 hours. I'd rather tell you that up front than have you find it.",
+    "I'm a software engineer in Delhi NCR working across backend and full-stack: Node.js, TypeScript, Express, React/Redux and SQL, with Redis and RabbitMQ where the work calls for them. I graduate from MAIT (GGSIPU) in May 2026 with a 9.2 CGPA, though most of what I know came from shipping rather than coursework — 331 commits across two live codebases, plus microservices platforms of my own.",
+    "At Kraftshala I owned features end to end on the internal platform a team used every day. I took data-heavy dashboard queries from ~40s to ~400ms with a deferred join, built a self-service alerting platform where teams write their own SQL rules, engineered bulk Excel ingestion handling 1,000+ records an upload, implemented Google OAuth 2.0 SSO with conflict detection on booking endpoints, and re-architected calendar-invite delivery through AWS SES — lifting the ceiling from around 2,000 a day to 400,000. The alerting platform is the one I would want to walk you through: months later another engineer shipped two of their own alert features on top of it, without needing me.",
+    "Before that I was a full-stack developer at BWS, where I built and deployed a MERN AI chatbot answering 100+ visitor queries, wired a callback flow that synced 200 leads into Zoho CRM, and cut page load from ~8s to ~2s. Earlier I mentored 100+ students through Java and DSA as a teaching assistant at Coding Blocks — which is still the fastest way I have found to discover what you only think you understand.",
+    "On my own time I have built a six-service food delivery platform coordinating orders over RabbitMQ, a real-time chat system with acknowledgements and offline delivery, and an AI SaaS running two LLM providers behind one adapter. Those are where most of my distributed-systems, Redis and Docker experience comes from.",
+    "I also broke production once. An SSO restriction I added locked some admins out of password sign-in. I caught it and rolled it back inside 48 hours. I would rather tell you that up front than have you find it.",
   ],
   facts: [
-    { k: "Based in", v: "Delhi NCR, India" },
+    { k: "Based in", v: "Delhi NCR, India — open to remote, globally" },
     { k: "Education", v: "B.Tech CSE, MAIT — 9.2 CGPA, Top 25 GGSIPU" },
-    { k: "Strongest at", v: "APIs, query optimization, async pipelines" },
-    { k: "Currently", v: "Open to full-time roles" },
+    { k: "Works in", v: "Node, TypeScript, React, SQL, Redis, RabbitMQ, Docker" },
+    { k: "Currently", v: "Open to backend and full-stack roles" },
   ],
 };
 

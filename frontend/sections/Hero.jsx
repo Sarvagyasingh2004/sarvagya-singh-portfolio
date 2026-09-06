@@ -68,8 +68,8 @@ const Hero = () => {
               </h1>
             </div>
             <p className="text-white-50 md:text-xl relative z-10 pointer-events-none">
-              Hi, I'm Sarvagya, a developer based in India with passion to learn
-              and code.
+              Backend and full-stack engineer in Delhi NCR — Node, TypeScript,
+              React and SQL. I build production systems and own them end to end.
             </p>
             <Button
               className="md:w-80 md:h-16 w-60 h-12"
