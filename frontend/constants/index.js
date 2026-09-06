@@ -166,17 +166,16 @@ const projects = [
     slug: "kraftshala-convex",
     title: "Convex — Kraftshala Operations Platform",
     tagline:
-      "Six months owning features end to end on the internal platform a real team used every day.",
-    stack: ["Node.js", "TypeScript", "MySQL", "React", "Bull", "OAuth 2.0"],
+      "Six months owning features on the internal platform a real team used daily.",
+    stack: ["Node.js", "TypeScript", "MySQL", "React"],
     highlights: [
-      "Self-service alerting: teams define a SQL rule and threshold via API, and a per-minute cron posts results into Google Chat. Another engineer later shipped two alert features on it unaided.",
-      "Dashboard queries re-architected around a deferred join — ~40s to ~400ms, and the inflated pagination counts went with it.",
-      "Bulk Excel ingestion: 1,000+ rows per upload, checked for duplicates and timing overlaps before any write, through a Bull queue.",
-      "Google OAuth 2.0 SSO, keyed on the immutable Google subject ID so accounts survive a Workspace email rename.",
+      "Self-service alerting on user-defined SQL rules. Another engineer later shipped two features on it unaided.",
+      "Dashboard queries rebuilt around a deferred join — ~40s to ~400ms, and the inflated pagination counts with it.",
+      "Bulk Excel ingestion: 1,000+ rows an upload, validated before any write, through a Bull queue.",
     ],
     // No repoUrl: this shipped inside a company.
     liveUrl: "REPLACE_ME",
-    note: "Production work at Kraftshala; the code is proprietary. More of it in Experience below.",
+    note: "Kraftshala production work — proprietary code. More in Experience.",
     shot: "/images/projects/kraftshala-convex.jpg",
     accent: "amber",
   },

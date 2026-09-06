@@ -3376,10 +3376,50 @@ html[data-theme="light"] #contact form textarea:not(:focus) {
   max-width: 34ch;
 }
 
-/* A four-point card carries more text than the three-point ones, so it trades
-   image height for it. Without this the extra point pushes the card past the
-   viewport, and since the stack PINS each card, anything below the fold can
-   never be scrolled to. */
-.stack-card:has(.stack-points li:nth-child(4)) .stack-shot {
-  height: clamp(11rem, 17vh, 15rem);
+/* Tap targets.
+   These links are 25px tall because the underline has to sit tight against
+   the text, so padding cannot be used to grow them - it would push the border
+   away from the words. An overlaid pseudo-element gives the 44px target the
+   WCAG guidance asks for while the visible link stays exactly where it is. */
+.stack-links a { position: relative; }
+.stack-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 44px;
+  transform: translateY(-50%);
+}
+
+/* The brand lock-up measured 38px — two short of the same threshold. */
+.navbar .brand { min-height: 44px; }
+
+/* ==========================================================================
+   MOBILE CORRECTIONS
+   ========================================================================== */
+
+/* `.tech-view` carries min-height: 9rem for its standalone use. Inside the
+   constellation the box is sized by its parent — on a phone that is 78px, and
+   the 9rem floor made the view 144px, so each model rendered 66px past its own
+   box and sat on top of its caption. drei's <View> scissors to the tracked
+   element's rect, so the element's height IS the render height. */
+.constellation-model .tech-view { min-height: 0; }
+
+/* The CTA label is centred while the arrow is absolutely positioned over the
+   right edge, so on a narrow button the two meet — measured 12px of overlap at
+   390px, clipping "SEND MESSAGE" to "SEND MESSAG". The template avoided this
+   by translating the label left, but that also made it jump on hover. Padding
+   reserves the arrow's space instead, so the label centres in what is left and
+   never moves. */
+@media (max-width: 900px) {
+  .cta-button { padding-right: 4.5rem; }
+}
+
+/* Project screenshots are wide captures. `cover` fills the card but on a phone
+   it crops so hard that the Convex module tiles became half-words. `contain`
+   shows the whole frame instead, letterboxed against the card surface. */
+@media (max-width: 768px) {
+  .stack-shot { background: var(--surface); }
+  .stack-shot img { object-fit: contain; }
 }
