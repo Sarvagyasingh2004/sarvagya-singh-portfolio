@@ -15,7 +15,7 @@ export function Room(props) {
 
   // All seven materials in ONE memo.
   //
-  // They used to be constructed in the render body, so every re-render built
+  // Constructing these in the render body builds
   // seven brand-new material objects that three.js swapped onto every mesh in
   // the room. That swap is the flicker — much bigger than the single light
   // that was fixed earlier, and the reason it persisted after that fix.

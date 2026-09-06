@@ -1,27 +1,13 @@
 /**
- * Keeps React DevTools from crashing on @react-three/fiber's renderer.
+ * Stops React DevTools crashing on @react-three/fiber's renderer.
  *
- * r3f 9.3.0 calls `reconciler.injectIntoDevTools({ ..., version: React.version })`,
- * but react-reconciler 0.31's `injectIntoDevTools()` takes NO arguments — it
- * builds its payload from the reconciler config's `rendererVersion`, which r3f
- * never sets. The Three.js renderer therefore registers with `version:
- * undefined`, and React DevTools 7.x does:
+ * r3f 9.3 registers its renderer with `version: undefined`, and DevTools 7.x
+ * runs `gte(version, "19.3.0-canary")` on it, which throws. r3f 9.7 fixes this
+ * upstream but changes how the scene renders — the hero room blows out — so
+ * the version stays pinned and the missing field is filled in here instead.
  *
- *     1 === renderer.bundleType && gte(renderer.version, "19.3.0-canary")
- *
- * whose `function gte(e = "", t = "")` turns that undefined into an empty
- * string, which fails semver parsing and throws
- * `Invalid argument not valid semver ('' received)` — surfaced by Next as a
- * runtime error overlay on every dev page load.
- *
- * r3f 9.7.0 fixes this upstream, but that release also changes how the scene
- * is rendered: the hero room blows out to white under the same lighting rig.
- * So the version stays pinned at 9.3.0 (exactly — a caret range would drift
- * back onto 9.7) and the missing field is filled in here instead.
- *
- * Runs from <head>, so it wraps the hook before any renderer registers.
- * Dev only: a production build sets bundleType 0, so DevTools short-circuits
- * before it ever reaches that version check.
+ * Runs from <head> so it wraps the hook before any renderer registers. Dev
+ * only: a production build never reaches that check.
  */
 export const devtoolsVersionShim = `(function () {
   try {

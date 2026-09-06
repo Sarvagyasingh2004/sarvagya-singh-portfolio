@@ -24,12 +24,17 @@ import { useEffect, useRef, useState } from "react";
 // Held long enough to read as a loading screen rather than a flicker. On a
 // warm local server `load` fires almost immediately, so without a floor the
 // whole thing would be gone before anyone saw it.
-const MIN_VISIBLE_MS = 2100;
+const MIN_VISIBLE_MS = 3200;
 // Second visit in the same tab session: the point has been made, so it just
 // covers the paint and goes.
 const REPEAT_VISIBLE_MS = 400;
 const SESSION_KEY = "sarvagya-loader-seen";
 const HARD_CAP_MS = 6000;
+
+const NAME = "SARVAGYA SINGH".split("");
+// The hero cycles these four; reusing them keeps one vocabulary across the
+// page instead of writing throwaway loader copy.
+const LOADER_WORDS = ["Ideas", "Concepts", "Designs", "Code"];
 
 /**
  * How long to hold, decided ONCE per page load.
@@ -127,7 +132,24 @@ const Loader = () => {
         <span className="site-loader-rule">
           <i style={{ transform: `scaleX(${progress})` }} />
         </span>
-        <span className="site-loader-name">Sarvagya Singh</span>
+        {/* The name assembles letter by letter, then the hero's own carousel
+            runs underneath it — the same four words the headline cycles, so
+            the loader previews the page rather than inventing copy for it. */}
+        <span className="site-loader-name">
+          {NAME.map((ch, i) => (
+            <span key={i} style={{ "--i": i } as React.CSSProperties}>
+              {ch === " " ? "\u00a0" : ch}
+            </span>
+          ))}
+        </span>
+        <span className="site-loader-words" aria-hidden="true">
+          <i>
+            {LOADER_WORDS.map((w) => (
+              <b key={w}>{w}</b>
+            ))}
+            <b>{LOADER_WORDS[0]}</b>
+          </i>
+        </span>
       </div>
     </div>
   );
