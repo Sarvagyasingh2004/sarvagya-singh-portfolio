@@ -2345,9 +2345,11 @@ html[data-theme="light"] .core-ring-2 { border-color: rgba(124, 58, 237, 0.15); 
 }
 
 .core-logo { display: grid; place-items: center; }
+/* Halved from where this started. The artwork already carries its own bloom;
+   stacking a strong CSS glow on top of it was most of what read as glitter. */
 .logo-mark.is-glowing {
-  filter: drop-shadow(0 0 16px rgba(167, 139, 250, 0.9))
-    drop-shadow(0 0 38px rgba(139, 92, 246, 0.5));
+  filter: drop-shadow(0 0 12px rgba(167, 139, 250, 0.45))
+    drop-shadow(0 0 30px rgba(139, 92, 246, 0.22));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2434,18 +2436,13 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
    four directions instead of four separate keyframes. */
 .resume-btn {
   position: relative;
-  /* Deliberately not `overflow: hidden`. Clipping the button also clipped the
-     hover stabiliser below, which has to sit one pixel outside the padding box
-     to hold the hover boundary still. The fill carries its own rounding
-     instead, so nothing needs clipping: at rest it is scaled to zero, and at
-     full scale it is exactly the padding box. */
+  overflow: hidden;
   isolation: isolate;
 }
 .resume-btn .resume-fill {
   position: absolute;
   inset: 0;
   z-index: -1;
-  border-radius: inherit;
   background: var(--grad-accent);
   transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -2470,10 +2467,8 @@ html[data-theme="light"] button:hover > .cta-button { box-shadow: none; }
 .resume-btn:hover { border-color: transparent; }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Was scale(7), which relied on the button clipping it. A fade reads the
-     same here and stays inside its own box. */
-  .resume-btn .resume-fill { transform: none; opacity: 0; transition: opacity 0.2s ease; }
-  .resume-btn:hover .resume-fill { opacity: 1; }
+  .resume-btn .resume-fill { transition: opacity 0.2s ease; }
+  .resume-btn:hover .resume-fill { transform: scale(7); }
 }
 
 /* ==========================================================================
@@ -3582,12 +3577,12 @@ html[data-theme="light"] .site-loader::before {
 @keyframes loader-mark {
   0%, 100% {
     transform: scale(0.97);
-    filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.45));
+    filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.24));
   }
   62% {
     transform: scale(1.03);
-    filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.95))
-      drop-shadow(0 0 46px rgba(139, 92, 246, 0.55));
+    filter: drop-shadow(0 0 15px rgba(167, 139, 250, 0.5))
+      drop-shadow(0 0 36px rgba(139, 92, 246, 0.24));
   }
 }
 
@@ -3720,6 +3715,17 @@ html[data-theme="light"] .site-loader::before {
   transition: transform 0.3s ease;
 }
 .btn-surface:hover::after { transform: translateY(1px); }
+
+/* Resume is the exception. It clips itself to keep the edge-wipe fill inside
+   the pill, and that clip crops the stabiliser's one overhanging pixel — an
+   attempt to let the fill round itself instead left a grey ring where it no
+   longer reached the button's edge. So this button gives up the 1px lift
+   rather than its fill: with no transform there is no moving hit box and no
+   flicker to correct. The gradient wipe already carries the hover; the shadow
+   below stands in for the pixel of rise. */
+.resume-btn:hover { transform: none; }
+.resume-btn:hover::after { transform: none; }
+.resume-btn:hover { box-shadow: 0 5px 20px rgba(109, 92, 246, 0.26); }
 .chat-fab::after { transition-duration: 0.25s; }
 .chat-fab:hover::after { transform: translateY(2px); }
 
@@ -3735,56 +3741,47 @@ html[data-theme="light"] .site-loader::before {
 
 /* ==========================================================================
    LIGHT THEME — the neon mark
-   The brand mark is a triangulated neon "S" drawn for a dark ground: pale
-   strokes with the glow baked into the artwork's alpha. Filtering it for light
-   mode was tried and rejected — darkening the strokes darkens the halo with
-   them, and the mark turns into a violet smudge. What the artwork actually
-   needs is the ground it was drawn for, so on light it gets a dark plate. The
-   theme already does exactly this with the assistant button, so it reads as
-   part of the design rather than an exception.
+   One treatment everywhere. The mark is a triangulated neon "S" whose glow
+   lives in the artwork's alpha, so on a light ground it needs contrast rather
+   than a different colour or a plate behind it — saturate and contrast sharpen
+   the strokes while leaving the halo soft, and the drop-shadow supplies the
+   glow the light background swallows. The navbar, the constellation hub and
+   the loader all use it, so the mark reads as one thing in both themes.
    ========================================================================== */
-html[data-theme="light"] .brand-mark {
-  background: #10151b;
-  border-color: rgba(16, 21, 27, 0.35);
+html[data-theme="light"] .logo-mark,
+html[data-theme="light"] .site-loader-mark {
+  filter: saturate(2) contrast(1.75) brightness(0.76)
+    drop-shadow(0 0 9px rgba(124, 58, 237, 0.3));
+}
+html[data-theme="light"] .logo-mark.is-glowing {
+  filter: saturate(2) contrast(1.75) brightness(0.76)
+    drop-shadow(0 0 15px rgba(124, 58, 237, 0.32))
+    drop-shadow(0 0 38px rgba(109, 40, 217, 0.15));
 }
 
-html[data-theme="light"] .site-loader-mark {
-  /* content-box so the padding grows the plate around the art instead of
-     shrinking the art inside it. */
-  box-sizing: content-box;
-  padding: 0.85rem;
-  border-radius: 1.4rem;
-  background: #10151b;
-  animation-name: loader-mark-light;
-}
-/* No brightness or saturation here: on its own plate the artwork is already
-   correct. Only the halo changes — a violet glow that reads on white, pulsing
-   on the same beat the dark theme uses. */
+/* The loader's monogram animates its own filter, so light mode needs matching
+   keyframes rather than a static filter the animation would overwrite. */
+html[data-theme="light"] .site-loader-mark { animation-name: loader-mark-light; }
 @keyframes loader-mark-light {
   0%, 100% {
     transform: scale(0.97);
-    filter: drop-shadow(0 6px 16px rgba(16, 21, 27, 0.16))
-      drop-shadow(0 0 12px rgba(124, 58, 237, 0.18));
+    filter: saturate(2) contrast(1.75) brightness(0.76)
+      drop-shadow(0 0 9px rgba(124, 58, 237, 0.26));
   }
   62% {
     transform: scale(1.03);
-    filter: drop-shadow(0 10px 26px rgba(16, 21, 27, 0.22))
-      drop-shadow(0 0 26px rgba(124, 58, 237, 0.42));
+    filter: saturate(2.05) contrast(1.8) brightness(0.72)
+      drop-shadow(0 0 18px rgba(124, 58, 237, 0.4))
+      drop-shadow(0 0 42px rgba(109, 40, 217, 0.17));
   }
 }
 /* The reduced-motion rule further up is less specific than the one naming the
    light keyframes, so it has to be restated or the animation survives. */
 @media (prefers-reduced-motion: reduce) {
-  html[data-theme="light"] .site-loader-mark { animation: none; }
-}
-
-/* The constellation's hub is freestanding — the strings run into the monogram
-   itself, so a plate there would break the gesture. Contrast and saturation
-   without darkening sharpen the strokes and leave the halo soft. */
-html[data-theme="light"] .logo-mark.is-glowing {
-  filter: saturate(1.9) contrast(1.9)
-    drop-shadow(0 0 18px rgba(124, 58, 237, 0.4))
-    drop-shadow(0 0 44px rgba(109, 40, 217, 0.2));
+  html[data-theme="light"] .site-loader-mark {
+    animation: none;
+    filter: saturate(2) contrast(1.75) brightness(0.76);
+  }
 }
 
 /* The strings ramp from 15%-opacity lavender, which is nothing at all against

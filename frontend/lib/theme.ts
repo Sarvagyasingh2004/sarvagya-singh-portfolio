@@ -2,8 +2,26 @@ export type Theme = "dark" | "light";
 export type Period = "day" | "night";
 export const THEME_KEY = "sarvagya-theme";
 
+/**
+ * When the site considers it daytime, in minutes past local midnight.
+ *
+ * Defined once and interpolated into the pre-hydration script below, because
+ * the boundary used to be written out twice — as `h >= 6 && h < 18` here and
+ * again inside that script — and two copies of a rule are one edit away from
+ * disagreeing with each other.
+ *
+ * 19:30 rather than 18:00: sunset in Delhi runs from about 17:30 in December
+ * to 19:15 in June, so an 18:00 cutoff flipped the site to night while it was
+ * still broad daylight for half the year.
+ */
+export const DAY_START_MIN = 6 * 60; // 06:00
+export const DAY_END_MIN = 19 * 60 + 30; // 19:30
+
 /** Local to the browser's own timezone — no geo lookup, no permission prompt. */
-export const isDaytime = (d = new Date()) => d.getHours() >= 6 && d.getHours() < 18;
+export const isDaytime = (d = new Date()) => {
+  const m = d.getHours() * 60 + d.getMinutes();
+  return m >= DAY_START_MIN && m < DAY_END_MIN;
+};
 export const periodNow = (d = new Date()): Period => (isDaytime(d) ? "day" : "night");
 
 /**
@@ -29,11 +47,12 @@ export const localZone = () => {
 
 // Runs before hydration so the first paint is already correct. Kept as a source
 // string rather than importing the helpers above: it has to execute in <head>,
-// before any bundle has loaded.
+// before any bundle has loaded. The boundary is interpolated from the constants
+// so there is still only one definition of it.
 export const themeInitScript = `
 (function(){
-  var h=new Date().getHours();
-  var now=(h>=6&&h<18)?"day":"night";
+  var d=new Date(),m=d.getHours()*60+d.getMinutes();
+  var now=(m>=${DAY_START_MIN}&&m<${DAY_END_MIN})?"day":"night";
   var theme=now==="day"?"light":"dark";
   try{
     var p=(localStorage.getItem(${JSON.stringify(THEME_KEY)})||"").split(":");

@@ -164,7 +164,7 @@ const expCards = [
 const projects = [
   {
     slug: "kraftshala-convex",
-    title: "Convex — Kraftshala Operations Platform",
+    title: "Convex — Kraftshala Internal Platform",
     tagline:
       "Six months owning features on the internal platform a real team used daily.",
     stack: ["Node.js", "TypeScript", "MySQL", "React"],
