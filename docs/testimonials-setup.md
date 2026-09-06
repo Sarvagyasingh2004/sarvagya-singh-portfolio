@@ -72,6 +72,9 @@ In the sheet: **Extensions → Apps Script**, replace everything with this, then
 save.
 
 ```js
+// The TAB name along the bottom of the spreadsheet — not the file name. Google
+// creates it as 'Form Responses 1'. If you renamed the tab, or the file, this
+// falls back to the first tab, so in practice you never have to touch it.
 const SHEET_NAME = 'Form Responses 1';
 
 // Matched loosely against the header row so the Form's own wording works
@@ -90,8 +93,9 @@ const FIELDS = {
 };
 
 function doGet() {
-  const sheet = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
-  if (!sheet) return out({ error: 'No sheet named ' + SHEET_NAME });
+  const ss = SpreadsheetApp.getActive();
+  const sheet = ss.getSheetByName(SHEET_NAME) || ss.getSheets()[0];
+  if (!sheet) return out({ error: 'This spreadsheet has no tabs.' });
 
   const [header, ...rows] = sheet.getDataRange().getValues();
   const head = header.map((c) => String(c).trim().toLowerCase());
@@ -116,7 +120,11 @@ function doGet() {
   // which column is missing instead of showing a silent [].
   const missing = ['name', 'review', 'approved'].filter((k) => at[k] < 0);
   if (missing.length) {
-    return out({ error: 'Missing column(s): ' + missing.join(', '), headers: head });
+    return out({
+      error: 'Missing column(s): ' + missing.join(', '),
+      readingTab: sheet.getName(),
+      headers: head,
+    });
   }
 
   const cell = (row, key) => (at[key] > -1 ? String(row[at[key]] || '').trim() : '');
