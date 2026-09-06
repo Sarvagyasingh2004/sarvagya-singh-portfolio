@@ -207,8 +207,8 @@ const projects = [
     // Two repositories: the split is the point of the project, so both are
     // linked rather than hiding half the system behind one button.
     repos: [
-      { label: "Frontend code", url: "https://github.com/Sarvagyasingh2004/Microservices_chat_frontend" },
-      { label: "Backend code", url: "https://github.com/Sarvagyasingh2004/Microservices_chat_backend" },
+      { label: "Frontend code", url: "https://github.com/Sarvagyasingh2004/Skein-frontend" },
+      { label: "Backend code", url: "https://github.com/Sarvagyasingh2004/Skein-backend" },
     ],
     shot: "/images/projects/skein.jpg",
     accent: "indigo",
