@@ -162,6 +162,28 @@ Copy the `/exec` URL it gives you.
 > fetches this without signing in. The sheet itself stays private; only this
 > JSON is exposed, and it only ever contains rows you approved.
 
+### "Google hasn't verified this app"
+
+Expected, and not a problem. Google shows this for any Apps Script that has not
+been through its review, which is a process meant for scripts handed out to
+other people. Read the warning and it names the developer it is warning you
+about: your own address. It is your script, reading your own spreadsheet.
+
+Click **Advanced** → **Go to (your project) (unsafe)** → **Allow**, then
+**Done** on the deployment dialog. Copy the web app URL ending in `/exec`.
+
+Authorising grants the script access to your spreadsheets under your account.
+To narrow that to only the sheet it is attached to, open **Project Settings**,
+tick *Show "appsscript.json" manifest file in editor*, and add to that file:
+
+```json
+"oauthScopes": ["https://www.googleapis.com/auth/spreadsheets.currentonly"]
+```
+
+Then redeploy. `SpreadsheetApp.getActive()` is exactly what that scope covers.
+Optional — the broader default is not dangerous, it is just wider than this
+script needs.
+
 ## 4. Wire it up
 
 Add the URL to `frontend/.env.local` for local work, and to the Vercel project's
