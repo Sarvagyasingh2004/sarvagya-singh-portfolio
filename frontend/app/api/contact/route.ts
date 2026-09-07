@@ -142,16 +142,17 @@ async function verifyMailbox(email: string): Promise<MailCheck> {
 
   try {
     const url =
-      "https://emailvalidation.abstractapi.com/v1/?api_key=" +
+      "https://emailreputation.abstractapi.com/v1/?api_key=" +
       encodeURIComponent(key) +
       "&email=" +
       encodeURIComponent(email);
-    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    const res = await fetch(url, { signal: AbortSignal.timeout(7000) });
+
     if (!res.ok) {
       // Logged rather than swallowed. Failing open is right - a verifier outage
-      // must not turn away a real visitor - but a rejected key returns exactly
-      // the same "everything is deliverable" behaviour as a working one, and
-      // that took a direct call to the provider to discover. Now it says so.
+      // must not turn away a real visitor - but a rejected key behaves exactly
+      // like "everything is deliverable", and telling those apart previously
+      // meant calling the provider by hand.
       const body = await res.text().catch(() => "");
       console.error(
         `[contact] mailbox verifier HTTP ${res.status}: ${body.slice(0, 160)}`
@@ -160,15 +161,17 @@ async function verifyMailbox(email: string): Promise<MailCheck> {
     }
 
     const data = (await res.json()) as {
-      deliverability?: string;
-      is_smtp_valid?: { value?: boolean };
-      is_mx_found?: { value?: boolean };
+      suggested_correction?: string | null;
+      email_deliverability?: {
+        status?: string;
+        status_detail?: string;
+        is_smtp_valid?: boolean;
+        is_mx_valid?: boolean;
+      };
+      email_quality?: { is_disposable?: boolean; is_catchall?: boolean };
       error?: unknown;
     };
 
-    // Logged so the verdict is visible in the function logs. Without this there
-    // is no way to tell a working check that says DELIVERABLE from a broken one
-    // that returned nothing.
     if (data.error) {
       console.error(
         `[contact] mailbox verifier rejected the request: ${JSON.stringify(
@@ -178,21 +181,40 @@ async function verifyMailbox(email: string): Promise<MailCheck> {
       return { ok: true };
     }
 
+    const d = data.email_deliverability ?? {};
+    const q = data.email_quality ?? {};
     console.log(
-      `[contact] mailbox check: deliverability=${data.deliverability} ` +
-        `smtp=${data.is_smtp_valid?.value} mx=${data.is_mx_found?.value}`
+      `[contact] mailbox check: status=${d.status} detail=${d.status_detail} ` +
+        `smtp=${d.is_smtp_valid} mx=${d.is_mx_valid} ` +
+        `disposable=${q.is_disposable} catchall=${q.is_catchall}`
     );
 
-    const undeliverable = data.deliverability === "UNDELIVERABLE";
-    const noMailbox = data.is_smtp_valid?.value === false;
-    if (undeliverable || noMailbox) {
+    if (data.suggested_correction) {
       return {
         ok: false,
-        error: "That mailbox does not exist. Please check the address.",
+        error: `Did you mean ${data.suggested_correction}? Please check the address.`,
       };
     }
+
+    if (q.is_disposable === true) {
+      return { ok: false, error: "Please use an address you can be reached at." };
+    }
+
+    // A catch-all domain accepts anything, so an SMTP result there proves
+    // nothing either way and must not be treated as a refusal.
+    if (!q.is_catchall && (d.status === "undeliverable" || d.is_smtp_valid === false)) {
+      return {
+        ok: false,
+        error:
+          d.status_detail === "invalid_mailbox"
+            ? "That mailbox does not exist. Please check the address."
+            : "That address cannot receive mail. Please check it and try again.",
+      };
+    }
+
     return { ok: true };
-  } catch {
+  } catch (err) {
+    console.error(`[contact] mailbox verifier failed: ${(err as Error).message}`);
     return { ok: true };
   }
 }
