@@ -152,7 +152,19 @@ async function verifyMailbox(email: string): Promise<MailCheck> {
     const data = (await res.json()) as {
       deliverability?: string;
       is_smtp_valid?: { value?: boolean };
+      is_mx_found?: { value?: boolean };
+      error?: unknown;
     };
+
+    // Logged so the verdict is visible in the function logs. Without this there
+    // is no way to tell a working check that says DELIVERABLE from a broken one
+    // that returned nothing.
+    console.log(
+      `[contact] mailbox check: deliverability=${data.deliverability} ` +
+        `smtp=${data.is_smtp_valid?.value} mx=${data.is_mx_found?.value}` +
+        (data.error ? ` error=${JSON.stringify(data.error).slice(0, 120)}` : "")
+    );
+
     const undeliverable = data.deliverability === "UNDELIVERABLE";
     const noMailbox = data.is_smtp_valid?.value === false;
     if (undeliverable || noMailbox) {

@@ -90,14 +90,16 @@ const abilities = [
 ];
 
 const techStackIcons = [
-  { name: "TypeScript", modelPath: "/models/typescript-extruded.glb", scale: 3, rotation: [0, 0, 0] },
-  { name: "React & Redux", modelPath: "/models/react_logo-transformed.glb", scale: 1, rotation: [0, 0, 0] },
-  { name: "Node.js", modelPath: "/models/nodejs-extruded.glb", scale: 3, rotation: [0, 0, 0] },
-  { name: "Express", modelPath: "/models/express-extruded.glb", scale: 3, rotation: [0, 0, 0] },
-  { name: "MongoDB", modelPath: "/models/mongodb-extruded.glb", scale: 3, rotation: [0, 0, 0] },
-  { name: "PostgreSQL", modelPath: "/models/postgresql-extruded.glb", scale: 3, rotation: [0, 0, 0] },
-  { name: "Redis", modelPath: "/models/redis-extruded.glb", scale: 3, rotation: [0, 0, 0] },
-  { name: "RabbitMQ", modelPath: "/models/rabbitmq-extruded.glb", scale: 3, rotation: [0, 0, 0] },
+  { name: "TypeScript", modelPath: "/models/typescript-extruded.glb", scale: 3, rotation: [0, 0, 0], iconPath: "/images/tech/typescript.svg" },
+  { name: "React & Redux", modelPath: "/models/react_logo-transformed.glb", scale: 1, rotation: [0, 0, 0], iconPath: "/images/tech/react.svg" },
+  { name: "Node.js", modelPath: "/models/nodejs-extruded.glb", scale: 3, rotation: [0, 0, 0], iconPath: "/images/tech/node-js.svg" },
+  // Express ships as #0A0A0A, which disappears on the dark theme when it is
+  // drawn flat. The 3D build substitutes a mid-tone; the flat one inverts.
+  { name: "Express", modelPath: "/models/express-extruded.glb", scale: 3, rotation: [0, 0, 0], iconPath: "/images/tech/express.svg", invertOnDark: true },
+  { name: "MongoDB", modelPath: "/models/mongodb-extruded.glb", scale: 3, rotation: [0, 0, 0], iconPath: "/images/tech/mongodb.svg" },
+  { name: "PostgreSQL", modelPath: "/models/postgresql-extruded.glb", scale: 3, rotation: [0, 0, 0], iconPath: "/images/tech/postgresql.svg" },
+  { name: "Redis", modelPath: "/models/redis-extruded.glb", scale: 3, rotation: [0, 0, 0], iconPath: "/images/tech/redis.svg" },
+  { name: "RabbitMQ", modelPath: "/models/rabbitmq-extruded.glb", scale: 3, rotation: [0, 0, 0], iconPath: "/images/tech/rabbitmq.svg" },
 ];
 
 const expCards = [

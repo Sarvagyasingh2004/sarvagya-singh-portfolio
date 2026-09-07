@@ -61,6 +61,27 @@ const TechStack = () => {
   // The shared canvas draws the whole viewport every frame. There is no reason
   // to do that while the section is nowhere near the screen, which is most of
   // the time and most of the scrolling.
+  // Where in the pinned range the assembly finishes, set when the timeline
+  // is built and read by the nav handler outside that scope.
+  const assembledAt = useRef(1);
+
+  // The same breakpoint the pinned animation opts out of at line ~130. Below
+  // it the logos are flat SVGs floated in CSS instead of WebGL views.
+  //
+  // A drei <View> paints into a position: fixed canvas at whatever rect its DOM
+  // element currently reports, and that update rides the render loop while the
+  // page scrolls on the compositor - so on a phone the logos visibly trail
+  // their own captions. Nothing about the frame rate fixes that; the geometry
+  // is chasing the scroll. A CSS transform is composited, so it cannot lag.
+  const [flat, setFlat] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 900px)");
+    const read = () => setFlat(mq.matches);
+    read();
+    mq.addEventListener("change", read);
+    return () => mq.removeEventListener("change", read);
+  }, []);
+
   const [inView, setInView] = useState(false);
   useEffect(() => {
     const node = sectionRef.current;
@@ -143,8 +164,15 @@ const TechStack = () => {
         return nav ? nav.getBoundingClientRect().height : 72;
       };
 
-      const STAGES = nodes.length + 3;
+      // Three animated stages follow the logos (hub, strings, glow), then two
+      // of nothing. The pin holds through those, so once the constellation has
+      // assembled it sits still for most of a screen of scrolling instead of
+      // sliding straight off with the page - which read as the logos moving
+      // the moment you touched the scroll.
+      const HOLD = 2;
+      const STAGES = nodes.length + 3 + HOLD;
       const unit = 1 / STAGES;
+      assembledAt.current = (STAGES - HOLD) / STAGES;
 
       const MAX_SCREENS = 5.5;
       const perStage = Math.min(0.5, MAX_SCREENS / STAGES);
@@ -188,7 +216,10 @@ const TechStack = () => {
           { opacity: 0 },
           { opacity: 1, duration: unit, ease: "power2.out" },
           (nodes.length + 2) * unit
-        );
+        )
+        // Empty tween: no animation, it only lends the timeline length, and
+        // length is what keeps the section pinned and motionless.
+        .to({}, { duration: unit * HOLD });
     }, wrapRef);
 
     const onNavClick = (e) => {
@@ -198,7 +229,13 @@ const TechStack = () => {
       if (!link || !st) return;
       e.preventDefault();
       ScrollTrigger.refresh();
-      window.scrollTo({ top: Math.ceil(st.end), behavior: "smooth" });
+      // Land where the animation has just finished, not at st.end. The end is
+      // the point the pin releases, so arriving there meant the constellation
+      // was assembled but already free to scroll away on the next flick. The
+      // hold occupies the last HOLD stages, so stopping at the start of it
+      // gives the finished state with the section still pinned.
+      const target = st.start + (st.end - st.start) * assembledAt.current;
+      window.scrollTo({ top: Math.ceil(target), behavior: "smooth" });
     };
     document.addEventListener("click", onNavClick);
 
@@ -270,7 +307,18 @@ const TechStack = () => {
               >
                 <div className="constellation-node-inner">
                   <div className="constellation-model">
-                    <TechIcon model={icon} />
+                    {flat ? (
+                      <img
+                        className={`constellation-flat${icon.invertOnDark ? " invert-on-dark" : ""}`}
+                        src={icon.iconPath}
+                        alt=""
+                        loading="lazy"
+                        draggable={false}
+                        style={{ "--n": i }}
+                      />
+                    ) : (
+                      <TechIcon model={icon} />
+                    )}
                   </div>
                   <p>{icon.name}</p>
                 </div>

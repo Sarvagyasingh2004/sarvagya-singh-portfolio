@@ -1989,7 +1989,7 @@ html[data-theme="light"] .contact-canvas-wrap {
   position: relative;
   width: 100%;
   margin-top: clamp(1.5rem, 3vh, 2.75rem);
-  padding-bottom: clamp(14rem, 40vh, 28rem);
+  padding-bottom: clamp(17rem, 46vh, 32rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2658,7 +2658,7 @@ html[data-theme="light"] .mobile-nav-scrim { background: rgba(15, 23, 42, 0.34);
     bottom: auto;
     left: auto;
     transform: none;
-    margin: clamp(3rem, 12vw, 5rem) auto 0;
+    margin: clamp(5rem, 18vw, 7.5rem) auto 0;
     width: clamp(7rem, 30vw, 10rem);
     height: clamp(7rem, 30vw, 10rem);
   }
@@ -3518,4 +3518,45 @@ html[data-theme="light"] #loader-wire stop:last-child  { stop-color: rgba(67, 56
     line-height: 1.25;
     letter-spacing: 0;
   }
+}
+
+
+/* No backdrop blur on a phone. These two live in the fixed navbar, permanently
+   composited over the constellation's full-screen canvas, so the browser
+   re-blurs them on every frame the canvas changes. A phone has better uses for
+   that. The surfaces keep a solid tint instead. */
+@media (max-width: 640px) {
+  .btn-surface,
+  .hero-badge {
+    backdrop-filter: none;
+  }
+  html:not([data-theme="light"]) .btn-surface { background: rgba(22, 24, 32, 0.92); }
+  html[data-theme="light"] .btn-surface { background: rgba(255, 255, 255, 0.92); }
+}
+
+/* Flat logos on a phone, floated in CSS.
+   A composited transform cannot fall behind the scroll the way a WebGL view
+   tracking a DOM rect does, so this keeps the drift the 3D version had while
+   staying locked to its caption. Staggered so the row breathes rather than
+   bobbing in unison. */
+.constellation-flat {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  animation: logo-float 4.6s ease-in-out infinite;
+  animation-delay: calc(var(--n, 0) * -0.55s);
+  will-change: transform;
+}
+@keyframes logo-float {
+  0%, 100% { transform: translateY(-3.5%) rotate(-1.1deg); }
+  50%      { transform: translateY(3.5%) rotate(1.1deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .constellation-flat { animation: none; transform: none; }
+}
+
+/* A couple of brands are officially near-black and vanish on the dark ground
+   when drawn flat. The 3D models substitute a mid-tone; these invert instead. */
+html:not([data-theme="light"]) .constellation-flat.invert-on-dark {
+  filter: invert(1) brightness(1.6);
 }
