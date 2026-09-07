@@ -52,6 +52,31 @@ const Chatbot = () => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
   }, [messages]);
 
+  // Publishes how much of the screen the on-screen keyboard is covering, so
+  // the panel can sit above it.
+  //
+  // iOS does not move the layout viewport when the keyboard opens, so neither
+  // vh nor dvh changes and a fixed panel measured in either ends up behind the
+  // keyboard. visualViewport is the only thing that reports it.
+  useEffect(() => {
+    if (!open) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const root = document.documentElement;
+    const apply = () => {
+      const covered = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      root.style.setProperty("--kb", `${Math.round(covered)}px`);
+    };
+    apply();
+    vv.addEventListener("resize", apply);
+    vv.addEventListener("scroll", apply);
+    return () => {
+      vv.removeEventListener("resize", apply);
+      vv.removeEventListener("scroll", apply);
+      root.style.removeProperty("--kb");
+    };
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {

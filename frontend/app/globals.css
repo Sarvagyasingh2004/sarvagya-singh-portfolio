@@ -843,7 +843,7 @@ html[data-theme="light"] .chat-fab {
   bottom: 5.6rem;
   z-index: 170;
   width: min(25rem, calc(100vw - 2.7rem));
-  height: min(33rem, calc(100vh - 9rem));
+  height: min(33rem, calc(100dvh - 9rem));
   display: flex;
   flex-direction: column;
   background: #0a0c10;
@@ -2543,7 +2543,13 @@ html[data-theme="light"] .cta-button {
   .reveal { opacity: 1; transform: none; transition: none; }
 }
 
+/* The scrim (190) and the drawer (200) are children of .navbar, and inside a
+   stacking context a positioned element with a z-index paints over a static
+   one whatever the parent's z-index is. So the X sat behind the scrim it was
+   supposed to dismiss. It needs a position and a number of its own. */
 .nav-burger {
+  position: relative;
+  z-index: 210;
   display: none;
   align-items: center;
   justify-content: center;
@@ -2699,7 +2705,16 @@ html[data-theme="light"] .mobile-nav-scrim { background: rgba(15, 23, 42, 0.34);
 /* ---- Assistant ---- */
 @media (max-width: 480px) {
   .chat-fab { right: 1rem; bottom: 1rem; width: 2.9rem; height: 2.9rem; }
-  .chat-shell { right: 0.65rem; left: 0.65rem; bottom: 4.7rem; height: min(30rem, calc(100svh - 8rem)); }
+  /* --kb is the height the on-screen keyboard is covering, published from
+     Chatbot.tsx via visualViewport. Neither vh nor dvh moves when an iOS
+     keyboard opens - only the visual viewport does - so a fixed panel sized in
+     either ends up underneath it, which is what broke this. */
+  .chat-shell {
+    right: 0.65rem;
+    left: 0.65rem;
+    bottom: calc(4.7rem + var(--kb, 0px));
+    height: min(30rem, calc(100svh - 8rem - var(--kb, 0px)));
+  }
 }
 
 /* ---- Marquee ---- */
@@ -3475,4 +3490,32 @@ html[data-theme="light"] #loader-wire stop:last-child  { stop-color: rgba(67, 56
   .outcome, .outcome-arrow { transition: none; }
   .outcome { opacity: 1; transform: none; }
   .outcome-arrow { transform: scaleX(1); }
+}
+
+
+/* Two rows of four on a phone. At the desktop sizing these wrapped 3/3/2, which
+   left a ragged last row; the node width is pinned to a quarter of the arc so
+   the grid is even, and the model and label shrink to fit inside it. */
+@media (max-width: 640px) {
+  /* The arc is a grid at this width, not the flex row it is on desktop, so the
+     column count is what decides the layout - flex-basis on the node does
+     nothing here. auto-fit with a 6.5rem minimum gave three per row and a
+     ragged last row of two. */
+  .constellation-arc {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.1rem 0.55rem;
+    max-width: none;
+  }
+  .constellation-node { min-width: 0; }
+  .constellation-model,
+  .constellation-model .tech-view {
+    width: 3.4rem;
+    height: 3.4rem;
+  }
+  .constellation-node-inner { gap: 0.5rem; }
+  .constellation-node p {
+    font-size: 0.6rem;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
 }

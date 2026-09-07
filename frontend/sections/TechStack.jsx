@@ -58,6 +58,20 @@ const TechStack = () => {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // The shared canvas draws the whole viewport every frame. There is no reason
+  // to do that while the section is nowhere near the screen, which is most of
+  // the time and most of the scrolling.
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), {
+      rootMargin: "120% 0px 120% 0px",
+    });
+    io.observe(node);
+    return () => io.disconnect();
+  }, []);
+
   const measure = useCallback(() => {
     const wrap = wrapRef.current;
     const core = coreRef.current;
@@ -276,7 +290,7 @@ const TechStack = () => {
 
       </div>
 
-      {mounted ? createPortal(<TechCanvas />, document.body) : null}
+      {mounted ? createPortal(<TechCanvas active={inView} />, document.body) : null}
     </div>
   );
 };

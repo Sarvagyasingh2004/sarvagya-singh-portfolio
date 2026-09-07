@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -5,7 +6,7 @@ import { DOMParser } from "@xmldom/xmldom";
 import * as THREE from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
-import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { mergeVertices, toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 globalThis.DOMParser = DOMParser;
 
@@ -43,7 +44,10 @@ if (!slug) {
 const outName = (process.argv[3] || "").startsWith("--") ? `${slug}-extruded.glb` : process.argv[3] || `${slug}-extruded.glb`;
 
 const segArg = process.argv.find((a) => a.startsWith("--segments="));
-const CURVE_SEGMENTS = segArg ? Number(segArg.split("=")[1]) : 6;
+// These marks are mostly curves, and six segments rendered a MongoDB leaf as
+// 736 triangles - a polygon rather than a leaf. A few tens of KB gzipped is not
+// worth a visibly faceted logo.
+const CURVE_SEGMENTS = segArg ? Number(segArg.split("=")[1]) : 24;
 
 const data = new SVGLoader().parse(readFileSync(join(SRC, `${slug}.svg`), "utf8"));
 const staged = new THREE.Group();
@@ -68,7 +72,7 @@ for (const path of data.paths) {
           bevelEnabled: true,
           bevelThickness: 0.5,
           bevelSize: 0.4,
-          bevelSegments: 1,
+          bevelSegments: 3,
           curveSegments: CURVE_SEGMENTS,
         }),
         material
@@ -96,14 +100,36 @@ staged.traverse((o) => {
   g.scale(k, k, kz);
   g.deleteAttribute("uv");
   const welded = mergeVertices(g, 1e-4);
-  welded.computeVertexNormals();
-  out.add(new THREE.Mesh(welded, o.material));
+  // Not computeVertexNormals(). Welding makes the front face and the side wall
+  // share vertices, and averaging their normals rounds off every edge - the
+  // face picks up a gradient toward its rim and the whole mark reads soft.
+  // Creasing keeps anything sharper than the threshold sharp and smooths only
+  // the genuine curves, which is what these outlines are made of.
+  const shaded = toCreasedNormals(welded, Math.PI / 5);
+  out.add(new THREE.Mesh(shaded, o.material));
 });
 
 const glb = await new Promise((resolve, reject) =>
   new GLTFExporter().parse(out, resolve, reject, { binary: true, onlyVisible: true })
 );
 writeFileSync(join(OUT, outName), Buffer.from(glb));
+
+// Draco, the way the hand-authored models in this folder are compressed. It is
+// what makes the fidelity affordable: at 24 curve segments these are ~1MB of
+// raw glTF each, and ~30KB gzipped once compressed - about what the coarse
+// uncompressed versions cost. drei's loader already pulls a Draco decoder, so
+// nothing on the page changes.
+const target = join(OUT, outName);
+try {
+  execFileSync(
+    "npx",
+    ["--yes", "@gltf-transform/cli@latest", "draco", target, target,
+     "--quantize-position", "14", "--quantize-normal", "10"],
+    { stdio: "ignore" }
+  );
+} catch {
+  console.warn("  (draco compression skipped - npx unavailable; the model still works, just larger)");
+}
 
 let tris = 0;
 out.traverse((o) => {
