@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site";
 
-const SITE = "https://sarvagyasingh.space";
+const SITE = SITE_URL;
 
 export const dynamic = "force-static";
 

@@ -38,7 +38,13 @@ const Hero = () => {
           <div className="flex flex-col gap-7">
             <div className="hero-text">
               <h1>
-                <span className="hero-line">
+                {/* The animated words repeat to loop the marquee, which leaves the
+                    visible heading reading as one duplicated run-on string. This is
+                    the heading a crawler and a screen reader get instead. */}
+                <span className="sr-only">
+                  Sarvagya Singh — Full-Stack &amp; Backend Engineer
+                </span>
+                <span className="hero-line" aria-hidden="true">
                 Shaping
                 <span className="slide">
                   <span className="wrapper">
@@ -58,8 +64,8 @@ const Hero = () => {
                   </span>
                 </span>
                 </span>
-                <span className="hero-line">into Real Projects</span>
-                <span className="hero-line">that Deliver Results</span>
+                <span className="hero-line" aria-hidden="true">into Real Projects</span>
+                <span className="hero-line" aria-hidden="true">that Deliver Results</span>
               </h1>
             </div>
             <p className="text-white-50 md:text-xl relative z-10 pointer-events-none">

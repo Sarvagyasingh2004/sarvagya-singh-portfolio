@@ -1,10 +1,18 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { SITE_URL } from "@/lib/site";
 import { faviconScript, themeInitScript } from "@/lib/theme";
 import { devtoolsVersionShim } from "@/lib/devtoolsShim";
 import Loader from "@/components/Loader";
 import "./globals.css";
 
-const SITE = "https://sarvagyasingh.space";
+const SITE = SITE_URL;
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f6f8" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d0b16" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
@@ -28,14 +36,12 @@ export const metadata: Metadata = {
     title: "Sarvagya Singh — Full-Stack & Backend Engineer",
     description:
       "Production APIs, async pipelines and query optimization in Node.js and TypeScript. 12 months shipping across two production codebases.",
-    images: [{ url: "/images/og.png", width: 1200, height: 630, alt: "Sarvagya Singh" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Sarvagya Singh — Full-Stack & Backend Engineer",
     description:
       "Production APIs, async pipelines and query optimization in Node.js and TypeScript.",
-    images: ["/images/og.png"],
   },
   robots: { index: true, follow: true },
 };
@@ -47,6 +53,10 @@ const personSchema = {
   name: "Sarvagya Singh",
   jobTitle: "Full-Stack Software Engineer",
   url: SITE,
+  image: `${SITE}/opengraph-image`,
+  description:
+    "Full-stack and backend engineer in Delhi NCR building production APIs, " +
+    "async pipelines and query optimizations in Node.js and TypeScript.",
   address: {
     "@type": "PostalAddress",
     addressRegion: "Delhi NCR",
