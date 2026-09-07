@@ -147,7 +147,17 @@ async function verifyMailbox(email: string): Promise<MailCheck> {
       "&email=" +
       encodeURIComponent(email);
     const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
-    if (!res.ok) return { ok: true };
+    if (!res.ok) {
+      // Logged rather than swallowed. Failing open is right - a verifier outage
+      // must not turn away a real visitor - but a rejected key returns exactly
+      // the same "everything is deliverable" behaviour as a working one, and
+      // that took a direct call to the provider to discover. Now it says so.
+      const body = await res.text().catch(() => "");
+      console.error(
+        `[contact] mailbox verifier HTTP ${res.status}: ${body.slice(0, 160)}`
+      );
+      return { ok: true };
+    }
 
     const data = (await res.json()) as {
       deliverability?: string;
@@ -159,10 +169,18 @@ async function verifyMailbox(email: string): Promise<MailCheck> {
     // Logged so the verdict is visible in the function logs. Without this there
     // is no way to tell a working check that says DELIVERABLE from a broken one
     // that returned nothing.
+    if (data.error) {
+      console.error(
+        `[contact] mailbox verifier rejected the request: ${JSON.stringify(
+          data.error
+        ).slice(0, 200)}`
+      );
+      return { ok: true };
+    }
+
     console.log(
       `[contact] mailbox check: deliverability=${data.deliverability} ` +
-        `smtp=${data.is_smtp_valid?.value} mx=${data.is_mx_found?.value}` +
-        (data.error ? ` error=${JSON.stringify(data.error).slice(0, 120)}` : "")
+        `smtp=${data.is_smtp_valid?.value} mx=${data.is_mx_found?.value}`
     );
 
     const undeliverable = data.deliverability === "UNDELIVERABLE";
